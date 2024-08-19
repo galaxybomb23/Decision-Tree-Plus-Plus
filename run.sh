@@ -5,17 +5,21 @@
 # Function to perform the build
 build() {
     echo "Building..."
+    mkdir -p build
     cd build
     rm -rf *
     cmake ..
     make
+    cd ..
 }
 
 # Function to perform the tests
 test() {
     echo "Running tests..."
+    mkdir -p build
     cd build
     ctest
+    cd ..
 }
 
 # Parse command-line arguments

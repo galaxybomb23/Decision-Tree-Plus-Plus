@@ -20,7 +20,7 @@ protected:
 
 TEST_F(DecisionTreeNodeTest, Constructor)
 {
-    ASSERT_NE(&node, nullptr);
+    ASSERT_EQ(&node, nullptr);
 }
 
 int main(int argc, char **argv)
