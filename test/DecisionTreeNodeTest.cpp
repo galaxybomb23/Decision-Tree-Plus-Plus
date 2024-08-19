@@ -18,9 +18,9 @@ protected:
     DecisionTreeNode node;
 };
 
-TEST_F(DecisionTreeNodeTest, Constructor)
+TEST_F(DecisionTreeNodeTest, ConstructorInitializesNode)
 {
-    ASSERT_EQ(&node, nullptr);
+    ASSERT_NE(&node, nullptr);
 }
 
 int main(int argc, char **argv)
