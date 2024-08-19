@@ -1,10 +1,10 @@
-Start testing: Aug 19 15:39 EDT
+Start testing: Aug 19 15:43 EDT
 ----------------------------------------------------------
 1/1 Testing: DecisionTreeNodeTest
 1/1 Test: DecisionTreeNodeTest
 Command: "/home/tom/Desktop/classes/senior_design/Decision-Tree-Plus-Plus/build/DecisionTreeNodeTest"
 Directory: /home/tom/Desktop/classes/senior_design/Decision-Tree-Plus-Plus/build
-"DecisionTreeNodeTest" start time: Aug 19 15:39 EDT
+"DecisionTreeNodeTest" start time: Aug 19 15:43 EDT
 Output:
 ----------------------------------------------------------
 [==========] Running 1 test from 1 test suite.
@@ -21,8 +21,8 @@ Output:
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"DecisionTreeNodeTest" end time: Aug 19 15:39 EDT
+"DecisionTreeNodeTest" end time: Aug 19 15:43 EDT
 "DecisionTreeNodeTest" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Aug 19 15:39 EDT
+End testing: Aug 19 15:43 EDT

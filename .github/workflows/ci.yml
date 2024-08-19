@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 7-setup-dev-env
   pull_request:
     branches:
       - main
