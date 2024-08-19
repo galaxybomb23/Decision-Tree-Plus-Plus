@@ -1,0 +1,28 @@
+Start testing: Aug 19 11:03 EDT
+----------------------------------------------------------
+1/1 Testing: DecisionTreeNodeTest
+1/1 Test: DecisionTreeNodeTest
+Command: "/home/tom/Desktop/classes/senior_design/Decision-Tree-Plus-Plus/build/DecisionTreeNodeTest"
+Directory: /home/tom/Desktop/classes/senior_design/Decision-Tree-Plus-Plus/build
+"DecisionTreeNodeTest" start time: Aug 19 11:03 EDT
+Output:
+----------------------------------------------------------
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from DecisionTreeNodeTest
+[ RUN      ] DecisionTreeNodeTest.Constructor
+[       OK ] DecisionTreeNodeTest.Constructor (0 ms)
+[----------] 1 test from DecisionTreeNodeTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"DecisionTreeNodeTest" end time: Aug 19 11:03 EDT
+"DecisionTreeNodeTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Aug 19 11:03 EDT
