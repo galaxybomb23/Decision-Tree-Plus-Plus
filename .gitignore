@@ -1,0 +1,4 @@
+# ignore build files and .DS_Store and vscode files
+build/
+.DS_Store
+.vscode/
