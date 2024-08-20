@@ -59,4 +59,3 @@ if [ "$test_flag" = true ]; then
 fi
 
 build
-asciiquarium
