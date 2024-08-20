@@ -2,31 +2,42 @@
 # Script to build and test the project, not to be considered as a part of the project
 # Written with help of ChatGPT for argument parsing
 
+# "defensive Programming"
+cd "$(dirname "$0")"
+
 # Function to perform the build
 build() {
     echo "Building..."
-    mkdir -p build
+    
+    if [ ! -d "build" ]; then
+        mkdir build
+    fi
+    
     cd build
-    rm -rf *
     cmake ..
     make
     cd ..
 }
 
+#remove build repo
+clean(){
+    echo "Cleaning build..."
+    rm -r build 
+}
 # Function to perform the tests
 test() {
+    build
     echo "Running tests..."
-    mkdir -p build
     cd build
     ctest
     cd ..
 }
 
 # Parse command-line arguments
-while getopts "bt" opt; do
+while getopts "ct" opt; do
     case $opt in
-        b)
-            build_flag=true
+        c)
+            clean_flag=true
             ;;
         t)
             test_flag=true
@@ -38,20 +49,14 @@ while getopts "bt" opt; do
     esac
 done
 
-# Execute build if requested
-if [ "$build_flag" = true ]; then
-    build
+if [ "$clean_flag" = true ]; then
+    clean
 fi
-
 # Execute test if requested
 if [ "$test_flag" = true ]; then
     test
+    exit 0
 fi
 
-# If no options were provided, show usage
-if [ -z "$build_flag" ] && [ -z "$test_flag" ]; then
-    echo "Usage: $0 [-b] [-t]"
-    echo "  -b    Build"
-    echo "  -t    Test"
-    exit 1
-fi
+build
+asciiquarium
