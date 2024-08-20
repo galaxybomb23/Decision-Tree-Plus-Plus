@@ -2,7 +2,12 @@
 
 DecisionTreeNode::DecisionTreeNode()
 {
-   // Constructor
+
+}
+
+DecisionTreeNode::~DecisionTreeNode()
+{
+
 }
 
 // Other functions below

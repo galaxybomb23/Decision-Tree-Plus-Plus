@@ -5,6 +5,7 @@ class DecisionTreeNode
 {
 public:
     DecisionTreeNode(); // Constructor
+    ~DecisionTreeNode(); // Destructor
 
 private:
     // Private members

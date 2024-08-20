@@ -6,12 +6,12 @@ class DecisionTreeNodeTest : public ::testing::Test
 protected:
     void SetUp() override
     {
-        // Initialization code here
+        // called before each test
     }
 
     void TearDown() override
     {
-        // Cleanup code here (delete DecisionTreeNode object)
+        // called after each test ends
     }
 
     // Class members to be used in tests
