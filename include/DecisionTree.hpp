@@ -30,7 +30,7 @@ private:
     int _csv_cleanup_needed;
     int _debug1, _debug2, _debug3;
 
-    std::vector<std::string> _csv_columns_for_features;
+    std::vector<int> _csv_columns_for_features;
     std::vector<std::string> _class_names;
     std::map<std::string, std::vector<std::string>> _training_data_dict;
     std::map<std::string, std::vector<double>> _numeric_features_valuerange_dict;
