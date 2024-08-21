@@ -6,6 +6,9 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -21,18 +24,18 @@ public:
     int HowManyNodes();
 
     // Getters
-    vector<string> GetClassNames();
+    vector<string> GetClassNames() const;
     int GetNextSerialNum() const;
-    void GetFeature() const;
-    float GetNodeEntropy() const;
-    vector<float> GetClassProbabilities() const;
+    string GetFeature() const;
+    double GetNodeEntropy() const;
+    vector<double> GetClassProbabilities() const;
     vector<string> GetBranchFeaturesAndValuesOrThresholds() const;
     vector<shared_ptr<DecisionTreeNode>> GetChildren() const;
     int GetSerialNum() const;
 
     // Setters
     void SetClassNames(const vector<string> classNames);
-    void SetNodeCreationEntropy(const float entropy);
+    void SetNodeCreationEntropy(const double entropy);
     void AddChildLink(shared_ptr<DecisionTreeNode> newNode);
 
     void DeleteAllLinks();
@@ -43,13 +46,13 @@ public:
 
 private:
     // Private members
-    DecisionTree &_dt;
+    DecisionTree &_dt; // by reference may be a problem later
     int _serialNumber;
     string _feature;
     double _nodeCreationEntropy;
     vector<double> _classProbabilities;
     vector<string> _branchFeaturesAndValuesOrThresholds;
-    vector<shared_ptr<DecisionTreeNode>> _linked_to; // maybe change to weak if cyclic referencing
+    vector<shared_ptr<DecisionTreeNode>> _linkedTo; // maybe change to weak if cyclic referencing
 };
 
 #endif // DECISION_TREE_NODE_HPP
