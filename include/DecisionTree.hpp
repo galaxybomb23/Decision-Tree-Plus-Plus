@@ -2,13 +2,12 @@
 #define DECISION_TREE_HPP
 
 // Include
+#include "DecisionTreeNode.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
 #include <map>
 #include <set>
-
-#include "DecisionTreeNode.hpp"
 
 class DecisionTree
 {
