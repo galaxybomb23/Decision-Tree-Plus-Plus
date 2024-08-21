@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 
+class DecisionTreeNode;
 class DecisionTree
 {
 public:
@@ -18,6 +19,9 @@ public:
     void get_training_data();
     void calculate_first_order_probabilities();
     void show_training_data() const;
+
+    int _nodes_created;
+    std::vector<std::string> _class_names;
 
 private:
     std::string _training_datafile;
@@ -29,7 +33,6 @@ private:
     int _csv_cleanup_needed;
     int _debug1, _debug2, _debug3;
     int _how_many_total_training_samples;
-    int _nodes_created;
 
     DecisionTreeNode* _root_node;
     std::vector<int> _csv_columns_for_features;
@@ -39,7 +42,6 @@ private:
     std::map<std::string, std::set<std::string>> _features_and_values_dict;
     std::map<std::string, std::set<std::string>> _features_and_unique_values_dict;
     std::map<std::string, std::string> _samples_class_label_dict;
-    std::vector<std::string> _class_names;
     std::map<std::string, double> _class_priors_dict;
     std::vector<std::string> _feature_names;
     std::map<std::string, std::vector<double>> _numeric_features_valuerange_dict;

@@ -5,12 +5,14 @@ set(CMAKE_CXX_STANDARD 17)
 # SOURCES
 set(SOURCES
     src/DecisionTreeNode.cpp
+    src/DecisionTree.cpp
 )
 
 # HEADERS
 include_directories(include)
 set(HEADERS
     include/DecisionTreeNode.hpp
+    include/DecisionTree.hpp
 )
 
 ## TESTS ##

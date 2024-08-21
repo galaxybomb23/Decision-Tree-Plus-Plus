@@ -9,6 +9,7 @@
 
 using namespace std;
 
+class DecisionTree;
 class DecisionTreeNode
 {
 public:

@@ -10,14 +10,19 @@ DecisionTreeNode::DecisionTreeNode(const std::string &feature, double entropy,
 {
     if (isRoot)
     {
-        dt.nodesCreated = -1;
-        dt.classNames.clear();
+        _dt._nodes_created = -1;
+        _dt._class_names.clear();
     }
     _serialNumber = GetNextSerialNum();
 }
 
 DecisionTreeNode::~DecisionTreeNode()
 {
+}
+
+int DecisionTreeNode::GetNextSerialNum() const
+{
+    return _dt._nodes_created + 1; // placeholder
 }
 
 // Other functions below
