@@ -2,7 +2,9 @@
 #define DECISION_TREE_NODE_HPP
 
 // import decision Tree
-#include "DecisionTree.hpp"
+// #include "DecisionTree.hpp"
+class DecisionTree;
+
 #include <memory>
 #include <vector>
 #include <string>
@@ -15,6 +17,8 @@ using namespace std;
 class DecisionTreeNode
 {
 public:
+    DecisionTreeNode(DecisionTree &dt); // Constructor
+
     DecisionTreeNode(const std::string &feature, double entropy,
                      const std::vector<double> &class_probabilities,
                      const std::vector<string> &branch_features_and_values_or_thresholds,

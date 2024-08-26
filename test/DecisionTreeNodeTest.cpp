@@ -7,6 +7,8 @@ protected:
     void SetUp() override
     {
         // called before each test
+        DecisionTree dt = DecisionTree();
+        node = DecisionTreeNode(&dt)
     }
 
     void TearDown() override
@@ -18,9 +20,12 @@ protected:
     DecisionTreeNode node;
 };
 
-TEST_F(DecisionTreeNodeTest, ConstructorInitializesNode)
+TEST_F(DecisionTreeNodeTest, TestDecisionTreeNode)
 {
-    ASSERT_NE(&node, nullptr);
+    // Test the DecisionTreeNode constructor
+    DecisionTree dt = DecisionTree();
+    DecisionTreeNode node = DecisionTreeNode(&dt);
+    EXPECT_EQ(node.GetSerialNum(), 0);
 }
 
 int main(int argc, char **argv)

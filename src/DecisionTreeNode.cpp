@@ -1,4 +1,5 @@
 #include "DecisionTreeNode.hpp"
+#include "DecisionTree.hpp"
 
 DecisionTreeNode::DecisionTreeNode(const std::string &feature, double entropy,
                                    const std::vector<double> &class_probabilities,
@@ -10,9 +11,15 @@ DecisionTreeNode::DecisionTreeNode(const std::string &feature, double entropy,
 {
     if (isRoot)
     {
-        dt.nodesCreated = -1;
-        dt.classNames.clear();
+        dt._nodesCreated = -1;
+        dt._classNames.clear();
     }
+    _serialNumber = GetNextSerialNum();
+}
+
+DecisionTreeNode::DecisionTreeNode(DecisionTree &dt)
+    : _dt(dt)
+{
     _serialNumber = GetNextSerialNum();
 }
 
@@ -23,18 +30,18 @@ DecisionTreeNode::~DecisionTreeNode()
 // Other functions below
 int DecisionTreeNode::HowManyNodes()
 {
-    return _dt.nodesCreated + 1;
+    return _dt._nodesCreated + 1;
 }
 
 vector<string> DecisionTreeNode::GetClassNames() const
 {
-    return _dt.classNames;
+    return _dt._classNames;
 }
 
 int DecisionTreeNode::GetNextSerialNum() const
 {
-    _dt.nodesCreated++;
-    return _dt.nodesCreated;
+    _dt._nodesCreated++;
+    return _dt._nodesCreated;
 }
 
 string DecisionTreeNode::GetFeature() const
@@ -69,7 +76,7 @@ int DecisionTreeNode::GetSerialNum() const
 
 void DecisionTreeNode::SetClassNames(const vector<string> classNames)
 {
-    _dt.classNames = classNames;
+    _dt._classNames = classNames;
 }
 
 void DecisionTreeNode::SetNodeCreationEntropy(const double entropy)
@@ -140,19 +147,3 @@ void DecisionTreeNode::DisplayNode()
 
     std::cout << nodeDisplay.str();
 }
-
-void
-
-    // int main()
-    // {
-    //     // Example usage
-    //     DecisionTreeNode node;
-    //     node._feature = "Feature A";
-    //     node._node_creation_entropy = 0.54321;
-    //     node._class_probabilities = {0.1, 0.7, 0.2};
-    //     node._serial_number = 1;
-    //     node._branch_features_and_values_or_thresholds = {"Threshold B", "Value C"};
-
-    //     node.display_node(); // Display the node's information
-    //     return 0;
-    // }
