@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <memory>
 
 class DecisionTreeNode;
 class DecisionTree
@@ -34,7 +35,7 @@ private:
     int _debug1, _debug2, _debug3;
     int _howManyTotalTrainingSamples;
 
-    DecisionTreeNode* _rootNode;
+    std::unique_ptr<DecisionTreeNode> _rootNode;
     std::vector<int> _csvColumnsForFeatures;
     std::map<std::string, double> _probabilityCache;
     std::map<std::string, double> _entropyCache;
