@@ -1,22 +1,25 @@
 cmake_minimum_required(VERSION 3.10)
-project(DecisionTreeProject)
+
+project(DecisionTreeProject VERSION 1.0 LANGUAGES CXX)
+
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# SOURCES
-file(GLOB SOURCES "src/*.cpp")
-
-# HEADERS
 include_directories(include)
-file(GLOB HEADERS "include/*.hpp")
 
-# # TESTS ##
-# Link Google Test libraries
-find_package(GTest REQUIRED)
+# Gather source files for the library
+file(GLOB_RECURSE LIB_SOURCES "src/*.cpp")
+add_library(DecisionTreeLibrary STATIC ${LIB_SOURCES})
+
+# Make the library exportable for use in other projects
+target_include_directories(DecisionTreeLibrary PUBLIC include)
+
+# Testing
 enable_testing()
+find_package(GTest REQUIRED)
+file(GLOB_RECURSE TEST_SOURCES "test/*Test.cpp")
+add_executable(DecisionTreeTests ${TEST_SOURCES})
 
-# ADD TEST EXECUTABLES AND LINK LIBRARIES
-add_executable(DecisionTreeNodeTest test/DecisionTreeNodeTest.cpp ${SOURCES} ${HEADERS})
-target_link_libraries(DecisionTreeNodeTest GTest::gtest_main)
-
-# ADD TESTS
-add_test(NAME DecisionTreeNodeTest COMMAND DecisionTreeNodeTest)
+# Link the test executable to the library and Google Test
+target_link_libraries(DecisionTreeTests DecisionTreeLibrary GTest::gtest_main)
+add_test(NAME DecisionTreeTests COMMAND DecisionTreeTests)
