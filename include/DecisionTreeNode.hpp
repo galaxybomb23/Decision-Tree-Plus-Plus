@@ -7,7 +7,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
-// #include "DecisionTree.hpp"
+#include "DecisionTree.hpp"
 // Forward declaration
 class DecisionTree;
 
@@ -45,7 +45,7 @@ public:
 
     // Displays
     void DisplayNode();
-    void DisplayDecisionTree();
+    void DisplayDecisionTree(const std::string &offset);
 
 private:
     // Private members
