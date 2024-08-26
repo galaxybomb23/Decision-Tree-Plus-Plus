@@ -7,8 +7,6 @@ protected:
     void SetUp() override
     {
         // called before each test
-        DecisionTree dt = DecisionTree();
-        node = DecisionTreeNode(&dt)
     }
 
     void TearDown() override
