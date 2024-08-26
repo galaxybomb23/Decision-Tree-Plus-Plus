@@ -3,17 +3,13 @@ project(DecisionTreeProject)
 set(CMAKE_CXX_STANDARD 17)
 
 # SOURCES
-set(SOURCES
-    src/DecisionTreeNode.cpp
-)
+file(GLOB SOURCES "src/*.cpp")
 
 # HEADERS
 include_directories(include)
-set(HEADERS
-    include/DecisionTreeNode.hpp
-)
+file(GLOB HEADERS "include/*.hpp")
 
-## TESTS ##
+# # TESTS ##
 # Link Google Test libraries
 find_package(GTest REQUIRED)
 enable_testing()

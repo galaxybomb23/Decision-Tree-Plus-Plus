@@ -29,7 +29,7 @@ test() {
     build
     echo "Running tests..."
     cd build
-    ctest
+    ctest --output-on-failure
     cd ..
 }
 

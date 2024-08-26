@@ -17,7 +17,9 @@ protected:
     }
 
     // Class members to be used in tests
-    DecisionTreeNode node;
+    std::map<std::string, std::string> kwargs;
+    DecisionTree dt = DecisionTree(kwargs);
+    DecisionTreeNode node = DecisionTreeNode("feature", 0.0, {0.0}, {"branch"}, dt, true);
 };
 
 TEST_F(DecisionTreeNodeTest, TestDecisionTreeNode)
