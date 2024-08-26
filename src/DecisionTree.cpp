@@ -13,7 +13,7 @@ DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
     }
 
     // Allowed keys for the kwargs
-    std::vector<std::string> allowed_keys = {
+    std::vector<std::string> allowedKeys = {
         "training_datafile",
         "entropy_threshold",
         "max_depth_desired",
@@ -28,29 +28,29 @@ DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
     };
 
     // Set default values
-    _entropy_threshold = 0.01;
-    _symbolic_to_numeric_cardinality_threshold = 10;
-    _csv_cleanup_needed = 0;
-    _csv_columns_for_features = {};
+    _entropyThreshold = 0.01;
+    _symbolicToNumericCardinalityThreshold = 10;
+    _csvCleanupNeeded = 0;
+    _csvColumnsForFeatures = {};
     _debug1 = _debug2 = _debug3 = 0;
-    _max_depth_desired = _csv_class_column_index = _number_of_histogram_bins = -1;
-    _root_node = nullptr;
-    _how_many_total_training_samples = 0;
-    _probability_cache = {};
-    _entropy_cache = {};
-    _training_data_dict = {};
-    _features_and_values_dict = {};
-    _features_and_unique_values_dict = {};
-    _samples_class_label_dict = {};
-    _class_names = {};
-    _class_priors_dict = {};
-    _feature_names = {};
-    _numeric_features_valuerange_dict = {};
-    _sampling_points_for_numeric_feature_dict = {};
-    _feature_values_how_many_uniques_dict = {};
-    _prob_distribution_numeric_features_dict = {};
-    _histogram_delta_dict = {};
-    _num_of_histogram_bins_dict = {};
+    _maxDepthDesired = _csvClassColumnIndex = _numberOfHistogramBins = -1;
+    _rootNode = nullptr;
+    _howManyTotalTrainingSamples = 0;
+    _probabilityCache = {};
+    _entropyCache = {};
+    _trainingDataDict = {};
+    _featuresAndValuesDict = {};
+    _featuresAndUniqueValuesDict = {};
+    _samplesClassLabelDict = {};
+    _classNames = {};
+    _classPriorsDict = {};
+    _featureNames = {};
+    _numericFeaturesValueRangeDict = {};
+    _samplingPointsForNumericFeatureDict = {};
+    _featureValuesHowManyUniquesDict = {};
+    _probDistributionNumericFeaturesDict = {};
+    _histogramDeltaDict = {};
+    _numOfHistogramBinsDict = {};
 
     // Check and set keyword arguments
     for (const auto& kv : kwargs) {
@@ -58,23 +58,23 @@ DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
         const std::string& value = kv.second;
 
         if (key == "training_datafile") {
-            _training_datafile = value;
+            _trainingDatafile = value;
         } else if (key == "entropy_threshold") {
-            _entropy_threshold = std::stod(value);
+            _entropyThreshold = std::stod(value);
         } else if (key == "max_depth_desired") {
-            _max_depth_desired = std::stoi(value);
+            _maxDepthDesired = std::stoi(value);
         } else if (key == "csv_class_column_index") {
-            _csv_class_column_index = std::stoi(value);
+            _csvClassColumnIndex = std::stoi(value);
         } else if (key == "csv_columns_for_features") {
             for (const auto& c : value) {
-                _csv_columns_for_features.push_back(c);
+                _csvColumnsForFeatures.push_back(c);
             }
         } else if (key == "symbolic_to_numeric_cardinality_threshold") {
-            _symbolic_to_numeric_cardinality_threshold = std::stoi(value);
+            _symbolicToNumericCardinalityThreshold = std::stoi(value);
         } else if (key == "number_of_histogram_bins") {
-            _number_of_histogram_bins = std::stoi(value);
+            _numberOfHistogramBins = std::stoi(value);
         } else if (key == "csv_cleanup_needed") {
-            _csv_cleanup_needed = std::stoi(value);
+            _csvCleanupNeeded = std::stoi(value);
         } else if (key == "debug1") {
             _debug1 = std::stoi(value);
         } else if (key == "debug2") {
