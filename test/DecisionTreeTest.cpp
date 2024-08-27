@@ -56,4 +56,5 @@ TEST_F(DecisionTreeTest, CheckParamsDt)
 TEST_F(DecisionTreeTest, CheckGetTrainingData)
 {
     ASSERT_NO_THROW(dt.getTrainingData());
+    ASSERT_EQ(dt.getHowManyTotalTrainingSamples(), 146);
 }
