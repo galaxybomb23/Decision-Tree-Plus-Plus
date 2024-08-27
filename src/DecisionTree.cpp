@@ -182,3 +182,65 @@ void DecisionTree::setDebug2(int debug2) {
 void DecisionTree::setDebug3(int debug3) {
     _debug3 = debug3;
 }
+
+// Get training data
+void DecisionTree::getTrainingData() 
+{
+    // Check if training data file is a CSV file
+    if (_trainingDatafile.find(".csv") == std::string::npos) { // std::string.find() returns std::string::npos if not found
+        throw std::invalid_argument("Aborted. get_training_data_from_csv() is only for CSV files");
+    }
+    
+    _classNames = {};
+
+    // Open the file
+    std::ifstream file(_trainingDatafile); // std::ifstream is used to read input from a file
+    if (!file.is_open()) {
+        throw std::invalid_argument("Could not open file: " + _trainingDatafile);
+    }
+
+
+    // Read the header
+    std::string line;
+    if (std::getline(file, line)) {
+        std::istringstream ss(line);
+        std::string token;
+        while (std::getline(ss, token, ',')) {
+            _featureNames.push_back(token); // Get the feature names
+        }
+    }
+
+    // Read the data
+    while (std::getline(file, line)) {
+        std::istringstream ss(line);
+        std::string token;
+        std::vector<std::string> row;
+        while (std::getline(ss, token, ',')) {
+            row.push_back(token);
+        }
+        _trainingDataDict[row[0]] = row;
+        _classNames.push_back(row[_csvClassColumnIndex]);
+    }
+
+    // Close the file
+    file.close();
+
+    // Get the unique class labels
+    std::sort(_classNames.begin(), _classNames.end());
+    _classNames.erase(std::unique(_classNames.begin(), _classNames.end()), _classNames.end());
+
+    // Get the number of unique class labels
+    int numUniqueClassLabels = _classNames.size();
+
+    // Get the number of training samples
+    _howManyTotalTrainingSamples = _trainingDataDict.size();
+
+    // Get the unique values for each feature
+    for (int i = 1; i < _featureNames.size(); i++) {
+        std::set<std::string> uniqueValues;
+        for (const auto& kv : _trainingDataDict) {
+            uniqueValues.insert(kv.second[i]);
+        }
+        _featuresAndValuesDict[_featureNames[i]] = uniqueValues;
+    }
+}
