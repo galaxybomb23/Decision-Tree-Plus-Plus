@@ -23,4 +23,5 @@ protected:
 TEST_F(DecisionTreeNodeTest, ConstructorInitializesNode)
 {
     ASSERT_NE(&node, nullptr);
+}
 
