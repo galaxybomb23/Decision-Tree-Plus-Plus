@@ -87,9 +87,26 @@ DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
     }
 }
 
+// Destructor
 DecisionTree::~DecisionTree()
 {
 
 }
 
-// Other functions below
+// Get training data
+void getTrainingData() 
+{
+
+}
+
+// Calculate first order probabilities
+void calculateFirstOrderProbabilities()
+{
+
+}
+
+// Show training data
+void showTrainingData()
+{
+    
+}
