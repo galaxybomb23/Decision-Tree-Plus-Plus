@@ -8,10 +8,6 @@
 
 DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
 {
-    // print kwargs
-    for (const auto& kv : kwargs) {
-        std::cout << kv.first << " " << kv.second << std::endl;
-    }
     if (kwargs.empty()) {
         throw std::invalid_argument("Missing training datafile.");
     }
@@ -71,6 +67,7 @@ DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
             _csvClassColumnIndex = std::stoi(value);
         } else if (key == "csv_columns_for_features") {
             for (const auto& c : value) {
+                std::cout << "val: " << c << std::endl;
                 _csvColumnsForFeatures.push_back(c);
             }
         } else if (key == "symbolic_to_numeric_cardinality_threshold") {
@@ -91,26 +88,97 @@ DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
     }
 }
 
-// Destructor
 DecisionTree::~DecisionTree()
 {
 
 }
 
-// Get training data
-void getTrainingData() 
-{
-
+// Other functions below
+std::string DecisionTree::getTrainingDatafile() const {
+    return _trainingDatafile;
 }
 
-// Calculate first order probabilities
-void calculateFirstOrderProbabilities()
-{
-
+double DecisionTree::getEntropyThreshold() const {
+    return _entropyThreshold;
 }
 
-// Show training data
-void showTrainingData()
-{
-    
+int DecisionTree::getMaxDepthDesired() const {
+    return _maxDepthDesired;
+}
+
+int DecisionTree::getCsvClassColumnIndex() const {
+    return _csvClassColumnIndex;
+}
+
+std::vector<int> DecisionTree::getCsvColumnsForFeatures() const {
+    return _csvColumnsForFeatures;
+}
+
+int DecisionTree::getSymbolicToNumericCardinalityThreshold() const {
+    return _symbolicToNumericCardinalityThreshold;
+}
+
+int DecisionTree::getNumberOfHistogramBins() const {
+    return _numberOfHistogramBins;
+}
+
+int DecisionTree::getCsvCleanupNeeded() const {
+    return _csvCleanupNeeded;
+}
+
+int DecisionTree::getDebug1() const {
+    return _debug1;
+}
+
+int DecisionTree::getDebug2() const {
+    return _debug2;
+}
+
+int DecisionTree::getDebug3() const {
+    return _debug3;
+}
+
+// Setters
+void DecisionTree::setTrainingDatafile(const std::string& trainingDatafile) {
+    _trainingDatafile = trainingDatafile;
+}
+
+void DecisionTree::setEntropyThreshold(double entropyThreshold) {
+    _entropyThreshold = entropyThreshold;
+}
+
+void DecisionTree::setMaxDepthDesired(int maxDepthDesired) {
+    _maxDepthDesired = maxDepthDesired;
+}
+
+void DecisionTree::setCsvClassColumnIndex(int csvClassColumnIndex) {
+    _csvClassColumnIndex = csvClassColumnIndex;
+}
+
+void DecisionTree::setCsvColumnsForFeatures(const std::vector<int>& csvColumnsForFeatures) {
+    _csvColumnsForFeatures = csvColumnsForFeatures;
+}
+
+void DecisionTree::setSymbolicToNumericCardinalityThreshold(int symbolicToNumericCardinalityThreshold) {
+    _symbolicToNumericCardinalityThreshold = symbolicToNumericCardinalityThreshold;
+}
+
+void DecisionTree::setNumberOfHistogramBins(int numberOfHistogramBins) {
+    _numberOfHistogramBins = numberOfHistogramBins;
+}
+
+void DecisionTree::setCsvCleanupNeeded(int csvCleanupNeeded) {
+    _csvCleanupNeeded = csvCleanupNeeded;
+}
+
+void DecisionTree::setDebug1(int debug1) {
+    _debug1 = debug1;
+}
+
+void DecisionTree::setDebug2(int debug2) {
+    _debug2 = debug2;
+}
+
+void DecisionTree::setDebug3(int debug3) {
+    _debug3 = debug3;
 }
