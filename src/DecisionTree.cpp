@@ -8,6 +8,10 @@
 
 DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
 {
+    // print kwargs
+    for (const auto& kv : kwargs) {
+        std::cout << kv.first << " " << kv.second << std::endl;
+    }
     if (kwargs.empty()) {
         throw std::invalid_argument("Missing training datafile.");
     }
