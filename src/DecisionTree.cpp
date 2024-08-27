@@ -67,7 +67,6 @@ DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
             _csvClassColumnIndex = std::stoi(value);
         } else if (key == "csv_columns_for_features") {
             for (const auto& c : value) {
-                std::cout << "val: " << c << std::endl;
                 _csvColumnsForFeatures.push_back(c);
             }
         } else if (key == "symbolic_to_numeric_cardinality_threshold") {

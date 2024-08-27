@@ -16,7 +16,7 @@ protected:
 
     // Class members to be used in tests
     std::map<std::string, std::string> kwargs = {
-        {"training_datafile", "test/resources/stage3cancer.csv"},
+        {"training_datafile", "../test/resources/stage3cancer.csv"},
         {"entropy_threshold", "0.1"},
         {"max_depth_desired", "20"},
         {"csv_class_column_index", "1"},

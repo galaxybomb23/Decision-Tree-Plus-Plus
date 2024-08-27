@@ -16,7 +16,7 @@ protected:
 
     // Class members to be used in tests
     std::map<std::string, std::string> kwargs = {
-        {"training_datafile", "test/resources/stage3cancer.csv"},
+        {"training_datafile", "../test/resources/stage3cancer.csv"},
         {"entropy_threshold", "0.1"},
         {"max_depth_desired", "20"},
         {"csv_class_column_index", "1"},
@@ -43,7 +43,7 @@ TEST_F(DecisionTreeTest, ConstructorInitializesNode)
 
 TEST_F(DecisionTreeTest, CheckParamsDt)
 {
-    ASSERT_EQ(dt.getTrainingDatafile(), "test/resources/stage3cancer.csv");
+    ASSERT_EQ(dt.getTrainingDatafile(), "../test/resources/stage3cancer.csv");
     ASSERT_EQ(dt.getEntropyThreshold(), 0.1);
     ASSERT_EQ(dt.getMaxDepthDesired(), 20);
     ASSERT_EQ(dt.getCsvClassColumnIndex(), 1);
@@ -54,10 +54,6 @@ TEST_F(DecisionTreeTest, CheckParamsDt)
     ASSERT_EQ(dt.getDebug1(), 1);
     ASSERT_EQ(dt.getDebug2(), 2);
     ASSERT_EQ(dt.getDebug3(), 3);
-}
-
-TEST_F(DecisionTreeTest, CheckGetTrainingData)
-{
     ASSERT_NO_THROW(dt.getTrainingData());
     ASSERT_EQ(dt.getHowManyTotalTrainingSamples(), 146);
 }
