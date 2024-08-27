@@ -55,3 +55,15 @@ TEST_F(DecisionTreeTest, CheckParamsDt)
     ASSERT_EQ(dt.getDebug2(), 2);
     ASSERT_EQ(dt.getDebug3(), 3);
 }
+
+TEST_F(DecisionTreeTest, CheckGetTrainingData)
+{
+    ASSERT_NO_THROW(dt.getTrainingData());
+    ASSERT_EQ(dt.getHowManyTotalTrainingSamples(), 146);
+}
+
+TEST_F(DecisionTreeTest, CheckGetTrainingData)
+{
+    ASSERT_NO_THROW(dt.getTrainingData());
+    ASSERT_EQ(dt.getHowManyTotalTrainingSamples(), 146);
+}
