@@ -92,4 +92,172 @@ DecisionTree::~DecisionTree()
 
 }
 
-// Other functions below
+// Get training data
+void DecisionTree::getTrainingData() 
+{
+    // Check if training data file is a CSV file
+    if (_trainingDatafile.find(".csv") == std::string::npos) { // std::string.find() returns std::string::npos if not found
+        throw std::invalid_argument("Aborted. get_training_data_from_csv() is only for CSV files");
+    }
+    
+    _classNames = {};
+
+    // Open the file
+    std::ifstream file(_trainingDatafile); // std::ifstream is used to read input from a file
+    if (!file.is_open()) {
+        throw std::invalid_argument("Could not open file: " + _trainingDatafile);
+    }
+
+
+    // Read the header
+    std::string line;
+    if (std::getline(file, line)) {
+        std::istringstream ss(line);
+        std::string token;
+        while (std::getline(ss, token, ',')) {
+            // strip leading/trailing whitespaces and \" from the token
+            token.erase(0, token.find_first_not_of(" \""));
+            token.erase(token.find_last_not_of(" \"") + 1);
+            _featureNames.push_back(token); // Get the feature names
+        }
+    }
+
+    // Read the data
+    while (std::getline(file, line)) {
+        std::istringstream ss(line);
+        std::string token;
+        std::vector<std::string> row;
+        while (std::getline(ss, token, ',')) {
+            // strip leading/trailing whitespaces and \" from the token
+            token.erase(0, token.find_first_not_of(" \""));
+            token.erase(token.find_last_not_of(" \"") + 1);
+            row.push_back(token);
+        }
+        _trainingDataDict[row[0]] = row;
+        _classNames.push_back(row[_csvClassColumnIndex]);
+    }
+
+    // Close the file
+    file.close();
+
+    // Get the unique class labels
+    std::sort(_classNames.begin(), _classNames.end());
+    _classNames.erase(std::unique(_classNames.begin(), _classNames.end()), _classNames.end());
+
+    // Get the number of unique class labels
+    int numUniqueClassLabels = _classNames.size();
+
+    // Get the number of training samples
+    _howManyTotalTrainingSamples = _trainingDataDict.size();
+
+    // Get the unique values for each feature
+    for (int i = 1; i < _featureNames.size(); i++) {
+        std::set<std::string> uniqueValues;
+        for (const auto& kv : _trainingDataDict) {
+            uniqueValues.insert(kv.second[i]);
+        }
+        _featuresAndValuesDict[_featureNames[i]] = uniqueValues;
+    }
+}
+
+// Getters
+std::string DecisionTree::getTrainingDatafile() const {
+    return _trainingDatafile;
+}
+
+double DecisionTree::getEntropyThreshold() const {
+    return _entropyThreshold;
+}
+
+int DecisionTree::getMaxDepthDesired() const {
+    return _maxDepthDesired;
+}
+
+int DecisionTree::getCsvClassColumnIndex() const {
+    return _csvClassColumnIndex;
+}
+
+std::vector<int> DecisionTree::getCsvColumnsForFeatures() const {
+    return _csvColumnsForFeatures;
+}
+
+int DecisionTree::getSymbolicToNumericCardinalityThreshold() const {
+    return _symbolicToNumericCardinalityThreshold;
+}
+
+int DecisionTree::getNumberOfHistogramBins() const {
+    return _numberOfHistogramBins;
+}
+
+int DecisionTree::getCsvCleanupNeeded() const {
+    return _csvCleanupNeeded;
+}
+
+int DecisionTree::getDebug1() const {
+    return _debug1;
+}
+
+int DecisionTree::getDebug2() const {
+    return _debug2;
+}
+
+int DecisionTree::getDebug3() const {
+    return _debug3;
+}
+
+int DecisionTree::getHowManyTotalTrainingSamples() const {
+    return _howManyTotalTrainingSamples;
+}
+
+std::vector<std::string> DecisionTree::getFeatureNames() const {
+    return _featureNames;
+}
+
+std::map<std::string, std::vector<std::string>> DecisionTree::getTrainingDataDict() const {
+    return _trainingDataDict;
+}
+
+// Setters
+void DecisionTree::setTrainingDatafile(const std::string& trainingDatafile) {
+    _trainingDatafile = trainingDatafile;
+}
+
+void DecisionTree::setEntropyThreshold(double entropyThreshold) {
+    _entropyThreshold = entropyThreshold;
+}
+
+void DecisionTree::setMaxDepthDesired(int maxDepthDesired) {
+    _maxDepthDesired = maxDepthDesired;
+}
+
+void DecisionTree::setCsvClassColumnIndex(int csvClassColumnIndex) {
+    _csvClassColumnIndex = csvClassColumnIndex;
+}
+
+void DecisionTree::setCsvColumnsForFeatures(const std::vector<int>& csvColumnsForFeatures) {
+    _csvColumnsForFeatures = csvColumnsForFeatures;
+}
+
+void DecisionTree::setSymbolicToNumericCardinalityThreshold(int symbolicToNumericCardinalityThreshold) {
+    _symbolicToNumericCardinalityThreshold = symbolicToNumericCardinalityThreshold;
+}
+
+void DecisionTree::setNumberOfHistogramBins(int numberOfHistogramBins) {
+    _numberOfHistogramBins = numberOfHistogramBins;
+}
+
+void DecisionTree::setCsvCleanupNeeded(int csvCleanupNeeded) {
+    _csvCleanupNeeded = csvCleanupNeeded;
+}
+
+void DecisionTree::setDebug1(int debug1) {
+    _debug1 = debug1;
+}
+
+void DecisionTree::setDebug2(int debug2) {
+    _debug2 = debug2;
+}
+
+void DecisionTree::setDebug3(int debug3) {
+    _debug3 = debug3;
+}

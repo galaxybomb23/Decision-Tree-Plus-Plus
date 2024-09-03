@@ -24,6 +24,36 @@ public:
     int _nodesCreated;
     std::vector<std::string> _classNames;
 
+    // Getters
+    std::string getTrainingDatafile() const;
+    double getEntropyThreshold() const;
+    int getMaxDepthDesired() const;
+    int getNumberOfHistogramBins() const;
+    int getCsvClassColumnIndex() const;
+    std::vector<int> getCsvColumnsForFeatures() const;
+    int getSymbolicToNumericCardinalityThreshold() const;
+    int getCsvCleanupNeeded() const;
+    int getDebug1() const;
+    int getDebug2() const;
+    int getDebug3() const;
+    int getHowManyTotalTrainingSamples() const;
+    std::vector<std::string> getFeatureNames() const;
+    std::map<std::string, std::vector<std::string>> getTrainingDataDict() const;
+
+    // Setters
+    void setTrainingDatafile(const std::string& trainingDatafile);
+    void setEntropyThreshold(double entropyThreshold);
+    void setMaxDepthDesired(int maxDepthDesired);
+    void setNumberOfHistogramBins(int numberOfHistogramBins);
+    void setCsvClassColumnIndex(int csvClassColumnIndex);
+    void setCsvColumnsForFeatures(const std::vector<int>& csvColumnsForFeatures);
+    void setSymbolicToNumericCardinalityThreshold(int symbolicToNumericCardinalityThreshold);
+    void setCsvCleanupNeeded(int csvCleanupNeeded);
+    void setDebug1(int debug1);
+    void setDebug2(int debug2);
+    void setDebug3(int debug3);
+    void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
+
 private:
     std::string _trainingDatafile;
     double _entropyThreshold;
