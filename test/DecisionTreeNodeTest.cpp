@@ -67,3 +67,57 @@ TEST_F(DecisionTreeNodeTest, TestDisplayDecisionTree)
     std::string output = ::testing::internal::GetCapturedStdout();
     std::cout << output << std::endl;
 }
+
+// test all setters and getters
+TEST_F(DecisionTreeNodeTest, TestSettersAndGetters)
+{
+    // Setters
+    node.SetClassNames({"class1", "class2"});
+    node.SetNodeCreationEntropy(0.2);
+    std::shared_ptr<DecisionTreeNode> child = std::make_shared<DecisionTreeNode>(dt);
+    node.AddChildLink(child);
+
+    // Getters
+    ASSERT_EQ(node.GetClassNames(), std::vector<std::string>({"class1", "class2"}));
+    ASSERT_EQ(node.GetNodeEntropy(), 0.2);
+    ASSERT_EQ(node.GetChildren().size(), 1);
+}
+
+// test get serial number
+TEST_F(DecisionTreeNodeTest, TestGetSerialNum)
+{
+    ASSERT_EQ(node.GetSerialNum(), 0);
+}
+
+// test get feature at node
+TEST_F(DecisionTreeNodeTest, TestGetFeatureAtNode)
+{
+    ASSERT_EQ(node.GetFeature(), "feature");
+}
+
+// test get branch features and values or thresholds
+TEST_F(DecisionTreeNodeTest, TestGetBranchFeaturesAndValuesOrThresholds)
+{
+    ASSERT_EQ(node.GetBranchFeaturesAndValuesOrThresholds(), std::vector<std::string>({"branch"}));
+}
+
+// test get class probabilities
+TEST_F(DecisionTreeNodeTest, TestGetClassProbabilities)
+{
+    ASSERT_EQ(node.GetClassProbabilities(), std::vector<double>({0.2}));
+}
+
+// test how many nodes
+TEST_F(DecisionTreeNodeTest, TestHowManyNodes)
+{
+    ASSERT_EQ(node.HowManyNodes(), 1);
+}
+
+// test delete all links
+TEST_F(DecisionTreeNodeTest, TestDeleteAllLinks)
+{
+    std::shared_ptr<DecisionTreeNode> child = std::make_shared<DecisionTreeNode>(dt);
+    node.AddChildLink(child);
+    node.DeleteAllLinks();
+    ASSERT_EQ(node.GetChildren().size(), 0);
+}
