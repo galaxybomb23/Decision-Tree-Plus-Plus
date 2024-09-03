@@ -92,8 +92,6 @@ DecisionTree::~DecisionTree()
 
 }
 
-
-
 // Get training data
 void DecisionTree::getTrainingData() 
 {

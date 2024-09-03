@@ -25,7 +25,6 @@ public:
     std::vector<std::string> _classNames;
 
     // Getters
-    // Getters
     std::string getTrainingDatafile() const;
     double getEntropyThreshold() const;
     int getMaxDepthDesired() const;
