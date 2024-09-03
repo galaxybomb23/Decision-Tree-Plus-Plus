@@ -28,7 +28,20 @@ TEST_F(DecisionTreeNodeTest, TestDecisionTreeNode)
 TEST(DecisionTreeNodeTest, TestDisplayDecisionTree)
 {
     // Create a decision tree node
-    DecisionTree dt;
+    // Class members to be used in tests
+    std::map<std::string, std::string> kwargs = {
+        {"training_datafile", "../test/resources/stage3cancer.csv"},
+        {"entropy_threshold", "0.1"},
+        {"max_depth_desired", "20"},
+        {"csv_class_column_index", "1"},
+        {"symbolic_to_numeric_cardinality_threshold", "20"},
+        {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+        {"number_of_histogram_bins", "10"},
+        {"csv_cleanup_needed", "1"},
+        {"debug1", "1"},
+        {"debug2", "2"},
+        {"debug3", "3"}};
+    DecisionTree dt = DecisionTree(kwargs);
     DecisionTreeNode node(dt);
 
     // Add child nodes
@@ -49,6 +62,9 @@ TEST(DecisionTreeNodeTest, TestDisplayDecisionTree)
     expectedOutput += "          Node Creation Entropy: 0.000   Class Probs: []\n";
     expectedOutput += "   NODE 2:  BRANCH TESTS TO LEAF NODE: []\n";
     expectedOutput += "          Node Creation Entropy: 0.000   Class Probs: []\n";
+
+    // print the output
+    std::cout << output << std::endl;
 
     ASSERT_EQ(output, expectedOutput);
 }
