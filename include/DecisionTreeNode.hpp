@@ -44,8 +44,8 @@ public:
     void DeleteAllLinks();
 
     // Displays
-    void DisplayNode();
-    void DisplayDecisionTree(const std::string &offset);
+    void DisplayNode(const std::string &offset) const;
+    void DisplayDecisionTree(const std::string &offset) const;
 
 private:
     // Private members

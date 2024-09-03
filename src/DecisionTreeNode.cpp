@@ -104,7 +104,7 @@ void DecisionTreeNode::DeleteAllLinks()
     _linkedTo.clear();
 }
 
-void DecisionTreeNode::DisplayNode()
+void DecisionTreeNode::DisplayNode(const std::string &offset) const
 {
     // Handle feature at node
     std::string featureAtNode = _feature.empty() ? " " : _feature;
@@ -137,10 +137,9 @@ void DecisionTreeNode::DisplayNode()
 
     // Build and display the node information
     std::ostringstream nodeDisplay;
-    nodeDisplay << "\n\nNODE " << _serialNumber
-                << ":\n   Branch features and values to this node: "
-                << branchFeaturesAndValuesStr
-                << "\n   Class probabilities at current node: [";
+    nodeDisplay << offset << "NODE " << _serialNumber << ":" << endl
+                << offset << "  Branch features and values to this node: " << branchFeaturesAndValuesStr << endl
+                << offset << "  Class probabilities at current node: [";
 
     for (size_t i = 0; i < classProbsForDisplay.size(); ++i)
     {
@@ -151,84 +150,23 @@ void DecisionTreeNode::DisplayNode()
         }
     }
 
-    nodeDisplay << "]"
-                << "\n   Entropy at current node: " << printNodeCreationEntropyAtNode
-                << "\n   Best feature test at current node: " << featureAtNode << "\n\n";
+    nodeDisplay << "]" << endl
+                << offset << "  Entropy at current node: " << printNodeCreationEntropyAtNode << endl
+                << offset << "  Best feature test at current node: " << featureAtNode << endl
+                << endl;
 
     std::cout << nodeDisplay.str();
 }
 
-void DecisionTreeNode::DisplayDecisionTree(const std::string &offset)
+void DecisionTreeNode::DisplayDecisionTree(const std::string &offset) const
 {
-    int serialNum = this->GetSerialNum();
-    if (!_linkedTo.empty())
+    // Display the current node
+    this->DisplayNode(offset);
+
+    // Recursively display child nodes with an increased offset
+    std::string newOffset = offset + "    ";
+    for (const auto &child : this->GetChildren())
     {
-        std::string featureAtNode = _feature.empty() ? " " : _feature;
-        double nodeCreationEntropyAtNode = _nodeCreationEntropy;
-        std::ostringstream entropyStream;
-        entropyStream << std::fixed << std::setprecision(3) << _nodeCreationEntropy;
-        std::string printNodeCreationEntropyAtNode = entropyStream.str();
-
-        std::vector<std::string> branchFeaturesAndValuesOrThresholds = _branchFeaturesAndValuesOrThresholds;
-        std::vector<double> classProbabilities = _classProbabilities;
-        std::vector<std::string> printClassProbabilities;
-        for (double prob : classProbabilities)
-        {
-            std::ostringstream probStream;
-            probStream << std::fixed << std::setprecision(3) << prob;
-            printClassProbabilities.push_back(probStream.str());
-        }
-
-        std::vector<std::string> printClassProbabilitiesWithClass;
-        std::vector<std::string> classNames = this->GetClassNames();
-        for (size_t i = 0; i < classNames.size(); ++i)
-        {
-            printClassProbabilitiesWithClass.push_back(classNames[i] + " => " + printClassProbabilities[i]);
-        }
-
-        std::cout << "NODE " << serialNum << ":  " << offset << "BRANCH TESTS TO NODE: "
-                  << branchFeaturesAndValuesOrThresholds << std::endl;
-
-        std::string secondLineOffset = offset + std::string(8 + std::to_string(serialNum).length(), ' ');
-        std::cout << secondLineOffset << "Decision Feature: " << featureAtNode
-                  << "   Node Creation Entropy: " << printNodeCreationEntropyAtNode
-                  << "   Class Probs: " << printClassProbabilitiesWithClass << std::endl;
-
-        std::string newOffset = offset + "   ";
-        for (const auto &child : this->GetChildren())
-        {
-            child->DisplayDecisionTree(newOffset);
-        }
-    }
-    else
-    {
-        double nodeCreationEntropyAtNode = this->GetNodeEntropy();
-        std::ostringstream entropyStream;
-        entropyStream << std::fixed << std::setprecision(3) << nodeCreationEntropyAtNode;
-        std::string printNodeCreationEntropyAtNode = entropyStream.str();
-
-        std::vector<std::string> branchFeaturesAndValuesOrThresholds = this->GetBranchFeaturesAndValuesOrThresholds();
-        std::vector<double> classProbabilities = this->GetClassProbabilities();
-        std::vector<std::string> printClassProbabilities;
-        for (double prob : classProbabilities)
-        {
-            std::ostringstream probStream;
-            probStream << std::fixed << std::setprecision(3) << prob;
-            printClassProbabilities.push_back(probStream.str());
-        }
-
-        std::vector<std::string> printClassProbabilitiesWithClass;
-        std::vector<std::string> classNames = this->GetClassNames();
-        for (size_t i = 0; i < classNames.size(); ++i)
-        {
-            printClassProbabilitiesWithClass.push_back(classNames[i] + " => " + printClassProbabilities[i]);
-        }
-
-        std::cout << "NODE " << serialNum << ":  " << offset << "BRANCH TESTS TO LEAF NODE: "
-                  << branchFeaturesAndValuesOrThresholds << std::endl;
-
-        std::string secondLineOffset = offset + std::string(8 + std::to_string(serialNum).length(), ' ');
-        std::cout << secondLineOffset << "Node Creation Entropy: " << printNodeCreationEntropyAtNode
-                  << "   Class Probs: " << printClassProbabilitiesWithClass << std::endl;
+        child->DisplayDecisionTree(newOffset);
     }
 }
