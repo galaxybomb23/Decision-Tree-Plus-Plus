@@ -62,4 +62,18 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
 {
     ASSERT_NO_THROW(dt.getTrainingData());
     ASSERT_EQ(dt.getHowManyTotalTrainingSamples(), 146);
+
+    std::vector<std::string> expectedFeatureNames = {"","pgtime","pgstat","age","eet","g2","grade","gleason","ploidy"};
+    ASSERT_EQ(dt.getFeatureNames(), expectedFeatureNames);
+
+    // check if getTrainingDataDict() contains the following randomly selected data
+    std::map<std::string, std::vector<std::string>> expectedTrainingDataDict = {
+            {"1", {"1","6.1","0","64","2","10.26","2","4","diploid"}},
+            {"146", {"146","2.1","1","56","2","9.01","3","7","diploid"}},
+            {"28", {"28","13.9","0","57","2","12.13","3","6","diploid"}}
+        };
+    for (auto data : expectedTrainingDataDict)
+    {
+        ASSERT_EQ(dt.getTrainingDataDict()[data.first], data.second);
+    }
 }

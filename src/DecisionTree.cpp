@@ -115,6 +115,9 @@ void DecisionTree::getTrainingData()
         std::istringstream ss(line);
         std::string token;
         while (std::getline(ss, token, ',')) {
+            // strip leading/trailing whitespaces and \" from the token
+            token.erase(0, token.find_first_not_of(" \""));
+            token.erase(token.find_last_not_of(" \"") + 1);
             _featureNames.push_back(token); // Get the feature names
         }
     }
@@ -125,6 +128,9 @@ void DecisionTree::getTrainingData()
         std::string token;
         std::vector<std::string> row;
         while (std::getline(ss, token, ',')) {
+            // strip leading/trailing whitespaces and \" from the token
+            token.erase(0, token.find_first_not_of(" \""));
+            token.erase(token.find_last_not_of(" \"") + 1);
             row.push_back(token);
         }
         _trainingDataDict[row[0]] = row;
@@ -201,6 +207,14 @@ int DecisionTree::getDebug3() const {
 
 int DecisionTree::getHowManyTotalTrainingSamples() const {
     return _howManyTotalTrainingSamples;
+}
+
+std::vector<std::string> DecisionTree::getFeatureNames() const {
+    return _featureNames;
+}
+
+std::map<std::string, std::vector<std::string>> DecisionTree::getTrainingDataDict() const {
+    return _trainingDataDict;
 }
 
 // Setters
