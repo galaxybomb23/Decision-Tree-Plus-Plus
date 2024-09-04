@@ -17,9 +17,12 @@ public:
     DecisionTree(std::map<std::string, std::string> kwargs); // constructor
     ~DecisionTree(); // destructor
 
+    // Functions
     void getTrainingData();
     void calculateFirstOrderProbabilities();
     void showTrainingData() const;
+    double probability_of_feature_value(const std::string& feature, const std::string& value);
+    double probability_of_feature_value(const std::string& feature, double sampling_point);
 
     int _nodesCreated;
     std::vector<std::string> _classNames;

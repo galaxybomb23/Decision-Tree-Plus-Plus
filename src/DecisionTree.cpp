@@ -160,6 +160,50 @@ void DecisionTree::getTrainingData()
     }
 }
 
+// Calculate first order probabilities
+void DecisionTree::calculateFirstOrderProbabilities() {
+    std::cout << "\nEstimating probabilities...\n";
+        for (const auto& feature : _featureNames) {
+            // Calculate probability for the feature's value
+            probability_of_feature_value(feature, "");
+
+            // Debug output if debug2 is enabled
+            if (_debug2) {
+                // Check if the feature has a probability distribution for numeric values
+                if (_probDistributionNumericFeaturesDict.find(feature) != _probDistributionNumericFeaturesDict.end()) {
+                    std::cout << "\nPresenting probability distribution for a feature considered to be numeric:\n";
+                    // Output sorted sampling points and their probabilities
+                    for (auto it = _probDistributionNumericFeaturesDict[feature].begin(); it != _probDistributionNumericFeaturesDict[feature].end(); ++it) {
+                        double samplingPoint = *it;
+                        double prob = probability_of_feature_value(feature, samplingPoint);
+                        std::cout << feature << "::" << samplingPoint << " = " 
+                                  << std::setprecision(5) << prob << "\n";
+                    }
+                } else {
+                    // Output probabilities for symbolic feature values
+                    std::cout << "\nPresenting probabilities for the values of a feature considered to be symbolic:\n";
+                    const auto& values_for_feature = _featuresAndUniqueValuesDict[feature];
+                    for (const auto& value : values_for_feature) {
+                        double prob = probability_of_feature_value(feature, value);
+                        std::cout << feature << "::" << value << " = " 
+                                  << std::setprecision(5) << prob << "\n";
+                    }
+                }
+            }
+        }
+}
+
+// Show training data
+void DecisionTree::showTrainingData() const {
+    for (const auto& kv : _trainingDataDict) {
+        std::cout << kv.first << ": ";
+        for (const auto& v : kv.second) {
+            std::cout << v << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
 // Getters
 std::string DecisionTree::getTrainingDatafile() const {
     return _trainingDatafile;
