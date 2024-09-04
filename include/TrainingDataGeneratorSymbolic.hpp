@@ -13,10 +13,4 @@ public:
     void GenerateTrainingDataSymbolic(); // Generate the training data for symbolic data
 };
 
-TrainingDataGeneratorSymbolic::TrainingDataGeneratorSymbolic(/* args */)
-{
-}
-
-TrainingDataGeneratorSymbolic::~TrainingDataGeneratorSymbolic()
-{
-}
+#endif // TRAINING_DATA_GENERATOR_SYMBOLIC_HPP
