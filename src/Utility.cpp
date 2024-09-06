@@ -65,10 +65,11 @@ std::optional<T> ClosestSamplingPoint(std::vector<T> const &vec, T const &val)
 std::string CleanupCsvString(std::string line)
 {
     // The purpose of this function is to clean up a CSV string.
-
+    // Replace special characters with spaces
     std::regex special_chars(":?/()[]{}'");
     line = std::regex_replace(line, special_chars, "          ");
 
+    // Replace double-quoted strings with cleaned versions
     std::regex double_quoted("\"[^\"]+\"");
     std::smatch match;
     while (std::regex_search(line, match, double_quoted))
@@ -81,6 +82,7 @@ std::string CleanupCsvString(std::string line)
         line = std::regex_replace(line, double_quoted, clean);
     }
 
+    // Replace white-spaced items between commas with cleaned versions
     std::regex white_spaced(",\\s*[^,]+(?=,|$)");
     while (std::regex_search(line, match, white_spaced))
     {
@@ -92,6 +94,7 @@ std::string CleanupCsvString(std::string line)
         line = line.substr(0, line.find(item)) + "," + litem + line.substr(line.find(item) + item.length());
     }
 
+    // Split the line into fields separated by commas
     std::regex fields(",");
     std::vector<std::string> newfields;
     std::sregex_token_iterator iter(line.begin(), line.end(), fields, -1);
@@ -110,6 +113,9 @@ std::string CleanupCsvString(std::string line)
         }
     }
 
+    // Replace fields with commas
     line = std::regex_replace(line, fields, ",");
+
+    // Return the cleaned up line
     return line;
 }
