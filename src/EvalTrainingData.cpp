@@ -183,6 +183,7 @@ public:
     }
 
 private:
+    // methods to print information << NEEDS TO BE IMPLEMENTED >>
     void printDebugInformation(DecisionTree &trainingDT, const std::vector<std::string> &testing_samples);
     void printClassificationInfo(const std::vector<std::string> &which_classes,
                                  const std::map<std::string, double> &classification,
