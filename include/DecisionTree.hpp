@@ -15,7 +15,7 @@ class DecisionTree
 {
 public:
     DecisionTree(std::map<std::string, std::string> kwargs); // constructor
-    ~DecisionTree(); // destructor
+    ~DecisionTree();                                         // destructor
 
     void getTrainingData();
     void calculateFirstOrderProbabilities();
@@ -41,20 +41,32 @@ public:
     std::map<std::string, std::vector<std::string>> getTrainingDataDict() const;
 
     // Setters
-    void setTrainingDatafile(const std::string& trainingDatafile);
+    void setTrainingDatafile(const std::string &trainingDatafile);
     void setEntropyThreshold(double entropyThreshold);
     void setMaxDepthDesired(int maxDepthDesired);
     void setNumberOfHistogramBins(int numberOfHistogramBins);
     void setCsvClassColumnIndex(int csvClassColumnIndex);
-    void setCsvColumnsForFeatures(const std::vector<int>& csvColumnsForFeatures);
+    void setCsvColumnsForFeatures(const std::vector<int> &csvColumnsForFeatures);
     void setSymbolicToNumericCardinalityThreshold(int symbolicToNumericCardinalityThreshold);
     void setCsvCleanupNeeded(int csvCleanupNeeded);
     void setDebug1(int debug1);
     void setDebug2(int debug2);
     void setDebug3(int debug3);
     void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
+    void setTrainingDataDict(const std::map<std::string, std::vector<std::string>> &trainingDataDict);
+    void setFeaturesAndValuesDict(const std::map<std::string, std::set<std::string>> &featuresAndValuesDict);
+    void setFeaturesAndUniqueValuesDict(const std::map<std::string, std::set<std::string>> &featuresAndUniqueValuesDict);
+    void setSamplesClassLabelDict(const std::map<std::string, std::string> &samplesClassLabelDict);
+    void setClassPriorsDict(const std::map<std::string, double> &classPriorsDict);
+    void setFeatureNames(const std::vector<std::string> &featureNames);
+    void setNumericFeaturesValueRangeDict(const std::map<std::string, std::vector<double>> &numericFeaturesValueRangeDict);
+    void setSamplingPointsForNumericFeatureDict(const std::map<std::string, std::vector<double>> &samplingPointsForNumericFeatureDict);
+    void setFeatureValuesHowManyUniquesDict(const std::map<std::string, int> &featureValuesHowManyUniquesDict);
+    void setProbDistributionNumericFeaturesDict(const std::map<std::string, std::vector<double>> &probDistributionNumericFeaturesDict);
+    void setHistogramDeltaDict(const std::map<std::string, double> &histogramDeltaDict);
+    void setNumOfHistogramBinsDict(const std::map<std::string, int> &numOfHistogramBinsDict);
 
-private:
+protected:
     std::string _trainingDatafile;
     double _entropyThreshold;
     int _maxDepthDesired;
