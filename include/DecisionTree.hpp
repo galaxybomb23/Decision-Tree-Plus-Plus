@@ -21,8 +21,27 @@ public:
     void getTrainingData();
     void calculateFirstOrderProbabilities();
     void showTrainingData() const;
-    double probability_of_feature_value(const std::string& feature, const std::string& value);
-    double probability_of_feature_value(const std::string& feature, double sampling_point);
+
+
+    // Classify
+    std::map<std::string, std::string> classify(void* root_node, const std::vector<std::string>& features_and_values);
+
+
+    // Construct tree
+    DecisionTreeNode* constructDecisionTreeClassifier();
+
+
+    // Entropy calculators
+    double classEntropyOnPriors();
+
+
+    // Probability calculators
+    double probabilityOfFeatureValue(const std::string& feature, const std::string& value);
+    double probabilityOfFeatureValue(const std::string& feature, double sampling_point);
+
+
+    // Class based utilities
+
 
     int _nodesCreated;
     std::vector<std::string> _classNames;

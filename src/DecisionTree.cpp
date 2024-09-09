@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <iterator>
+#include <regex>
 
 DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
 {
@@ -165,7 +166,7 @@ void DecisionTree::calculateFirstOrderProbabilities() {
     std::cout << "\nEstimating probabilities...\n";
         for (const auto& feature : _featureNames) {
             // Calculate probability for the feature's value
-            probability_of_feature_value(feature, "");
+            probabilityOfFeatureValue(feature, "");
 
             // Debug output if debug2 is enabled
             if (_debug2) {
@@ -175,7 +176,7 @@ void DecisionTree::calculateFirstOrderProbabilities() {
                     // Output sorted sampling points and their probabilities
                     for (auto it = _probDistributionNumericFeaturesDict[feature].begin(); it != _probDistributionNumericFeaturesDict[feature].end(); ++it) {
                         double samplingPoint = *it;
-                        double prob = probability_of_feature_value(feature, samplingPoint);
+                        double prob = probabilityOfFeatureValue(feature, samplingPoint);
                         std::cout << feature << "::" << samplingPoint << " = " 
                                   << std::setprecision(5) << prob << "\n";
                     }
@@ -184,7 +185,7 @@ void DecisionTree::calculateFirstOrderProbabilities() {
                     std::cout << "\nPresenting probabilities for the values of a feature considered to be symbolic:\n";
                     const auto& values_for_feature = _featuresAndUniqueValuesDict[feature];
                     for (const auto& value : values_for_feature) {
-                        double prob = probability_of_feature_value(feature, value);
+                        double prob = probabilityOfFeatureValue(feature, value);
                         std::cout << feature << "::" << value << " = " 
                                   << std::setprecision(5) << prob << "\n";
                     }
