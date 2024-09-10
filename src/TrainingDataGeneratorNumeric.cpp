@@ -172,69 +172,71 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
     // add class names and their parameter values to classes_and_their_param_values
     for (int i = 0; i < class_names.size(); i++)
     {
+        std::cout << "Adding [" << class_names[i] << "]" << std::endl;
         classes_and_their_param_values[class_names[i]] = {};
     }
 
     /*
     *  Regex search for class names and their parameter values
     */
-    std::regex regex("params for class:\\s+\\w*?\\W+?mean:[\\d\\.\\s+]+\\W*?covariance:\\W+?(?:[\\s+\\d.]+\\W+?)+");
-    std::smatch feature_param_matches;
-    auto feature_param_begin = std::sregex_iterator(params.begin(), params.end(), regex);
-    auto feature_param_end = std::sregex_iterator();
+    std::regex class_params_regex(R"(params for class:\s+(\w+)\W*mean:\s*([\d\s.-]+)\W*covariance:\s*([\d\s.-]+))", std::regex_constants::icase);
+    std::smatch match;
 
-    for (std::sregex_iterator i = feature_param_begin; i != feature_param_end; ++i)
+    std::string::const_iterator search_start(params.cbegin());
+
+    // Search for class names and their parameter values, go through all the matches
+    while (std::regex_search(search_start, params.cend(), match, class_params_regex))
     {
-        std::smatch match = *i;
         std::string class_name = match[1].str();
-        std::string mean_str = match[2].str();
-        std::string covariance_str = match[3].str();
+        std::string mean_string = match[2].str();
+        std::string covariance_string = match[3].str();
 
-        // Parse mean values
-        std::istringstream mean_stream(mean_str);
         std::vector<double> class_mean;
-        std::string value;
+        std::istringstream mean_stream(mean_string);
+        double val;
 
-        // Split mean_str by spaces and convert to list of doubles
-        while (mean_stream >> value)
+        // Split mean_string by ' ' delimiter and add to class_mean
+        while (mean_stream >> val)
         {
-            if (!value.empty())
-            {
-                class_mean.push_back(std::stod(value));
-            }
+            class_mean.push_back(val);
         }
 
-        // Parse covariance matrix
-        std::istringstream covariance_stream(covariance_str);
-        std::vector<std::vector<double>> covar_matrix;
+        std::istringstream covariance_stream(covariance_string);
         std::string line;
+        std::vector<std::vector<double>> covariance_matrix;
 
+        // Split covariance_string by '\n' delimiter and add to covariance_matrix
         while (std::getline(covariance_stream, line))
         {
-            std::istringstream line_stream(line);
+            std::istringstream row_stream(line);
             std::vector<double> row;
-            while (line_stream >> value)
+            double value;
+            while (row_stream >> value)
             {
-                if (!value.empty())
-                {
-                    row.push_back(std::stod(value));
-                }
+                // First add value to the row
+                row.push_back(value);
             }
             if (!row.empty())
             {
-                covar_matrix.push_back(row);
+                // Then add the row to the covariance matrix once full
+                covariance_matrix.push_back(row);
             }
         }
 
-        // Store the mean and covariance in the map
         classes_and_their_param_values[class_name]["mean"] = class_mean;
-        // flatten the covariance matrix (required to fit into a vector of doubles)
-        std::vector<double> covar_matrix_flattened;
-        for (const auto &row : covar_matrix)
+        classes_and_their_param_values[class_name]["covariance"] = std::vector<double>();
+
+        // Because classes_and_their_param_values is a map of string to map of string to vector of double
+        // we need to flatten the covariance matrix into a single vector
+        for (const auto &row : covariance_matrix)
         {
-            covar_matrix_flattened.insert(covar_matrix_flattened.end(), row.begin(), row.end());
+            classes_and_their_param_values[class_name]["covariance"].insert(
+                classes_and_their_param_values[class_name]["covariance"].end(),
+                row.begin(), row.end());
         }
-        classes_and_their_param_values[class_name]["covariance"] = covar_matrix_flattened;
+
+        // Update search_start to the end of the current match
+        search_start = match.suffix().first;
     }
 
     if (_debug)
@@ -260,12 +262,6 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
     _features_with_value_range = features_with_value_range;
     _classes_and_their_param_values = classes_and_their_param_values;
     _features_ordered = features_ordered;
-
-    std::cout << "end of ReadParameterFileNumeric" << std::endl;
-    for (const auto &kv : _classes_and_their_param_values)
-    {
-        std::cout << "one item is " << kv.first << std::endl;
-    }
 }
 
 void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
@@ -274,7 +270,9 @@ void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
 }
 
 
-// Getters
+/*
+* Getters
+*/
 std::string TrainingDataGeneratorNumeric::getOutputCsvFile() const
 {
     return _output_csv_file;

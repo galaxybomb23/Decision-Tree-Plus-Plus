@@ -76,8 +76,22 @@ TEST_F(TrainingDataGeneratorNumericTest, TestReadParameterFileNumericAll)
 
     // Check classes and their parameter values
     std::map<std::string, std::map<std::string, std::vector<double>>> classes_and_their_param_values = tdgn.getClassesAndTheirParamValues();
+    ASSERT_EQ(classes_and_their_param_values.size(), 2);
     ASSERT_EQ(classes_and_their_param_values["recession"]["mean"].size(), 2);
     ASSERT_EQ(classes_and_their_param_values["recession"]["mean"][0], 50.0);
     ASSERT_EQ(classes_and_their_param_values["recession"]["mean"][1], 30.0);
+    ASSERT_EQ(classes_and_their_param_values["recession"]["covariance"].size(), 4);
+    ASSERT_EQ(classes_and_their_param_values["recession"]["covariance"][0], 1.0);
+    ASSERT_EQ(classes_and_their_param_values["recession"]["covariance"][1], 0.0);
+    ASSERT_EQ(classes_and_their_param_values["recession"]["covariance"][2], 0.0);
+    ASSERT_EQ(classes_and_their_param_values["recession"]["covariance"][3], 20.0);
+    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["mean"].size(), 2);
+    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["mean"][0], 50.0);
+    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["mean"][1], 60.0);
+    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["covariance"].size(), 4);
+    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["covariance"][0], 1.0);
+    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["covariance"][1], 0.0);
+    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["covariance"][2], 0.0);
+    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["covariance"][3], 20.0);
 }
 
