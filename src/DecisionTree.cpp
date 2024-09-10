@@ -5,7 +5,10 @@
 #include <algorithm>
 #include <stdexcept>
 #include <iterator>
+#include <regex>
+#include <iomanip>
 
+//--------------- Constructors and Destructors ----------------//
 DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
 {
     if (kwargs.empty()) {
@@ -92,6 +95,9 @@ DecisionTree::~DecisionTree()
 
 }
 
+
+//--------------- Functions ----------------//
+
 // Get training data
 void DecisionTree::getTrainingData() 
 {
@@ -159,6 +165,85 @@ void DecisionTree::getTrainingData()
         _featuresAndValuesDict[_featureNames[i]] = uniqueValues;
     }
 }
+
+// Calculate first order probabilities
+void DecisionTree::calculateFirstOrderProbabilities() {
+    std::cout << "\nEstimating probabilities...\n";
+        for (const auto& feature : _featureNames) {
+            // Calculate probability for the feature's value
+            probabilityOfFeatureValue(feature, "");
+
+            // Debug output if debug2 is enabled
+            if (_debug2) {
+                // Check if the feature has a probability distribution for numeric values
+                if (_probDistributionNumericFeaturesDict.find(feature) != _probDistributionNumericFeaturesDict.end()) {
+                    std::cout << "\nPresenting probability distribution for a feature considered to be numeric:\n";
+                    // Output sorted sampling points and their probabilities
+                    for (auto it = _probDistributionNumericFeaturesDict[feature].begin(); it != _probDistributionNumericFeaturesDict[feature].end(); ++it) {
+                        double samplingPoint = *it;
+                        double prob = probabilityOfFeatureValue(feature, samplingPoint);
+                        std::cout << feature << "::" << samplingPoint << " = " 
+                                  << std::setprecision(5) << prob << "\n";
+                    }
+                } else {
+                    // Output probabilities for symbolic feature values
+                    std::cout << "\nPresenting probabilities for the values of a feature considered to be symbolic:\n";
+                    const auto& values_for_feature = _featuresAndUniqueValuesDict[feature];
+                    for (const auto& value : values_for_feature) {
+                        double prob = probabilityOfFeatureValue(feature, value);
+                        std::cout << feature << "::" << value << " = " 
+                                  << std::setprecision(5) << prob << "\n";
+                    }
+                }
+            }
+        }
+}
+
+// Show training data
+void DecisionTree::showTrainingData() const {
+    for (const auto& kv : _trainingDataDict) {
+        std::cout << kv.first << ": ";
+        for (const auto& v : kv.second) {
+            std::cout << v << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+
+//--------------- Classify ----------------//
+
+std::map<std::string, std::string> DecisionTree::classify(void* root_node, const std::vector<std::string>& features_and_values) {
+    return {};
+}
+
+
+//--------------- Construct Tree ----------------//
+
+DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier() {
+    return nullptr;
+}
+
+
+//--------------- Entropy Calculators ----------------//
+
+double DecisionTree::classEntropyOnPriors() {
+    return 0.0;
+}
+
+
+//--------------- Probability Calculators ----------------//
+
+double DecisionTree::probabilityOfFeatureValue(const std::string& feature, const std::string& value) {
+    return 1.0;
+}
+
+double DecisionTree::probabilityOfFeatureValue(const std::string& feature, double sampling_point) {
+    return 1.0;
+}
+
+
+//--------------- Class Based Utilities ----------------//
 
 // Getters
 std::string DecisionTree::getTrainingDatafile() const {
