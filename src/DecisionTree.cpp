@@ -8,6 +8,7 @@
 #include <regex>
 #include <iomanip>
 
+//--------------- Constructors and Destructors ----------------//
 DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
 {
     if (kwargs.empty()) {
@@ -93,6 +94,9 @@ DecisionTree::~DecisionTree()
 {
 
 }
+
+
+//--------------- Functions ----------------//
 
 // Get training data
 void DecisionTree::getTrainingData() 
@@ -205,6 +209,41 @@ void DecisionTree::showTrainingData() const {
         std::cout << std::endl;
     }
 }
+
+
+//--------------- Classify ----------------//
+
+std::map<std::string, std::string> DecisionTree::classify(void* root_node, const std::vector<std::string>& features_and_values) {
+    return {};
+}
+
+
+//--------------- Construct Tree ----------------//
+
+DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier() {
+    return nullptr;
+}
+
+
+//--------------- Entropy Calculators ----------------//
+
+double DecisionTree::classEntropyOnPriors() {
+    return 0.0;
+}
+
+
+//--------------- Probability Calculators ----------------//
+
+double DecisionTree::probabilityOfFeatureValue(const std::string& feature, const std::string& value) {
+    return 1.0;
+}
+
+double DecisionTree::probabilityOfFeatureValue(const std::string& feature, double sampling_point) {
+    return 1.0;
+}
+
+
+//--------------- Class Based Utilities ----------------//
 
 // Getters
 std::string DecisionTree::getTrainingDatafile() const {
