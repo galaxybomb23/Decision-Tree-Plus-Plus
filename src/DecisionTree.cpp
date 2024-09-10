@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <iterator>
 #include <regex>
+#include <iomanip>
 
 DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
 {
