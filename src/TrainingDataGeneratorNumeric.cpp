@@ -169,8 +169,8 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
         }
     }
 
-    // add class names and their parameter values (currently {}) to classes_and_their_param_values
-    for (int i = 0; i < class_names.size(); ++i)
+    // add class names and their parameter values to classes_and_their_param_values
+    for (int i = 0; i < class_names.size(); i++)
     {
         classes_and_their_param_values[class_names[i]] = {};
     }
@@ -255,11 +255,17 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
         }
     }
 
-    this->_class_names = class_names;
-    this->_class_names_and_priors = class_names_and_priors;
-    this->_features_with_value_range = features_with_value_range;
-    this->_classes_and_their_param_values = classes_and_their_param_values;
-    this->_features_ordered = features_ordered;
+    _class_names = class_names;
+    _class_names_and_priors = class_names_and_priors;
+    _features_with_value_range = features_with_value_range;
+    _classes_and_their_param_values = classes_and_their_param_values;
+    _features_ordered = features_ordered;
+
+    std::cout << "end of ReadParameterFileNumeric" << std::endl;
+    for (const auto &kv : _classes_and_their_param_values)
+    {
+        std::cout << "one item is " << kv.first << std::endl;
+    }
 }
 
 void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
