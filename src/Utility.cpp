@@ -28,3 +28,13 @@ std::optional<T> ClosestSamplingPoint(std::vector<T> const &vec, T const &val) {
 std::string CleanupCsvString(std::string const &str) {
     // The purpose of this function is to clean up a CSV string.
 };
+
+template <typename Container>
+std::ostream &operator<<(std::ostream &os, const Container &iterable)
+{
+    for (const auto &element : iterable)
+    {
+        os << element << " ";
+    }
+    return os;
+}

@@ -5,6 +5,8 @@
 #include <string>
 #include <map>
 #include "DecisionTree.hpp" // Include DecisionTree.hpp
+#include "Utility.hpp"      // Include Utility.hpp
+
 class EvalTrainingData : public DecisionTree
 {
 public:
@@ -12,6 +14,7 @@ public:
     ~EvalTrainingData();                                         // Destructor
 
     void evaluateTrainingData(); // Evaluate the training data
+    double _dataQualityIndex;
 
 private:
     // Private members

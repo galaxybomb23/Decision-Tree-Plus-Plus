@@ -1,16 +1,6 @@
 #include "DecisionTreeNode.hpp"
 #include "DecisionTree.hpp"
 
-// for vector output
-std::ostream &operator<<(std::ostream &os, const std::vector<std::string> &vec)
-{
-    for (const auto &str : vec)
-    {
-        os << str << " ";
-    }
-    return os;
-}
-
 DecisionTreeNode::DecisionTreeNode(const std::string &feature, double entropy,
                                    const std::vector<double> &class_probabilities,
                                    const std::vector<string> &branch_features_and_values_or_thresholds,

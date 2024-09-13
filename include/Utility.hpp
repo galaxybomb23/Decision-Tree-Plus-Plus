@@ -20,4 +20,25 @@ std::optional<T> ClosestSamplingPoint(std::vector<T> const &vec, T const &val);
 
 std::string CleanupCsvString(std::string const &str);
 
+// for vector output
+template <typename T>
+std::ostream &operator<<(std::ostream &os, const std::vector<T> &vec)
+{
+    for (const auto &elem : vec)
+    {
+        os << elem << " ";
+    }
+    return os;
+}
+
+template <typename T>
+std::ostream &operator<<(std::ostream &os, const std::set<T> &set)
+{
+    for (const auto &elem : set)
+    {
+        os << elem << " ";
+    }
+    return os;
+}
+
 #endif // UTILITY_HPP

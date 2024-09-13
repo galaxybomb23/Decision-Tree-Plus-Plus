@@ -1,13 +1,15 @@
 #ifndef DECISION_TREE_NODE_HPP
 #define DECISION_TREE_NODE_HPP
 
-#include <memory>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "DecisionTree.hpp"
+#include "Utility.hpp"
 // Forward declaration
 class DecisionTree;
 
@@ -18,10 +20,11 @@ class DecisionTreeNode
 public:
     DecisionTreeNode(DecisionTree &dt); // Constructor
 
-    DecisionTreeNode(const std::string &feature, double entropy,
-                     const std::vector<double> &class_probabilities,
-                     const std::vector<string> &branch_features_and_values_or_thresholds,
-                     DecisionTree &dt, const bool isRoot);
+    DecisionTreeNode(
+        const std::string &feature, double entropy,
+        const std::vector<double> &class_probabilities,
+        const std::vector<string> &branch_features_and_values_or_thresholds,
+        DecisionTree &dt, const bool isRoot);
     ~DecisionTreeNode(); // Destructor
 
     int HowManyNodes();
@@ -55,7 +58,8 @@ private:
     double _nodeCreationEntropy;
     vector<double> _classProbabilities;
     vector<string> _branchFeaturesAndValuesOrThresholds;
-    vector<shared_ptr<DecisionTreeNode>> _linkedTo; // maybe change to weak if cyclic referencing
+    vector<shared_ptr<DecisionTreeNode>>
+        _linkedTo; // maybe change to weak if cyclic referencing
 };
 
 #endif // DECISION_TREE_NODE_HPP
