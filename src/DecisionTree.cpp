@@ -213,7 +213,31 @@ void DecisionTree::showTrainingData() const {
 
 //--------------- Classify ----------------//
 
-std::map<std::string, std::string> DecisionTree::classify(void* root_node, const std::vector<std::string>& features_and_values) {
+std::map<std::string, std::string> DecisionTree::classify(void* rootNode, const std::vector<std::string>& featuresAndValues) {
+    if (!checkNamesUsed(featuresAndValues)) {
+        throw std::runtime_error(
+            "\n\nError in the names you have used for features and/or values. "
+            "Try using the csv_cleanup_needed option in the constructor call."
+        );
+    }
+
+    std::vector<std::string> newFeaturesAndValues;
+    std::regex pattern(R"((\S+)\s*=\s*(\S+))");
+    std::smatch match;
+
+    for (const auto& fv : featuresAndValues) {
+        if (std::regex_match(fv, match, pattern)) {
+            std::string feature = match[1];
+            std::string value = match[2];
+            newFeaturesAndValues.push_back(feature + "=" + value);
+        } else {
+            throw std::runtime_error(
+                "\n\nError in the format of the feature and value pairs. "
+                "Use the format feature=value."
+            );
+        }
+    }
+    
     return {};
 }
 
@@ -238,12 +262,16 @@ double DecisionTree::probabilityOfFeatureValue(const std::string& feature, const
     return 1.0;
 }
 
-double DecisionTree::probabilityOfFeatureValue(const std::string& feature, double sampling_point) {
+double DecisionTree::probabilityOfFeatureValue(const std::string& feature, double samplingPoint) {
     return 1.0;
 }
 
 
 //--------------- Class Based Utilities ----------------//
+
+bool DecisionTree::checkNamesUsed(const std::vector<std::string>& featuresAndValues) {
+    return true;
+}
 
 // Getters
 std::string DecisionTree::getTrainingDatafile() const {
