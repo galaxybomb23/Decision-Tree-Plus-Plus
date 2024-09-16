@@ -76,6 +76,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 
     if (std::regex_search(params, class_matches, class_regex))
     {
+        // Extract class names and priors, make them a vector and a map respectively
         std::string class_names_str = class_matches[1].str();
         std::string class_priors_str = class_matches[2].str();
         std::istringstream class_names_stream(class_names_str);
@@ -84,7 +85,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
         std::string name, prior;
         std::vector<double> class_priors;
 
-        // Read class names into the vector
+        // Split class_names_stream by ' ' delimiter and add to class_names
         while (class_names_stream >> name)
         {
             if (!name.empty())
@@ -93,7 +94,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
             }
         }
 
-        // Read class priors into the vector
+        // Split class_priors_stream by ' ' delimiter and add to class_priors
         while (class_priors_stream >> prior)
         {
             if (!prior.empty())
@@ -132,6 +133,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 
     for (std::sregex_iterator i = feature_begin; i != feature_end; ++i)
     {
+        // Same as above, extract feature names and value ranges
         std::smatch match = *i;
         std::string feature_name = match[1].str(); // feature name is the first match group
         std::string value_range_str = match[2].str(); // value range is the second match group
@@ -150,7 +152,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
             }
         }
 
-        // Ensure value_range has exactly two values
+        // Ensure value_range has exactly two values and add to features_with_value_range
         if (value_range.size() == 2)
         {
             features_with_value_range[feature_name] = std::make_pair(value_range[0], value_range[1]);
@@ -223,11 +225,11 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
             }
         }
 
+        // Add class name, mean and covariance to classes_and_their_param_values
         classes_and_their_param_values[class_name]["mean"] = class_mean;
         classes_and_their_param_values[class_name]["covariance"] = std::vector<double>();
 
-        // Because classes_and_their_param_values is a map of string to map of string to vector of double
-        // we need to flatten the covariance matrix into a single vector
+        // Because classes_and_their_param_values is a map of string to map of string to vector of double we need to flatten the covariance matrix into a single vector
         for (const auto &row : covariance_matrix)
         {
             classes_and_their_param_values[class_name]["covariance"].insert(
@@ -257,6 +259,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
         }
     }
 
+    // Update the class attributes
     _class_names = class_names;
     _class_names_and_priors = class_names_and_priors;
     _features_with_value_range = features_with_value_range;
@@ -264,11 +267,11 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
     _features_ordered = features_ordered;
 }
 
+// Function to generate multivariate normal samples, since Eigen does not have a built-in function for this
+// Original Python implementation uses numpy.random.multivariate_normal, but this is not available in cpp
+// We will use the Cholesky decomposition method to generate multivariate normal samples
 std::vector<VectorXd> TrainingDataGeneratorNumeric::GenerateMultivariateSamples(const std::vector<double> &mean, const MatrixXd &cov, int num_samples)
 {
-    // Function to generate multivariate normal samples, since Eigen does not have a built-in function for this
-    // Original Python implementation uses numpy.random.multivariate_normal, but this is not available in cpp
-
     std::random_device rd;
     std::mt19937 gen(rd());
     std::normal_distribution<> dist(0, 1);
@@ -321,14 +324,17 @@ void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
         samples_for_class[class_name] = GenerateMultivariateSamples(mean, cov_matrix, _number_of_samples_per_class);
     }
 
-    // Store data records
+    // Store data records to be written to the CSV file
+    // for each class, for each sample, create a data record
     std::vector<std::string> data_records;
     for (const auto &class_entry : samples_for_class)
     {
+        // For each sample in the class, create a data record
         const std::string &class_name = class_entry.first;
         for (int sample_index = 0; sample_index < _number_of_samples_per_class; ++sample_index)
         {
             std::string data_record = class_name + ",";
+            // For each feature in the sample, add to the data record
             for (int feature_index = 0; feature_index < class_entry.second[sample_index].size(); ++feature_index)
             {
                 data_record += std::to_string(class_entry.second[sample_index](feature_index));
