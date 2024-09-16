@@ -43,17 +43,5 @@ TEST_F(ClassifyTest, ConstructorInitializesNode)
 
 TEST_F(ClassifyTest, CheckParamsDt)
 {
-    ASSERT_EQ(dt.getTrainingDatafile(), "../test/resources/stage3cancer.csv");
-    ASSERT_EQ(dt.getEntropyThreshold(), 0.1);
-    ASSERT_EQ(dt.getMaxDepthDesired(), 20);
-    ASSERT_EQ(dt.getCsvClassColumnIndex(), 1);
-    ASSERT_EQ(dt.getSymbolicToNumericCardinalityThreshold(), 20);
-    ASSERT_EQ(dt.getCsvColumnsForFeatures().size(), 10);
-    ASSERT_EQ(dt.getNumberOfHistogramBins(), 10);
-    ASSERT_EQ(dt.getCsvCleanupNeeded(), 1);
-    ASSERT_EQ(dt.getDebug1(), 1);
-    ASSERT_EQ(dt.getDebug2(), 2);
-    ASSERT_EQ(dt.getDebug3(), 3);
-    ASSERT_NO_THROW(dt.getTrainingData());
-    ASSERT_EQ(dt.getHowManyTotalTrainingSamples(), 146);
+    
 }

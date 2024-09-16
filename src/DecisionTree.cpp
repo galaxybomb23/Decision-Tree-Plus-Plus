@@ -213,7 +213,7 @@ void DecisionTree::showTrainingData() const {
 
 //--------------- Classify ----------------//
 
-std::map<std::string, std::string> DecisionTree::classify(void* rootNode, const std::vector<std::string>& featuresAndValues) {
+std::map<std::string, std::string> DecisionTree::classify(DecisionTreeNode* rootNode, const std::vector<std::string>& featuresAndValues) {
     if (!checkNamesUsed(featuresAndValues)) {
         throw std::runtime_error(
             "\n\nError in the names you have used for features and/or values. "
@@ -237,7 +237,46 @@ std::map<std::string, std::string> DecisionTree::classify(void* rootNode, const 
             );
         }
     }
+
+    // Update the features and values
+    for (const auto& fv : newFeaturesAndValues) {
+        std::string feature = fv.substr(0, fv.find("="));
+        std::string value = fv.substr(fv.find("=") + 1);
+        _featuresAndValuesDict[feature].insert(value);
+    }
+
+    if (_debug3) {
+        std::cout << "\nCL1 New features and values:\n";
+        for (const auto& item : newFeaturesAndValues) {
+            std::cout << item << " ";
+        }
+    }
+
+    std::map<std::string, std::vector<double>> answer;
+    for (const auto& className : _classNames) {
+        answer[className] = {};
+    }
+    answer["solution_path"] = {};
+
+    std::map<std::string, double> classification = recursiveDescentForClassification(rootNode, newFeaturesAndValues, answer);
+    std::reverse(answer["solution_path"].begin(), answer["solution_path"].end());
+
+    if (_debug3) {
+        std::cout << "\nCL2 The classification:" << std::endl;
+        for (const auto& className : _classNames) {
+            std::cout << "    " << className << " with probability " << classification[className] << std::endl;
+        }
+    }
+
+
     
+    return {};
+}
+
+std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
+    DecisionTreeNode* node, const std::vector<std::string>& feature_and_values, 
+    std::map<std::string, vector<double>>& answer) 
+{
     return {};
 }
 
