@@ -70,10 +70,12 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
     std::map<std::string, std::vector<std::string>> expectedTrainingDataDict = {
             {"1", {"1","6.1","0","64","2","10.26","2","4","diploid"}},
             {"146", {"146","2.1","1","56","2","9.01","3","7","diploid"}},
-            {"28", {"28","13.9","0","57","2","12.13","3","6","diploid"}}
+            {"28", {"28","13.9","0","57","2","12.13","3","6","diploid"}},
+            {"55", {"55","1","1","61","1","2.4","4","10","diploid"}}
         };
+    std::map<std::string, std::vector<std::string>> trainingDataDict = dt.getTrainingDataDict();
     for (auto data : expectedTrainingDataDict)
     {
-        ASSERT_EQ(dt.getTrainingDataDict()[data.first], data.second);
+        ASSERT_EQ(trainingDataDict[data.first], data.second);
     }
 }

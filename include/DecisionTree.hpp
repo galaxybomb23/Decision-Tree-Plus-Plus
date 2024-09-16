@@ -14,12 +14,35 @@ class DecisionTreeNode;
 class DecisionTree
 {
 public:
+    //--------------- Constructors and Destructors ----------------//
     DecisionTree(std::map<std::string, std::string> kwargs); // constructor
     ~DecisionTree(); // destructor
 
+    //--------------- Functions ----------------//
     void getTrainingData();
     void calculateFirstOrderProbabilities();
     void showTrainingData() const;
+
+
+    //--------------- Classify ----------------//
+    std::map<std::string, std::string> classify(void* root_node, const std::vector<std::string>& features_and_values);
+
+
+    //--------------- Construct Tree ----------------//
+    DecisionTreeNode* constructDecisionTreeClassifier();
+
+
+    //--------------- Entropy Calculators ----------------//
+    double classEntropyOnPriors();
+
+
+    //--------------- Probability Calculators ----------------//
+    double probabilityOfFeatureValue(const std::string& feature, const std::string& value);
+    double probabilityOfFeatureValue(const std::string& feature, double sampling_point);
+
+
+    //--------------- Class Based Utilities ----------------//
+
 
     int _nodesCreated;
     std::vector<std::string> _classNames;
