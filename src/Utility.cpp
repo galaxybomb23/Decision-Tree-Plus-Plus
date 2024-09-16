@@ -15,6 +15,12 @@ template <typename T>
 std::vector<T> deepCopy(std::vector<T> const &vec)
 {
     // The purpose of this function is to create a deep copy of a vector.
+    std::vector<T> copy;
+    for (T const &elem : vec)
+    {
+        copy.push_back(elem);
+    }
+    return copy;
 }
 
 template <typename T>
