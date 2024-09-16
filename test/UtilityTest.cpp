@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include "Utility.hpp"
 
-
 class UtilityTest : public ::testing::Test
 {
 protected:
@@ -62,7 +61,7 @@ TEST_F(UtilityTest, ClosestSamplingPoint)
     // Test the ClosestSamplingPoint function on a vector of integers
     std::vector<int> vec = {1, 2, 3, 5, 8, 13, 21};
     std::optional<int> result = ClosestSamplingPoint(vec, 20);
-    ASSERT_EQ(result.value(), 20);
+    ASSERT_EQ(result.value(), 21);
 
     // Test the ClosestSamplingPoint function on a vector of doubles
     std::vector<double> vec2 = {1.0, 2.0, 3.0, 4.0, 5.0};
