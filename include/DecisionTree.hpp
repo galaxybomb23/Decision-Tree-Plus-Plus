@@ -66,6 +66,7 @@ public:
     int getHowManyTotalTrainingSamples() const;
     std::vector<std::string> getFeatureNames() const;
     std::map<std::string, std::vector<std::string>> getTrainingDataDict() const;
+    std::map<std::string, std::set<std::string>> getFeaturesAndValuesDict() const;
 
     // Setters
     void setTrainingDatafile(const std::string& trainingDatafile);

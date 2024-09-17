@@ -384,6 +384,10 @@ std::map<std::string, std::vector<std::string>> DecisionTree::getTrainingDataDic
     return _trainingDataDict;
 }
 
+std::map<std::string, std::set<std::string>> DecisionTree::getFeaturesAndValuesDict() const {
+    return _featuresAndValuesDict;
+}
+
 // Setters
 void DecisionTree::setTrainingDatafile(const std::string& trainingDatafile) {
     _trainingDatafile = trainingDatafile;

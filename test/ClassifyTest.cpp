@@ -41,7 +41,19 @@ TEST_F(ClassifyTest, ConstructorInitializesNode)
     ASSERT_NE(&node, nullptr);
 }
 
-TEST_F(ClassifyTest, CheckParamsDt)
+TEST_F(ClassifyTest, ClassifyFunction)
 {
-    
+    ASSERT_NO_THROW(dt.classify(&node, {"feature=0.0"}));
+
+    // Construct the features and values vector out of the features and values dictionary
+    std::vector<std::string> featuresAndValues;
+    for (const auto& kv : dt.getFeaturesAndValuesDict())
+    {
+        for (const auto& value : kv.second)
+        {
+            featuresAndValues.push_back(kv.first + "=" + value);
+        }
+    }
+
+    std::map<std::string, std::string> classification = dt.classify(&node, featuresAndValues);
 }
