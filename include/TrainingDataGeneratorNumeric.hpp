@@ -5,9 +5,10 @@
 #include <algorithm> // for std::shuffle
 #include <map>
 #include <Eigen/Dense> // For multivariate normal generation
-#include <ctime>       // For seeding random shuffle#include <string>
+#include <ctime>       // For seeding random shuffle
+#include <string>
 #include <vector>
-#include <algorithm> 
+#include <algorithm>
 #include <random>
 #include <regex>
 #include <fstream>
@@ -19,17 +20,18 @@ class TrainingDataGeneratorNumeric
 {
 private:
     // Attributes
-    std::string _output_csv_file;
-    std::string _parameter_file;
-    int _number_of_samples_per_class;
+    std::string _outputCsvFile;
+    std::string _parameterFile;
+    int _numberOfSamplesPerClass;
     int _debug;
 
     // Other attributes initialized in the constructor
-    std::vector<std::string> _class_names;
-    std::vector<std::string> _features_ordered;
-    std::map<std::string, double> _class_names_and_priors;
-    std::map<std::string, std::pair<double, double>> _features_with_value_range;
-    std::map<std::string, std::map<std::string, std::vector<double>>> _classes_and_their_param_values;
+    std::vector<std::string> _classNames;
+    std::vector<std::string> _featuresOrdered;
+    std::map<std::string, double> _classNamesAndPriors;
+    std::map<std::string, std::pair<double, double>> _featuresWithValueRange;
+    std::map<std::string, std::map<std::string, std::vector<double>>> _classesAndTheirParamValues;
+
 public:
     TrainingDataGeneratorNumeric(std::map<std::string, std::string> kwargs);
     ~TrainingDataGeneratorNumeric();
@@ -38,7 +40,7 @@ public:
     void GenerateTrainingDataNumeric(); // Generate the training data for numeric data
 
     // Helpers
-    std::vector<Eigen::VectorXd> GenerateMultivariateSamples(const std::vector<double> &mean, const Eigen::MatrixXd &cov, int num_samples);
+    std::vector<Eigen::VectorXd> GenerateMultivariateSamples(const std::vector<double> &mean, const Eigen::MatrixXd &cov, int numSamples);
 
     // Getters
     std::string getOutputCsvFile() const;

@@ -49,60 +49,60 @@ TEST_F(TrainingDataGeneratorNumericTest, TestReadParameterFileNumericAll)
     tdgn.ReadParameterFileNumeric();
 
     // Check class names
-    std::vector<std::string> class_names = tdgn.getClassNames();
-    ASSERT_EQ(class_names.size(), 2);
-    ASSERT_EQ(class_names[0], "recession");
-    ASSERT_EQ(class_names[1], "goodtimes");
+    std::vector<std::string> classNames = tdgn.getClassNames();
+    ASSERT_EQ(classNames.size(), 2);
+    ASSERT_EQ(classNames[0], "recession");
+    ASSERT_EQ(classNames[1], "goodtimes");
 
     // Check class names and priors
-    std::map<std::string, double> class_names_and_priors = tdgn.getClassNamesAndPriors();
-    ASSERT_EQ(class_names_and_priors.size(), 2);
-    ASSERT_EQ(class_names_and_priors["recession"], 0.4);
-    ASSERT_EQ(class_names_and_priors["goodtimes"], 0.6);
+    std::map<std::string, double> classNamesAndPriors = tdgn.getClassNamesAndPriors();
+    ASSERT_EQ(classNamesAndPriors.size(), 2);
+    ASSERT_EQ(classNamesAndPriors["recession"], 0.4);
+    ASSERT_EQ(classNamesAndPriors["goodtimes"], 0.6);
 
     // Check features ordered
-    std::vector<std::string> features_ordered = tdgn.getFeaturesOrdered();
-    ASSERT_EQ(features_ordered.size(), 2);
-    ASSERT_EQ(features_ordered[0], "gdp");
-    ASSERT_EQ(features_ordered[1], "return_on_invest");
+    std::vector<std::string> featuresOrdered = tdgn.getFeaturesOrdered();
+    ASSERT_EQ(featuresOrdered.size(), 2);
+    ASSERT_EQ(featuresOrdered[0], "gdp");
+    ASSERT_EQ(featuresOrdered[1], "return_on_invest");
 
     // Check features with value range
-    std::map<std::string, std::pair<double, double>> features_with_value_range = tdgn.getFeaturesWithValueRange();
-    ASSERT_EQ(features_with_value_range.size(), 2);
-    ASSERT_EQ(features_with_value_range["gdp"].first, 0.0);
-    ASSERT_EQ(features_with_value_range["gdp"].second, 100.0);
-    ASSERT_EQ(features_with_value_range["return_on_invest"].first, 0.0);
-    ASSERT_EQ(features_with_value_range["return_on_invest"].second, 100.0);
+    std::map<std::string, std::pair<double, double>> featuresWithValueRange = tdgn.getFeaturesWithValueRange();
+    ASSERT_EQ(featuresWithValueRange.size(), 2);
+    ASSERT_EQ(featuresWithValueRange["gdp"].first, 0.0);
+    ASSERT_EQ(featuresWithValueRange["gdp"].second, 100.0);
+    ASSERT_EQ(featuresWithValueRange["return_on_invest"].first, 0.0);
+    ASSERT_EQ(featuresWithValueRange["return_on_invest"].second, 100.0);
 
     // Check classes and their parameter values
-    std::map<std::string, std::map<std::string, std::vector<double>>> classes_and_their_param_values = tdgn.getClassesAndTheirParamValues();
-    ASSERT_EQ(classes_and_their_param_values.size(), 2);
-    ASSERT_EQ(classes_and_their_param_values["recession"]["mean"].size(), 2);
-    ASSERT_EQ(classes_and_their_param_values["recession"]["mean"][0], 50.0);
-    ASSERT_EQ(classes_and_their_param_values["recession"]["mean"][1], 30.0);
-    ASSERT_EQ(classes_and_their_param_values["recession"]["covariance"].size(), 4);
-    ASSERT_EQ(classes_and_their_param_values["recession"]["covariance"][0], 1.0);
-    ASSERT_EQ(classes_and_their_param_values["recession"]["covariance"][1], 0.0);
-    ASSERT_EQ(classes_and_their_param_values["recession"]["covariance"][2], 0.0);
-    ASSERT_EQ(classes_and_their_param_values["recession"]["covariance"][3], 20.0);
-    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["mean"].size(), 2);
-    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["mean"][0], 50.0);
-    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["mean"][1], 60.0);
-    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["covariance"].size(), 4);
-    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["covariance"][0], 1.0);
-    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["covariance"][1], 0.0);
-    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["covariance"][2], 0.0);
-    ASSERT_EQ(classes_and_their_param_values["goodtimes"]["covariance"][3], 20.0);
+    std::map<std::string, std::map<std::string, std::vector<double>>> classesAndTheirParamValues = tdgn.getClassesAndTheirParamValues();
+    ASSERT_EQ(classesAndTheirParamValues.size(), 2);
+    ASSERT_EQ(classesAndTheirParamValues["recession"]["mean"].size(), 2);
+    ASSERT_EQ(classesAndTheirParamValues["recession"]["mean"][0], 50.0);
+    ASSERT_EQ(classesAndTheirParamValues["recession"]["mean"][1], 30.0);
+    ASSERT_EQ(classesAndTheirParamValues["recession"]["covariance"].size(), 4);
+    ASSERT_EQ(classesAndTheirParamValues["recession"]["covariance"][0], 1.0);
+    ASSERT_EQ(classesAndTheirParamValues["recession"]["covariance"][1], 0.0);
+    ASSERT_EQ(classesAndTheirParamValues["recession"]["covariance"][2], 0.0);
+    ASSERT_EQ(classesAndTheirParamValues["recession"]["covariance"][3], 20.0);
+    ASSERT_EQ(classesAndTheirParamValues["goodtimes"]["mean"].size(), 2);
+    ASSERT_EQ(classesAndTheirParamValues["goodtimes"]["mean"][0], 50.0);
+    ASSERT_EQ(classesAndTheirParamValues["goodtimes"]["mean"][1], 60.0);
+    ASSERT_EQ(classesAndTheirParamValues["goodtimes"]["covariance"].size(), 4);
+    ASSERT_EQ(classesAndTheirParamValues["goodtimes"]["covariance"][0], 1.0);
+    ASSERT_EQ(classesAndTheirParamValues["goodtimes"]["covariance"][1], 0.0);
+    ASSERT_EQ(classesAndTheirParamValues["goodtimes"]["covariance"][2], 0.0);
+    ASSERT_EQ(classesAndTheirParamValues["goodtimes"]["covariance"][3], 20.0);
 }
 
 TEST_F(TrainingDataGeneratorNumericTest, TestGenerateMultivariateSamples)
 {
     // Generate samples for each class
     std::vector<double> mean = {50.0, 30.0};
-    MatrixXd cov_matrix(2, 2);
-    cov_matrix << 0.01, 0.0, 0.0, 0.01;
-    int num_samples = 3000;
-    std::vector<VectorXd> samples = tdgn.GenerateMultivariateSamples(mean, cov_matrix, num_samples);
+    MatrixXd covMatrix(2, 2);
+    covMatrix << 0.01, 0.0, 0.0, 0.01;
+    int numSamples = 3000;
+    std::vector<VectorXd> samples = tdgn.GenerateMultivariateSamples(mean, covMatrix, numSamples);
 
     // Check the number of samples
     ASSERT_EQ(samples.size(), 3000);
@@ -141,18 +141,18 @@ TEST_F(TrainingDataGeneratorNumericTest, TestGenerateTrainingDataNumeric)
         ASSERT_GE(gdp, 0.0);
         ASSERT_LE(gdp, 100.0);
         std::getline(ss, token, ',');
-        double return_on_invest = std::stod(token);
-        ASSERT_GE(return_on_invest, 0.0);
-        ASSERT_LE(return_on_invest, 100.0);
+        double returnOnInvest = std::stod(token);
+        ASSERT_GE(returnOnInvest, 0.0);
+        ASSERT_LE(returnOnInvest, 100.0);
     }
 
     // see if first 1000 samples approximately follow the mean and covariance
-    int recession_count = 0;
+    int recessionCount = 0;
     int goodtimes_count = 0;
-    int recession_sum_1 = 0;
-    int recession_sum_2 = 0;
-    int goodtimes_sum_1 = 0;
-    int goodtimes_sum_2 = 0;
+    int recessionSum1 = 0;
+    int recessionSum2 = 0;
+    int goodtimesSum1 = 0;
+    int goodtimesSum2 = 0;
     for (int i = 0; i < 1000; ++i)
     {
         std::getline(file, line);
@@ -164,26 +164,26 @@ TEST_F(TrainingDataGeneratorNumericTest, TestGenerateTrainingDataNumeric)
         std::getline(ss, token, ',');
         double gdp = std::stod(token);
         std::getline(ss, token, ',');
-        double return_on_invest = std::stod(token);
+        double returnOnInvest = std::stod(token);
         if (class_name == "recession")
         {
-            recession_count++;
-            recession_sum_1 += gdp;
-            recession_sum_2 += return_on_invest;
+            recessionCount++;
+            recessionSum1 += gdp;
+            recessionSum2 += returnOnInvest;
         }
         else
         {
             goodtimes_count++;
-            goodtimes_sum_1 += gdp;
-            goodtimes_sum_2 += return_on_invest;
+            goodtimesSum1 += gdp;
+            goodtimesSum2 += returnOnInvest;
         }
     }
 
     // Check the mean of the samples
-    ASSERT_NEAR(recession_sum_1 / recession_count, 50.0, 5);
-    ASSERT_NEAR(recession_sum_2 / recession_count, 30.0, 5);
-    ASSERT_NEAR(goodtimes_sum_1 / goodtimes_count, 50.0, 5);
-    ASSERT_NEAR(goodtimes_sum_2 / goodtimes_count, 60.0, 5);
+    ASSERT_NEAR(recessionSum1 / recessionCount, 50.0, 5);
+    ASSERT_NEAR(recessionSum2 / recessionCount, 30.0, 5);
+    ASSERT_NEAR(goodtimesSum1 / goodtimes_count, 50.0, 5);
+    ASSERT_NEAR(goodtimesSum2 / goodtimes_count, 60.0, 5);
 
     file.close();
 }
