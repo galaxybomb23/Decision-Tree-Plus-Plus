@@ -142,7 +142,7 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     // Make back into a string
     for (const auto &param : allParams)
     {
-        paramString += param + "\n";
+        paramString += param;
     }
 
     std::cout << "paramString: " << paramString << "\n";
@@ -152,34 +152,47 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
 
     // Match class names and class priors
     // Regex to match and capture class names
-    std::regex classPattern("^\\s*class names:(.*?)\\s*class priors:(.*?\\s*)(feature: .*)");
+    std::regex classPattern("class names:\\s*(.*?)\\s*class priors:\\s*(.*?)\\s*(feature: .*)");
     std::smatch m;
 
     if (std::regex_search(paramString, m, classPattern))
     {
-        std::vector<std::string> classPriorsStr;
-        restParams = m[3];
-        _classNames    = filterAndClean("", splitByRegex(m[1].str(), "\\s+")); // split by space
-        classPriorsStr = filterAndClean("", splitByRegex(m[2].str(), "\\s+")); // split by space
-        
-        for (const auto &cp : classPriorsStr)
+        // print matched groups
+        for (size_t i = 0; i < m.size(); ++i)
         {
-            _classPriors.push_back(std::stod(cp));
+            std::cout << "m[" << i << "]: " << m[i].str() << "\n\n";
         }
+
+        std::string classNames = m[1].str();
+        std::string classPriors = m[2].str();
+        restParams = m[3].str();
+
+        // Split class names and class priors
+        std::vector<std::string> classNamesList = filterAndClean("", splitByRegex(classNames, "\\s+"));
+        std::vector<std::string> classPriorsList = filterAndClean("", splitByRegex(classPriors, "\\s+"));
+
+        // Assign to class names and class priors
+        _classNames = classNamesList;
+        std::vector<double> classPriorsDouble;
+        for (const auto &item : classPriorsList)
+        {
+            classPriorsDouble.push_back(std::stod(item));
+        }
+        _classPriors = classPriorsDouble;
     }
     else
     {
         throw std::invalid_argument("Class names and class priors not found.");
     }
 
+    std::cout << " Rest of the parameters: " << restParams << "\n";
+
     // Now match Feature and bias
-    std::regex featureAndBiasPattern("(feature:.*?) (bias:.*)"); // this does not match
+    std::regex featureAndBiasPattern("^feature:\\s*(\\w+)|^bias:\\s*class:\\s*(\\w+)"); // this does not match
     std::smatch mFeatureBias;
     std::string featureString;
     std::string biasString;
     std::map<std::string, std::vector<double>> featuresAndValuesDict;
-
-    std::cout << "restParams: " << restParams << "\n";
 
     if (std::regex_search(restParams, mFeatureBias, featureAndBiasPattern))
     {
