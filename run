@@ -45,7 +45,6 @@ case $1 in
     test
     ;;
   *)
-    asciiquarium
     usage
     ;;
 esac        
