@@ -53,5 +53,43 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckReadParameterFileSymbolic)
 
     // check feature and values dictionary
     ASSERT_EQ(tdgs.getFeaturesAndValuesDict().size(), 4);
+    std::vector <std::string> features = {"smoking", "exercising", "fatIntake", "videoAddiction"};
 
+    int ctr = 0;
+    for (auto const &feature : tdgs.getFeaturesAndValuesDict())
+    {
+        ASSERT_TRUE(std::find(features.begin(), features.end(), feature.first) != features.end());
+        if (feature.first == "smoking")
+        {
+            ASSERT_EQ(feature.second.size(), 4);
+            ASSERT_EQ(feature.second[0], "heavy");
+            ASSERT_EQ(feature.second[1], "medium");
+            ASSERT_EQ(feature.second[2], "light");
+            ASSERT_EQ(feature.second[3], "never");
+        }
+        if (feature.first == "exercising")
+        {
+            ASSERT_EQ(feature.second.size(), 3);
+            ASSERT_EQ(feature.second[0], "never");
+            ASSERT_EQ(feature.second[1], "occasionally");
+            ASSERT_EQ(feature.second[2], "regularly");
+        }
+        if (feature.first == "fatIntake")
+        {
+            ASSERT_EQ(feature.second.size(), 3);
+            ASSERT_EQ(feature.second[0], "low");
+            ASSERT_EQ(feature.second[1], "medium");
+            ASSERT_EQ(feature.second[2], "heavy");
+        }
+        if (feature.first == "videoAddiction")
+        {
+            ASSERT_EQ(feature.second.size(), 4);
+            ASSERT_EQ(feature.second[0], "none");
+            ASSERT_EQ(feature.second[1], "low");
+            ASSERT_EQ(feature.second[2], "medium");
+            ASSERT_EQ(feature.second[3], "heavy");
+        }
+        ctr++;
+    }
+    ASSERT_EQ(ctr, 4);
 }

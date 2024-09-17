@@ -22,8 +22,8 @@ private:
     int _debug1;
     int _debug2;
     std::map<std::string, std::vector<double>> _trainingSampleRecords;
-    std::map<std::string, std::vector<double>> _featuresAndValuesDict;
-    std::map<std::string, std::map<std::string, std::vector<double>>> _biasDict;
+    std::map<std::string, std::vector<std::string>> _featuresAndValuesDict;
+    std::map<std::string, std::map<std::string, std::vector<std::string>>> _biasDict;
     std::vector<std::string> _classNames;
     std::vector<double> _classPriors;
 
@@ -56,8 +56,8 @@ public:
         return _classPriors;
     }
     std::vector<std::string> getClassNames() { return _classNames; }
-    std::map<std::string, std::vector<double>> getFeaturesAndValuesDict() { return _featuresAndValuesDict; }
-    std::map<std::string, std::map<std::string, std::vector<double>>> getBiasDict() { return _biasDict; }
+    std::map<std::string, std::vector<std::string>> getFeaturesAndValuesDict() { return _featuresAndValuesDict; }
+    std::map<std::string, std::map<std::string, std::vector<std::string>>> getBiasDict() { return _biasDict; }
     std::string getOutputDatafile() { return _outputDatafile; }
     std::string getParameterFile() { return _parameterFile; }
     int getNumberOfTrainingSamples() { return _numberOfTrainingSamples; }

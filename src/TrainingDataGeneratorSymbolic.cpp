@@ -142,17 +142,18 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     // Make back into a string
     for (const auto &param : allParams)
     {
-        paramString += param;
+        std::cout << "paramSTRING: " << param << "\n";
+        paramString += param + "\n";
     }
 
-    std::cout << "paramString: " << paramString << "\n";
+    std::cout << "paramString: " << paramString;
 
     // string used in matching
     std::string restParams;
 
     // Match class names and class priors
     // Regex to match and capture class names
-    std::regex classPattern("class names:\\s*(.*?)\\s*class priors:\\s*(.*?)\\s*(feature: .*)");
+    std::regex classPattern("class names:\\s*(.*?)\\s*class priors:\\s*(.*?)\\s*(feature: [\\s\\S]*)");
     std::smatch m;
 
     if (std::regex_search(paramString, m, classPattern))
@@ -171,6 +172,9 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
         std::vector<std::string> classNamesList = filterAndClean("", splitByRegex(classNames, "\\s+"));
         std::vector<std::string> classPriorsList = filterAndClean("", splitByRegex(classPriors, "\\s+"));
 
+        std::cout << "Class names: " << vecToString(classNamesList) << "\n";
+        std::cout << "Class priors: " << vecToString(classPriorsList) << "\n";
+
         // Assign to class names and class priors
         _classNames = classNamesList;
         std::vector<double> classPriorsDouble;
@@ -185,18 +189,23 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
         throw std::invalid_argument("Class names and class priors not found.");
     }
 
-    std::cout << " Rest of the parameters: " << restParams << "\n";
+    std::cout << "Rest of the parameters: " << restParams << "\n";
 
     // Now match Feature and bias
-    std::regex featureAndBiasPattern("^feature:\\s*(\\w+)|^bias:\\s*class:\\s*(\\w+)"); // this does not match
+    std::regex featureAndBiasPattern("(feature:[\\s\\S]*?)(?=\\s*bias:)((?=bias:)[\\s\\S]*)"); 
     std::smatch mFeatureBias;
     std::string featureString;
     std::string biasString;
-    std::map<std::string, std::vector<double>> featuresAndValuesDict;
+    std::map<std::string, std::vector<std::string>> featuresAndValuesDict;
 
     if (std::regex_search(restParams, mFeatureBias, featureAndBiasPattern))
     {
         std::cout << "mFeatureBias[1]: " << mFeatureBias[1].str() << "\n";
+        std::cout << "mFeatureBias[2]: " << mFeatureBias[2].str() << "\n";
+
+        std::cout << "Feature and bias found.\n";
+
+
         featureString = mFeatureBias[1].str();
         biasString = mFeatureBias[2].str();
         std::vector<std::string> features = filterAndClean("", splitByRegex(featureString, "(feature[:])"));
@@ -204,19 +213,36 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
         // for each feature
         for (const auto &feature : features)
         {
-            // if item starts with "feature" then continue
             if (feature.substr(0, 7) == "feature") { continue; }
+
             std::vector<std::string> splits = filterAndClean("", splitByRegex(feature, " "));
 
             // for each split
             for (int i = 0; i < splits.size(); i++)
             {
+                std::cout << " SPLIT " << i << ": " << splits[i] << "\n";
                 // if first item, then create a new key in the dictionary
-                if (i == 0) { featuresAndValuesDict[splits[i]] = {}; }
+                if (i == 0) {
+                    // remove anything after newline
+                    std::regex newlineRegex("(.*)\\n");
+                    std::smatch newlineMatch;
+                    if (std::regex_search(splits[0], newlineMatch, newlineRegex))
+                    {
+                        splits[0] = newlineMatch[1].str();
+                    }
+                    featuresAndValuesDict[splits[0]] = {};
+                }
                 else {
                     // otherwise, add the value to the dictionary
                     if (splits[i].substr(0, 6) == "values") { continue; }
-                    featuresAndValuesDict[splits[0]].push_back(std::stod(splits[i]));
+                    // remove newline
+                    std::regex newlineRegex("(.*)\\n");
+                    std::smatch newlineMatch;
+                    if (std::regex_search(splits[i], newlineMatch, newlineRegex))
+                    {
+                        splits[i] = newlineMatch[1].str();
+                    }
+                    featuresAndValuesDict[splits[0]].push_back(splits[i]);
                 }
             }
         }
@@ -226,8 +252,15 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     }
     _featuresAndValuesDict = featuresAndValuesDict;
 
+    // print the features and values
+    std::cout << "Here are the features and their possible values:\n\n";
+    for (const auto &item : _featuresAndValuesDict)
+    {
+        std::cout << item.first << " ===> " << vecToString(item.second) << "\n";
+    }
+
     // Now onto the bias
-    std::map<std::string, std::map<std::string, std::vector<double>>> biasDict;
+    std::map<std::string, std::map<std::string, std::vector<std::string>>> biasDict;
     std::vector<std::string> biases = filterAndClean("", splitByRegex(biasString, "(bias[:]\\s*class[:])"));
     for (const auto &bias : biases)
     {
@@ -255,7 +288,7 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
                 {
                     // Add to the feature's list only if featureName exists
                     if (featureName.empty()) { continue; }
-                    biasDict[splits[0]][featureName].push_back(std::stod(splits[i]));
+                    biasDict[splits[0]][featureName].push_back(splits[i]);
                 }
             }
         }
