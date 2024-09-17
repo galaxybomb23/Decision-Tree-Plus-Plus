@@ -28,7 +28,7 @@ public:
     std::map<std::string, std::string> classify(DecisionTreeNode* rootNode, const std::vector<std::string>& featuresAndValues);
     std::map<std::string, double> recursiveDescentForClassification(DecisionTreeNode* node, 
                                                                        const std::vector<std::string>& feature_and_values, 
-                                                                       std::map<std::string, vector<double>>& answer);
+                                                                       std::map<std::string, std::vector<double>>& answer);
 
 
     //--------------- Construct Tree ----------------//

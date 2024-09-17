@@ -268,14 +268,29 @@ std::map<std::string, std::string> DecisionTree::classify(DecisionTreeNode* root
         }
     }
 
-
+    std::map<std::string, std::string> classificationForDisplay = {};
+    for (const auto& kv : classification) {
+        if (std::isfinite(kv.second)) {
+            std::ostringstream oss;
+            oss << std::fixed << std::setprecision(3) << kv.second;
+            classificationForDisplay[kv.first] = oss.str();
+        } else {
+            std::vector<std::string> nodes;
+            for (const auto& x : kv.first) {
+                nodes.push_back("NODE" + std::to_string(x));
+            }
+            std::ostringstream oss;
+            std::copy(nodes.begin(), nodes.end(), std::ostream_iterator<std::string>(oss, ", "));
+            classificationForDisplay[kv.first] = oss.str();
+        }
+    }
     
-    return {};
+    return classificationForDisplay;
 }
 
 std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
-    DecisionTreeNode* node, const std::vector<std::string>& feature_and_values, 
-    std::map<std::string, vector<double>>& answer) 
+    DecisionTreeNode* node, const std::vector<std::string>& featureAndValues, 
+    std::map<std::string, std::vector<double>>& answer) 
 {
     return {};
 }
