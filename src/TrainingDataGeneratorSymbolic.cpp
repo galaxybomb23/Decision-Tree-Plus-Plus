@@ -288,6 +288,12 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
                 {
                     // Add to the feature's list only if featureName exists
                     if (featureName.empty()) { continue; }
+                    std::regex newlineRegex("(.*)\\n");
+                    std::smatch newlineMatch;
+                    if (std::regex_search(splits[i], newlineMatch, newlineRegex))
+                    {
+                        splits[i] = newlineMatch[1].str();
+                    }
                     biasDict[splits[0]][featureName].push_back(splits[i]);
                 }
             }

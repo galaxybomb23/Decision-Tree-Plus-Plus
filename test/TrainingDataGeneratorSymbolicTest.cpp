@@ -42,7 +42,7 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckParamsTdgs)
     ASSERT_NO_THROW(tdgs.GenerateTrainingDataSymbolic());
 }
 
-TEST_F(TrainingDataGeneratorSymbolicTest, CheckReadParameterFileSymbolic)
+TEST_F(TrainingDataGeneratorSymbolicTest, CheckFeaturesAndValues)
 {
     ASSERT_NO_THROW(tdgs.ReadParameterFileSymbolic());
 
@@ -92,4 +92,73 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckReadParameterFileSymbolic)
         ctr++;
     }
     ASSERT_EQ(ctr, 4);
+}
+
+TEST_F(TrainingDataGeneratorSymbolicTest, CheckBias)
+{
+    ASSERT_NO_THROW(tdgs.ReadParameterFileSymbolic());
+    std::map<std::string, std::map<std::string, std::vector<std::string>>> biasDict = tdgs.getBiasDict();
+    ASSERT_EQ(biasDict.size(), 2);
+
+    for (auto const &bias : biasDict)
+{
+    if (bias.first == "malignant")
+    {
+        ASSERT_EQ(bias.second.size(), 4);
+
+        for (auto const &feature : bias.second)
+        {
+            if (feature.first == "smoking")
+            {
+                ASSERT_EQ(feature.second.size(), 1);
+                ASSERT_EQ(feature.second[0], "heavy=0.8");
+            }
+            else if (feature.first == "exercising")
+            {
+                ASSERT_EQ(feature.second.size(), 1);
+                ASSERT_EQ(feature.second[0], "never=0.8");
+            }
+            else if (feature.first == "fatIntake")
+            {
+                ASSERT_EQ(feature.second.size(), 1);
+                ASSERT_EQ(feature.second[0], "heavy=0.8");
+            }
+            else if (feature.first == "videoAddiction")
+            {
+                ASSERT_EQ(feature.second.size(), 1);
+                ASSERT_EQ(feature.second[0], "");
+            }
+        }
+    }
+    else if (bias.first == "benign")
+    {
+        ASSERT_EQ(bias.second.size(), 4);
+
+        for (auto const &feature : bias.second)
+        {
+            if (feature.first == "smoking")
+            {
+                ASSERT_EQ(feature.second.size(), 1);
+                ASSERT_EQ(feature.second[0], "heavy=0.2");
+            }
+            else if (feature.first == "exercising")
+            {
+                ASSERT_EQ(feature.second.size(), 1);
+                ASSERT_EQ(feature.second[0], "never=0.2");
+            }
+            else if (feature.first == "fatIntake")
+            {
+                ASSERT_EQ(feature.second.size(), 1);
+                ASSERT_EQ(feature.second[0], "heavy=0.2");
+            }
+            else if (feature.first == "videoAddiction")
+            {
+                ASSERT_EQ(feature.second.size(), 1);
+                ASSERT_EQ(feature.second[0], "heavy=0.2");
+            }
+        }
+    }
+}
+
+
 }
