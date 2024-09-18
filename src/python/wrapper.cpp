@@ -10,29 +10,25 @@
 namespace py = pybind11;
 
 // Define the DecisionTreeNode module
-PYBIND11_MODULE(DecisionTreeNode, m)
-{
+PYBIND11_MODULE(DecisionTreeNode, m){
     py::class_<DecisionTreeNode>(m, "MyClass")
-    {
         .def(py::init<DecisionTree &>())
-            .def(py::init<const std::string &, double, const std::vector<double> &, const std::vector<string> &, DecisionTree &, const bool>())
-            .def("HowManyNodes", &DecisionTreeNode::HowManyNodes)
-            .def("GetClassNames", &DecisionTreeNode::GetClassNames)
-            .def("GetNextSerialNum", &DecisionTreeNode::GetNextSerialNum)
-            .def("GetFeature", &DecisionTreeNode::GetFeature)
-            .def("GetNodeEntropy", &DecisionTreeNode::GetNodeEntropy)
-            .def("GetClassProbabilities", &DecisionTreeNode::GetClassProbabilities)
-            .def("GetBranchFeaturesAndValuesOrThresholds", &DecisionTreeNode::GetBranchFeaturesAndValuesOrThresholds)
-            .def("GetChildren", &DecisionTreeNode::GetChildren)
-            .def("GetSerialNum", &DecisionTreeNode::GetSerialNum)
-            .def("SetClassNames", &DecisionTreeNode::SetClassNames)
-            .def("SetNodeCreationEntropy", &DecisionTreeNode::SetNodeCreationEntropy)
-            .def("AddChildLink", &DecisionTreeNode::AddChildLink)
-            .def("DeleteAllLinks", &DecisionTreeNode::DeleteAllLinks)
-            .def("DisplayNode", &DecisionTreeNode::DisplayNode)
-            .def("DisplayDecisionTree", &DecisionTreeNode::DisplayDecisionTree)
-    }
-}
+        .def(py::init<const std::string &, double, const std::vector<double> &, const std::vector<string> &, DecisionTree &, const bool>())
+        .def("HowManyNodes", &DecisionTreeNode::HowManyNodes)
+        .def("GetClassNames", &DecisionTreeNode::GetClassNames)
+        .def("GetNextSerialNum", &DecisionTreeNode::GetNextSerialNum)
+        .def("GetFeature", &DecisionTreeNode::GetFeature)
+        .def("GetNodeEntropy", &DecisionTreeNode::GetNodeEntropy)
+        .def("GetClassProbabilities", &DecisionTreeNode::GetClassProbabilities)
+        .def("GetBranchFeaturesAndValuesOrThresholds", &DecisionTreeNode::GetBranchFeaturesAndValuesOrThresholds)
+        .def("GetChildren", &DecisionTreeNode::GetChildren)
+        .def("GetSerialNum", &DecisionTreeNode::GetSerialNum)
+        .def("SetClassNames", &DecisionTreeNode::SetClassNames)
+        .def("SetNodeCreationEntropy", &DecisionTreeNode::SetNodeCreationEntropy)
+        .def("AddChildLink", &DecisionTreeNode::AddChildLink)
+        .def("DeleteAllLinks", &DecisionTreeNode::DeleteAllLinks)
+        .def("DisplayNode", &DecisionTreeNode::DisplayNode)
+        .def("DisplayDecisionTree", &DecisionTreeNode::DisplayDecisionTree)}
 
 // Define the DecisionTree module
 
