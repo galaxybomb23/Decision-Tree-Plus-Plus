@@ -14,6 +14,7 @@ feature: fatIntake
 values: low medium heavy
 
 feature: videoAddiction
+# comment
 values:  none low medium heavy
 
 

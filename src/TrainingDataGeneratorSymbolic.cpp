@@ -81,6 +81,7 @@ std::vector<std::string> TrainingDataGeneratorSymbolic::filterAndClean(const std
                 std::string token = iter->str();
                 if (!token.empty())
                 {
+                    std::cout << "  [!] Pushing back token: " << token << "\n";
                     cleaned.push_back(token);
                 }
                 ++iter;
@@ -242,6 +243,7 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
                     {
                         splits[i] = newlineMatch[1].str();
                     }
+
                     featuresAndValuesDict[splits[0]].push_back(splits[i]);
                 }
             }
@@ -271,12 +273,18 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
         // Process the splits
         for (size_t i = 0; i < splits.size(); ++i)
         {
-            if (i == 0) { biasDict[splits[0]] = {}; }
+            if (i == 0) 
+            { 
+                splits[0] = filterAndClean("", splitByRegex(splits[0], "\\n"))[0];
+                biasDict[splits[0]] = {}; 
+            }
             else
             {
                 // Check if the current split ends with a colon
                 std::regex featureRegex("(^.+)[:]$");
                 std::smatch match;
+
+                std::cout << "For class " << splits[0] << " and split " << i << ": " << splits[i] << "\n";
 
                 if (std::regex_search(splits[i], match, featureRegex))
                 {
@@ -294,7 +302,12 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
                     {
                         splits[i] = newlineMatch[1].str();
                     }
-                    biasDict[splits[0]][featureName].push_back(splits[i]);
+
+                    // only add if featurename does NOT exist yet
+                    if (biasDict[splits[0]][featureName].empty()) {
+                        std::cout << "CLass name: " << splits[0] << " Feature name: " << featureName << " Value: " << splits[i] << "\n";
+                        biasDict[splits[0]][featureName].push_back(splits[i]);
+                    }
                 }
             }
         }
@@ -324,6 +337,10 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
                       << item.first << "\n";
             for (const auto &bias : item.second)
             {
+                if (bias.second.size() == 2)
+                {
+                    std::cout << bias.first << " ===> (two)" << bias.second[0] << " and " << bias.second[1] << "\n";
+                }
                 std::cout << bias.first << " ===> " << vecToString(bias.second) << "\n";
             }
         }

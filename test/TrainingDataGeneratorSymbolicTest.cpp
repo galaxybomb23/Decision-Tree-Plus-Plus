@@ -20,8 +20,8 @@ protected:
         {"parameter_file", "../test/resources/param_symbolic.txt"},
         {"number_of_training_samples", "100"},
         {"write_to_file", "1"},
-        {"debug1", "0"},
-        {"debug2", "0"}};
+        {"debug1", "1"},
+        {"debug2", "1"}};
     TrainingDataGeneratorSymbolic tdgs = TrainingDataGeneratorSymbolic(kwargs);
 };
 
@@ -36,8 +36,8 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckParamsTdgs)
     ASSERT_EQ(tdgs.getParameterFile(), "../test/resources/param_symbolic.txt");
     ASSERT_EQ(tdgs.getNumberOfTrainingSamples(), 100);
     ASSERT_EQ(tdgs.getWriteToFile(), 1);
-    ASSERT_EQ(tdgs.getDebug1(), 0);
-    ASSERT_EQ(tdgs.getDebug2(), 0);
+    ASSERT_EQ(tdgs.getDebug1(), 1);
+    ASSERT_EQ(tdgs.getDebug2(), 1);
     ASSERT_NO_THROW(tdgs.ReadParameterFileSymbolic());
     ASSERT_NO_THROW(tdgs.GenerateTrainingDataSymbolic());
 }
@@ -53,45 +53,24 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckFeaturesAndValues)
 
     // check feature and values dictionary
     ASSERT_EQ(tdgs.getFeaturesAndValuesDict().size(), 4);
-    std::vector <std::string> features = {"smoking", "exercising", "fatIntake", "videoAddiction"};
+    std::vector<std::string> features = {"exercising", "fatIntake", "smoking", "videoAddiction"};
+    std::vector<std::vector<std::string>> values = {
+        {"never", "occasionally", "regularly"},
+        {"low", "medium", "heavy"},
+        {"heavy", "medium", "light", "never"},
+        {"none", "low", "medium", "heavy"}};
 
     int ctr = 0;
     for (auto const &feature : tdgs.getFeaturesAndValuesDict())
     {
-        ASSERT_TRUE(std::find(features.begin(), features.end(), feature.first) != features.end());
-        if (feature.first == "smoking")
+        ASSERT_EQ(feature.first, features[ctr]);
+        ASSERT_EQ(feature.second.size(), values[ctr].size());
+        for (int i = 0; i < feature.second.size(); i++)
         {
-            ASSERT_EQ(feature.second.size(), 4);
-            ASSERT_EQ(feature.second[0], "heavy");
-            ASSERT_EQ(feature.second[1], "medium");
-            ASSERT_EQ(feature.second[2], "light");
-            ASSERT_EQ(feature.second[3], "never");
-        }
-        if (feature.first == "exercising")
-        {
-            ASSERT_EQ(feature.second.size(), 3);
-            ASSERT_EQ(feature.second[0], "never");
-            ASSERT_EQ(feature.second[1], "occasionally");
-            ASSERT_EQ(feature.second[2], "regularly");
-        }
-        if (feature.first == "fatIntake")
-        {
-            ASSERT_EQ(feature.second.size(), 3);
-            ASSERT_EQ(feature.second[0], "low");
-            ASSERT_EQ(feature.second[1], "medium");
-            ASSERT_EQ(feature.second[2], "heavy");
-        }
-        if (feature.first == "videoAddiction")
-        {
-            ASSERT_EQ(feature.second.size(), 4);
-            ASSERT_EQ(feature.second[0], "none");
-            ASSERT_EQ(feature.second[1], "low");
-            ASSERT_EQ(feature.second[2], "medium");
-            ASSERT_EQ(feature.second[3], "heavy");
+            ASSERT_EQ(feature.second[i], values[ctr][i]);
         }
         ctr++;
     }
-    ASSERT_EQ(ctr, 4);
 }
 
 TEST_F(TrainingDataGeneratorSymbolicTest, CheckBias)
@@ -100,65 +79,27 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckBias)
     std::map<std::string, std::map<std::string, std::vector<std::string>>> biasDict = tdgs.getBiasDict();
     ASSERT_EQ(biasDict.size(), 2);
 
+    std::vector<std::string> expectedClasses = {"benign", "malignant"};
+    std::vector<std::vector<std::string>> expectedFeatures = {
+        {"exercising", "fatIntake", "smoking", "videoAddiction"},
+        {"exercising", "fatIntake", "smoking", "videoAddiction"}};
+    std::vector<std::vector<std::vector<std::string>>> expectedValues = {
+        {{"never=0.2"}, {"heavy=0.2"}, {"heavy=0.2"}, {"heavy=0.2"}},
+        {{"never=0.8"}, {"heavy=0.2"}, {"heavy=0.2"}, {""}}
+    };
+
+    int classIndex = 0;
     for (auto const &bias : biasDict)
-{
-    if (bias.first == "malignant")
     {
-        ASSERT_EQ(bias.second.size(), 4);
-
+        ASSERT_EQ(bias.first, expectedClasses[classIndex]);
+        int featureIndex = 0;
         for (auto const &feature : bias.second)
         {
-            if (feature.first == "smoking")
-            {
-                ASSERT_EQ(feature.second.size(), 1);
-                ASSERT_EQ(feature.second[0], "heavy=0.8");
-            }
-            else if (feature.first == "exercising")
-            {
-                ASSERT_EQ(feature.second.size(), 1);
-                ASSERT_EQ(feature.second[0], "never=0.8");
-            }
-            else if (feature.first == "fatIntake")
-            {
-                ASSERT_EQ(feature.second.size(), 1);
-                ASSERT_EQ(feature.second[0], "heavy=0.8");
-            }
-            else if (feature.first == "videoAddiction")
-            {
-                ASSERT_EQ(feature.second.size(), 1);
-                ASSERT_EQ(feature.second[0], "");
-            }
+            ASSERT_EQ(feature.first, expectedFeatures[classIndex][featureIndex]);
+            ASSERT_EQ(feature.second.size(), expectedValues[classIndex][featureIndex].size());
+            ASSERT_EQ(feature.second.size(), 1);
+            featureIndex++;
         }
+        classIndex++;
     }
-    else if (bias.first == "benign")
-    {
-        ASSERT_EQ(bias.second.size(), 4);
-
-        for (auto const &feature : bias.second)
-        {
-            if (feature.first == "smoking")
-            {
-                ASSERT_EQ(feature.second.size(), 1);
-                ASSERT_EQ(feature.second[0], "heavy=0.2");
-            }
-            else if (feature.first == "exercising")
-            {
-                ASSERT_EQ(feature.second.size(), 1);
-                ASSERT_EQ(feature.second[0], "never=0.2");
-            }
-            else if (feature.first == "fatIntake")
-            {
-                ASSERT_EQ(feature.second.size(), 1);
-                ASSERT_EQ(feature.second[0], "heavy=0.2");
-            }
-            else if (feature.first == "videoAddiction")
-            {
-                ASSERT_EQ(feature.second.size(), 1);
-                ASSERT_EQ(feature.second[0], "heavy=0.2");
-            }
-        }
-    }
-}
-
-
 }
