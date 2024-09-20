@@ -75,7 +75,8 @@ def tests():
     # print(f"DUT.mapAB(): {type(result)}|{result}")
 
     # donut test (fps, distane, refresh rate, xpos,ypos)
-    DUT.dounut(100,7, .2,0, 40, 12)
+    # DUT.dounut(60,5, .2,0, 40, 12)
+    DUT.dounut(30,7, .4, 100, 40, 12)
 
 
 

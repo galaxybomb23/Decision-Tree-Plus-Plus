@@ -1,16 +1,19 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "DecisionTreeNode.hpp"
-#include "DecisionTree.hpp"
-#include "EvalTrainingData.hpp"
-#include "TrainingDataGeneratorNumeric.hpp"
-#include "TrainingDataGeneratorSymbolic.hpp"
-#include "Utility.hpp"
+#include "include/DecisionTree.hpp"
+#include "include/DecisionTreeNode.hpp"
+#include "include/EvalTrainingData.hpp"
+#include "include/TrainingDataGeneratorNumeric.hpp"
+#include "include/TrainingDataGeneratorSymbolic.hpp"
+#include "include/Utility.hpp"
+
+#define PYTHON_BUILD
 
 namespace py = pybind11;
 
 // Define the DecisionTreeNode module
-PYBIND11_MODULE(DecisionTreeNode, m){
+PYBIND11_MODULE(DecisionTreePP, m)
+{
     py::class_<DecisionTreeNode>(m, "MyClass")
         .def(py::init<DecisionTree &>())
         .def(py::init<const std::string &, double, const std::vector<double> &, const std::vector<string> &, DecisionTree &, const bool>())
@@ -28,14 +31,12 @@ PYBIND11_MODULE(DecisionTreeNode, m){
         .def("AddChildLink", &DecisionTreeNode::AddChildLink)
         .def("DeleteAllLinks", &DecisionTreeNode::DeleteAllLinks)
         .def("DisplayNode", &DecisionTreeNode::DisplayNode)
-        .def("DisplayDecisionTree", &DecisionTreeNode::DisplayDecisionTree)}
+        .def("DisplayDecisionTree", &DecisionTreeNode::DisplayDecisionTree)
 
-// Define the DecisionTree module
+        // Define the DecisionTree module
 
-PYBIND11_MODULE(DecisionTree, m)
-{
-    // Bind the DecisionTree class
-    py::class_<DecisionTree>(m, "DecisionTree")
+        // Bind the DecisionTree class
+        py::class_<DecisionTree>(m, "DecisionTree")
         .def(py::init<std::map<std::string, std::string>>()) // Constructor
         .def("getTrainingData", &DecisionTree::getTrainingData)
         .def("calculateFirstOrderProbabilities", &DecisionTree::calculateFirstOrderProbabilities)
@@ -73,4 +74,27 @@ PYBIND11_MODULE(DecisionTree, m)
         .def("setDebug2", &DecisionTree::setDebug2)
         .def("setDebug3", &DecisionTree::setDebug3)
         .def("setHowManyTotalTrainingSamples", &DecisionTree::setHowManyTotalTrainingSamples);
+
+    // Bind the EvalTrainingData class
+    py::class_<EvalTrainingData>(m, "EvalTrainingData")
+        .def(py::init<>()) // Constructor
+        .def("evaluateTrainingData", &EvalTrainingData::evaluateTrainingData);
+
+    // Bind the TrainingDataGeneratorNumeric class
+    py::class_<TrainingDataGeneratorNumeric>(m, "TrainingDataGeneratorNumeric")
+        .def(py::init<>()) // Constructor
+        .def("generateTrainingData", &TrainingDataGeneratorNumeric::generateTrainingData);
+
+    // Bind the TrainingDataGeneratorSymbolic class
+    py::class_<TrainingDataGeneratorSymbolic>(m, "TrainingDataGeneratorSymbolic")
+        .def(py::init<>()) // Constructor
+        .def("generateTrainingData", &TrainingDataGeneratorSymbolic::generateTrainingData);
+
+    // Bind the Utility functions
+    m.def("sampleIndex", &sampleIndex);
+    m.def("deepCopy", &deepCopy);
+    m.def("minimum", &minimum);
+    m.def("convert", &convert);
+    m.def("ClosestSamplingPoint", &ClosestSamplingPoint);
+    m.def("CleanupCsvString", &CleanupCsvString);
 }
