@@ -311,8 +311,8 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
         std::cout << "\nCLRD1 Feature tested at node for classifcation: " << featureTestedAtNode << std::endl;
     }
 
-    std::string value_for_feature;
-    bool path_found = false;
+    std::string valueForFeature;
+    bool pathFound = false;
     std::regex pattern(R"((\S+)\s*=\s*(\S+))");
     std::smatch match;
 
@@ -322,12 +322,110 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
             std::string feature = match[1].str();
             std::string value = match[2].str();
             if (feature == featureTestedAtNode) {
-                value_for_feature = convert(value);
+                valueForFeature = convert(value);
             }
         }
     }
 
-    return {};
+    // Handle missing feature values
+    if (valueForFeature.empty()) {
+        std::vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
+        std::map<std::string, double> classProbabilities;
+        for (size_t i = 0; i < _classNames.size(); ++i) {
+            classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
+        }
+        answer["solution_path"].push_back(node->GetNextSerialNum());
+        
+        return classProbabilities;
+    }
+
+    // Numeric feature case
+    if (_probDistributionNumericFeaturesDict.find(featureTestedAtNode) != _probDistributionNumericFeaturesDict.end()) {
+        if (_debug3) std::cout << "\nCLRD2 In the numeric section";
+        for (const auto& child : children) {
+            std::vector<std::string> branchFeaturesAndValues = child->GetBranchFeaturesAndValuesOrThresholds();
+            std::string lastFeatureAndValueOnBranch = branchFeaturesAndValues.back();
+            std::regex pattern1(R"((.+)<(.+))");
+            std::regex pattern2(R"((.+)>(.+))");
+
+            if (std::regex_search(lastFeatureAndValueOnBranch, match, pattern1)) {
+                std::string threshold = match[2].str();
+                if (std::stod(valueForFeature) <= std::stod(threshold)) {
+                    pathFound = true;
+                    auto result = recursiveDescentForClassification(child.get(), featureAndValues, answer);
+                    answer.insert(result.begin(), result.end());
+                    answer["solution_path"].push_back(node->GetNextSerialNum());
+                    break;
+                }
+            } else if (std::regex_search(lastFeatureAndValueOnBranch, match, pattern2)) {
+                std::string threshold = match[2].str();
+                if (std::stod(valueForFeature) > std::stod(threshold)) {
+                    pathFound = true;
+                    auto result = recursiveDescentForClassification(child.get(), featureAndValues, answer);
+                    answer.insert(result.begin(), result.end());
+                    answer["solution_path"].push_back(node->GetNextSerialNum());
+                    break;
+                }
+            }
+        }
+
+        if (pathFound) {
+            std::map<std::string, double> result;
+            for (const auto& kv : answer) {
+                if (kv.first != "solution_path") {
+                    result[kv.first] = kv.second.empty() ? 0.0 : kv.second[0];
+                }
+            }
+
+            return result;
+        }
+    } else { // Symbolic feature case
+        std::string featureValueCombo = featureTestedAtNode + "=" + valueForFeature;
+        if (_debug3) std::cout << "\nCLRD3 In the symbolic section with feature_value_combo: " << featureValueCombo;
+
+        for (const auto& child : children) {
+            std::vector<std::string> branch_features_and_values = child->GetBranchFeaturesAndValuesOrThresholds();
+            if (_debug3) std::cout << "\nCLRD4 branch features and values: " << branch_features_and_values.back();
+            std::string lastFeatureAndValueOnBranch = branch_features_and_values.back();
+
+            if (lastFeatureAndValueOnBranch == featureValueCombo) {
+                auto result = recursiveDescentForClassification(child.get(), featureAndValues, answer);
+                answer.insert(result.begin(), result.end());
+                answer["solution_path"].push_back(node->GetNextSerialNum());
+                pathFound = true;
+                break;
+            }
+        }
+
+        if (pathFound) {
+            std::map<std::string, double> result;
+            for (const auto& kv : answer) {
+                if (kv.first != "solution_path") {
+                    result[kv.first] = kv.second.empty() ? 0.0 : kv.second[0];
+                }
+            }
+
+            return result;
+        }
+    }
+
+    // If no path found, assign class probabilities from the current node
+    if (!pathFound) {
+        std::vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
+        for (size_t i = 0; i < _classNames.size(); ++i) {
+            answer[_classNames[i]].push_back(leafNodeClassProbabilities[i]);
+        }
+        answer["solution_path"].push_back(node->GetNextSerialNum());
+    }
+
+    std::map<std::string, double> result;
+    for (const auto& kv : answer) {
+        if (kv.first != "solution_path") {
+            result[kv.first] = kv.second.empty() ? 0.0 : kv.second[0];
+        }
+    }
+
+    return result;
 }
 
 
