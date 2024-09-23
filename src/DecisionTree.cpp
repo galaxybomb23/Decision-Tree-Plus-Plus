@@ -1,9 +1,5 @@
 // Include
-#ifndef PYTHON_BUILD
 #include "DecisionTree.hpp"
-#else
-#include "../include/DecisionTree.hpp"
-#endif
 #include <fstream>
 #include <sstream>
 #include <algorithm>

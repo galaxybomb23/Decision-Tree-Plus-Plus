@@ -13,19 +13,16 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 if os.path.exists('src'):
     shutil.rmtree('src')
 shutil.copytree('../src', 'src')
-if os.path.exists('include'):
-    shutil.rmtree('include')
-shutil.copytree('../include', 'include')
+# shutil.copytree('../include', 'src')
+#copy include to src
+for file in os.listdir('../include'):
+    shutil.copy('../include/'+file, 'src/'+file)
 
 
 #get name in src dir
-src_files = os.listdir('src')
+src_files = os.listdir('../src')
 src_files = ['src/' + file for file in src_files]
 src_files.append("bindings.cpp")
-includes_files = os.listdir('include')
-includes_files = ['include/' + file for file in includes_files]
-
-
 
 ext_modules = [
     Extension(
@@ -41,3 +38,6 @@ setup(
     ext_modules=ext_modules,
     cmdclass={'build_ext': build_ext},  # Use `build_ext` imported from `pybind11.setup_helpers`
 )
+
+#remove the src dir
+shutil.rmtree('src')
