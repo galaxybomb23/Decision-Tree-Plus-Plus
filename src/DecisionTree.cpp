@@ -1,5 +1,6 @@
 // Include
 #include "DecisionTree.hpp"
+#include "Utility.hpp"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -292,6 +293,40 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
     DecisionTreeNode* node, const std::vector<std::string>& featureAndValues, 
     std::map<std::string, std::vector<double>>& answer) 
 {
+    vector<shared_ptr<DecisionTreeNode>> children = node->GetChildren();
+
+    if (children.empty()) {
+        // If leaf node, assign class probabilities
+        std::vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
+        std::map<std::string, double> classProbabilities;
+        for (size_t i = 0; i < _classNames.size(); ++i) {
+            classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
+        }
+        answer["solution_path"].push_back(node->GetNextSerialNum());
+        return classProbabilities;
+    }
+
+    std::string featureTestedAtNode = node->GetFeature();
+    if (_debug3) {
+        std::cout << "\nCLRD1 Feature tested at node for classifcation: " << featureTestedAtNode << std::endl;
+    }
+
+    std::string value_for_feature;
+    bool path_found = false;
+    std::regex pattern(R"((\S+)\s*=\s*(\S+))");
+    std::smatch match;
+
+    // Find the value for the feature being tested
+    for (const auto& featureAndValue : featureAndValues) {
+        if (std::regex_search(featureAndValue, match, pattern)) {
+            std::string feature = match[1].str();
+            std::string value = match[2].str();
+            if (feature == featureTestedAtNode) {
+                value_for_feature = convert(value);
+            }
+        }
+    }
+
     return {};
 }
 
