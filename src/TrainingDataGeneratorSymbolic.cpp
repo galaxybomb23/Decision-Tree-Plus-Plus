@@ -349,7 +349,99 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
 
 void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
 {
-    // Generate the training data for symbolic data
+    std::vector<std::string> classNames = _classNames;
+    std::vector<double> classPriors = _classPriors;
+    int howManyTrainingSamples = _numberOfTrainingSamples;
+    std::map<std::string, std::vector<std::string>> featuresAndValuesDict = _featuresAndValuesDict;
+    std::map<std::string, std::map<std::string, std::vector<std::string>>> biasDict = _biasDict;
+
+    std::map<std::string, std::vector<std::string>> trainingSampleRecords;
+    std::map<std::string, std::pair<double, double>> classPriorsToUnitIntervalMap;
+    double accumulatedInterval = 0.0;
+
+    // Create a map of class names to their corresponding unit intervals
+    for (size_t i = 0; i < classNames.size(); ++i)
+    {
+        accumulatedInterval += classPriors[i];
+        classPriorsToUnitIntervalMap[classNames[i]] = std::make_pair(accumulatedInterval, accumulatedInterval + classPriors[i]);
+    }
+
+    if (_debug1)
+    {
+        std::cout << "Mapping of class priors to unit interval:\n";
+        for (const auto &item : classPriorsToUnitIntervalMap)
+        {
+            std::cout << item.first << " ===> " << item.second.first << " to " << item.second.second << "\n";
+        }
+    }
+
+    std::map<std::string, std::map<std::string, std::map<std::string, std::pair<double, double>>>> classAndFeatureBasedValuePriorsToUnitIntervalMap;
+    for (const auto &className : classNames)
+    {
+        // Add entry for each class
+        classAndFeatureBasedValuePriorsToUnitIntervalMap[className] = {};
+        // for each feature in the featuresAndValuesDict
+        for (const auto &feature : featuresAndValuesDict)
+        {
+            // Add entry for each feature
+            classAndFeatureBasedValuePriorsToUnitIntervalMap[className][feature.first] = {};
+        }
+
+        // for each class
+        for (const auto &className : classNames)
+        {
+            // for each feature in the featuresAndValuesDict
+            for (const auto &feature : featuresAndValuesDict)
+            {
+                auto values = featuresAndValuesDict[feature.first];
+                std::string biasString;
+                if (!biasDict[className][feature.first].empty())
+                {
+                    biasString = biasDict[className][feature.first][0];
+                }
+                else
+                {
+                    double noBias = 1.0 / values.size();
+                    biasString = values[0] + "=" + std::to_string(noBias);
+
+                }
+
+                std::map<std::string, std::pair<double, double>> valuePriorsToUnitIntervalMap;
+                auto splits = splitByRegex(biasString, "'\\s*=\\s*'");
+                std::string chosenForBiasValue = splits[0];
+                double chosenBias = std::stod(splits[1]);
+                double remainingBias = 1.0 - chosenBias;
+                double remainingPortionBias = remainingBias / (values.size() - 1);
+                double accumulated = 0.0;
+
+                for (int i = 0; i < values.size(); ++i)
+                {
+                    if (values[i] == chosenForBiasValue)
+                    {
+                        valuePriorsToUnitIntervalMap[values[i]] = {accumulated, accumulated + chosenBias};
+                        accumulated += chosenBias;
+                    }
+                    else
+                    {
+                        valuePriorsToUnitIntervalMap[values[i]] = {accumulated, accumulated + remainingPortionBias};
+                        accumulated += remainingPortionBias;
+                    }
+                }
+                classAndFeatureBasedValuePriorsToUnitIntervalMap[className][feature.first] = valuePriorsToUnitIntervalMap;
+
+                if (_debug2)
+                {
+                    std::cout << "\nFor class " << className << ": Mapping feature value priors for feature '" << feature.first << "' to unit interval:\n";
+                    for (const auto &item : valuePriorsToUnitIntervalMap)
+                    {
+                        std::cout << "    " << item.first << " ===> [" << item.second.first << ", " << item.second.second << "]\n";
+                    }
+                }
+            }
+        }
+        
+        int eleIndex = 0;
+    }
 }
 
 // Other functions below
