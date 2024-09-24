@@ -1,22 +1,21 @@
 #!/bin/bash
-# Script to build and test the project, not to be considered as a part of the project
-# Written with help of ChatGPT for argument parsing
+# Script to build and test the project, not to be considered as a part of the project itself
 
 # "defensive Programming"
 cd "$(dirname "$0")"
 
 # Function to perform the build
 build() {
-    echo "Building..."
-    
-    if [ ! -d "build" ]; then
-        mkdir build
-    fi
-    
+    echo "Building..."   
     cd build
     cmake ..
     make
     cd ..
+}
+
+# usage
+usage() {
+    echo "Usage: $0 {build|clean|test}"
 }
 
 #remove build repo
@@ -33,29 +32,20 @@ test() {
     cd ..
 }
 
-# Parse command-line arguments
-while getopts "ct" opt; do
-    case $opt in
-        c)
-            clean_flag=true
-            ;;
-        t)
-            test_flag=true
-            ;;
-        \?)
-            echo "Invalid option: -$OPTARG" >&2
-            exit 1
-            ;;
-    esac
-done
-
-if [ "$clean_flag" = true ]; then
+# Main script execution
+case $1 in
+  build)
+    build
+    ;;
+  clean)
     clean
-fi
-# Execute test if requested
-if [ "$test_flag" = true ]; then
+    ;;
+  test)
+    build
     test
-    exit 0
-fi
-
-build
+    ;;
+  *)
+    asciiquarium
+    usage
+    ;;
+esac        
