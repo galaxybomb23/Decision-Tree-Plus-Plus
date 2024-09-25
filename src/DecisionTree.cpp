@@ -215,6 +215,12 @@ void DecisionTree::showTrainingData() const {
 //--------------- Classify ----------------//
 
 std::map<std::string, std::string> DecisionTree::classify(DecisionTreeNode* rootNode, const std::vector<std::string>& featuresAndValues) {
+    /*
+    Classifies one test sample at a time using the decision tree constructed from
+    your training file.  The data record for the test sample must be supplied as
+    shown in the scripts in the `Examples' subdirectory.  See the scripts
+    construct_dt_and_classify_one_sample_caseX.py in that subdirectory.
+    */
     if (!checkNamesUsed(featuresAndValues)) {
         throw std::runtime_error(
             "\n\nError in the names you have used for features and/or values. "
@@ -432,7 +438,49 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
 //--------------- Construct Tree ----------------//
 
 DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier() {
-    return nullptr;
+    /*
+    Construct the root node object and set its entropy value as derived from the priors
+    associated with the different classes.
+    */
+    std::cout << "\nConstructing a decision tree" << std::endl;
+    if (_debug3) {
+        // TODO //
+        // determineDataCondition();
+        std::cout << std::endl << "Starting construction of the decision tree:" << std::endl;
+    }
+
+    // Calculate prior class probabilities
+    std::vector<double> classProbabilities;
+    for (const auto& className : _classNames) {
+        // TODO //
+        // classProbabilities.push_back(priorProbabilityForClass(className));
+    }
+
+    if (_debug3) {
+        std::cout << std::endl << "Prior probabilities for the classes:" << std::endl;
+        for (size_t i = 0; i < _classNames.size(); ++i) {
+            std::cout << "    " << _classNames[i] << " with probability " << classProbabilities[i] << std::endl;
+        }
+    }
+
+    double entropy = classEntropyOnPriors();
+    if (_debug3) {
+        std::cout << std::endl << "Entropy on priors: " << entropy << std::endl;
+    }
+
+    // Create the root node
+    DecisionTreeNode* rootNode = new DecisionTreeNode("root", entropy, classProbabilities, {}, *this, true);
+    rootNode->SetClassNames(_classNames);
+    setRootNode(std::unique_ptr<DecisionTreeNode>(rootNode));
+
+    // Start recursive descent
+    recursiveDescent(rootNode);
+
+    return rootNode;
+}
+
+void DecisionTree::recursiveDescent(DecisionTreeNode* node) {
+
 }
 
 
@@ -564,4 +612,8 @@ void DecisionTree::setDebug2(int debug2) {
 
 void DecisionTree::setDebug3(int debug3) {
     _debug3 = debug3;
+}
+
+void DecisionTree::setRootNode(std::unique_ptr<DecisionTreeNode> rootNode) {
+    _rootNode = std::move(rootNode);
 }

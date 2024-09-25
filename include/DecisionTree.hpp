@@ -33,6 +33,7 @@ public:
 
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();
+    void recursiveDescent(DecisionTreeNode* node);
 
 
     //--------------- Entropy Calculators ----------------//
@@ -81,6 +82,7 @@ public:
     void setDebug2(int debug2);
     void setDebug3(int debug3);
     void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
+    void setRootNode(std::unique_ptr<DecisionTreeNode> rootNode);
 
 private:
     std::string _trainingDatafile;
