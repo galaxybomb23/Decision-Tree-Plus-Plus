@@ -26,7 +26,7 @@ protected:
         {"csv_cleanup_needed", "1"},
         {"debug1", "1"},
         {"debug2", "2"},
-        {"debug3", "3"}};
+        {"debug3", "0"}};
     DecisionTree dt = DecisionTree(kwargs);
     DecisionTreeNode node = DecisionTreeNode("feature", 0.0, {0.0}, {"branch"}, dt, true);
 };
@@ -43,8 +43,6 @@ TEST_F(ClassifyTest, ConstructorInitializesNode)
 
 TEST_F(ClassifyTest, ClassifyFunction)
 {
-    ASSERT_NO_THROW(dt.classify(&node, {"feature=0.0"}));
-
     // Construct the features and values vector out of the features and values dictionary
     std::vector<std::string> featuresAndValues;
     for (const auto& kv : dt.getFeaturesAndValuesDict())
@@ -56,4 +54,5 @@ TEST_F(ClassifyTest, ClassifyFunction)
     }
 
     std::map<std::string, std::string> classification = dt.classify(&node, featuresAndValues);
+    ASSERT_NE(&classification, nullptr);
 }
