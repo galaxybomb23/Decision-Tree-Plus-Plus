@@ -25,7 +25,10 @@ public:
 
 
     //--------------- Classify ----------------//
-    std::map<std::string, std::string> classify(void* root_node, const std::vector<std::string>& features_and_values);
+    std::map<std::string, std::string> classify(DecisionTreeNode* rootNode, const std::vector<std::string>& featuresAndValues);
+    std::map<std::string, double> recursiveDescentForClassification(DecisionTreeNode* node, 
+                                                                       const std::vector<std::string>& feature_and_values, 
+                                                                       std::map<std::string, std::vector<double>>& answer);
 
 
     //--------------- Construct Tree ----------------//
@@ -38,10 +41,11 @@ public:
 
     //--------------- Probability Calculators ----------------//
     double probabilityOfFeatureValue(const std::string& feature, const std::string& value);
-    double probabilityOfFeatureValue(const std::string& feature, double sampling_point);
+    double probabilityOfFeatureValue(const std::string& feature, double samplingPoint);
 
 
     //--------------- Class Based Utilities ----------------//
+    bool checkNamesUsed(const std::vector<std::string>& featuresAndValues);
 
 
     int _nodesCreated;
@@ -62,6 +66,7 @@ public:
     int getHowManyTotalTrainingSamples() const;
     std::vector<std::string> getFeatureNames() const;
     std::map<std::string, std::vector<std::string>> getTrainingDataDict() const;
+    std::map<std::string, std::set<std::string>> getFeaturesAndValuesDict() const;
 
     // Setters
     void setTrainingDatafile(const std::string& trainingDatafile);

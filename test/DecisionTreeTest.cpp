@@ -78,4 +78,24 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
     {
         ASSERT_EQ(trainingDataDict[data.first], data.second);
     }
+
+    // check if getFeaturesAndValuesDict() contains the following randomly selected data
+    std::map<std::string, std::set<std::string>> expectedFeaturesAndValuesDict = {
+            {"pgtime", {"15.9","6.1","4.8","5.2"}},
+            {"pgstat", {"0","1"}},
+            {"age", {"64","57","61"}},
+            {"eet", {"2","1","NA"}},
+            {"g2", {"10.26","9.01","12.13","2.4"}},
+            {"grade", {"2","3","4"}},
+            {"gleason", {"4","7","6","8","10"}},
+            {"ploidy", {"aneuploid","diploid","tetraploid"}}
+        };
+    std::map<std::string, std::set<std::string>> featuresAndValuesDict = dt.getFeaturesAndValuesDict();
+    for (const auto& data : expectedFeaturesAndValuesDict)
+    {
+        for (const auto& value : data.second)
+        {
+            ASSERT_TRUE(featuresAndValuesDict[data.first].count(value) > 0);
+        }
+    }
 }

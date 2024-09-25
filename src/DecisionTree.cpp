@@ -1,5 +1,6 @@
 // Include
 #include "DecisionTree.hpp"
+#include "Utility.hpp"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -213,8 +214,218 @@ void DecisionTree::showTrainingData() const {
 
 //--------------- Classify ----------------//
 
-std::map<std::string, std::string> DecisionTree::classify(void* root_node, const std::vector<std::string>& features_and_values) {
-    return {};
+std::map<std::string, std::string> DecisionTree::classify(DecisionTreeNode* rootNode, const std::vector<std::string>& featuresAndValues) {
+    if (!checkNamesUsed(featuresAndValues)) {
+        throw std::runtime_error(
+            "\n\nError in the names you have used for features and/or values. "
+            "Try using the csv_cleanup_needed option in the constructor call."
+        );
+    }
+
+    std::vector<std::string> newFeaturesAndValues;
+    std::regex pattern(R"((\S+)\s*=\s*(\S+))");
+    std::smatch match;
+
+    for (const auto& fv : featuresAndValues) {
+        if (std::regex_match(fv, match, pattern)) {
+            std::string feature = match[1];
+            std::string value = match[2];
+            newFeaturesAndValues.push_back(feature + "=" + value);
+        } else {
+            throw std::runtime_error(
+                "\n\nError in the format of the feature and value pairs. "
+                "Use the format feature=value."
+            );
+        }
+    }
+
+    // Update the features and values
+    for (const auto& fv : newFeaturesAndValues) {
+        std::string feature = fv.substr(0, fv.find("="));
+        std::string value = fv.substr(fv.find("=") + 1);
+        _featuresAndValuesDict[feature].insert(value);
+    }
+
+    if (_debug3) {
+        std::cout << "\nCL1 New features and values:\n";
+        for (const auto& item : newFeaturesAndValues) {
+            std::cout << item << " ";
+        }
+    }
+
+    std::map<std::string, std::vector<double>> answer;
+    for (const auto& className : _classNames) {
+        answer[className] = {};
+    }
+    answer["solution_path"] = {};
+
+    std::map<std::string, double> classification = recursiveDescentForClassification(rootNode, newFeaturesAndValues, answer);
+    std::reverse(answer["solution_path"].begin(), answer["solution_path"].end());
+
+    if (_debug3) {
+        std::cout << "\nCL2 The classification:" << std::endl;
+        for (const auto& className : _classNames) {
+            std::cout << "    " << className << " with probability " << classification[className] << std::endl;
+        }
+    }
+
+    std::map<std::string, std::string> classificationForDisplay = {};
+    for (const auto& kv : classification) {
+        if (std::isfinite(kv.second)) {
+            std::ostringstream oss;
+            oss << std::fixed << std::setprecision(3) << kv.second;
+            classificationForDisplay[kv.first] = oss.str();
+        } else {
+            std::vector<std::string> nodes;
+            for (const auto& x : kv.first) {
+                nodes.push_back("NODE" + std::to_string(x));
+            }
+            std::ostringstream oss;
+            std::copy(nodes.begin(), nodes.end(), std::ostream_iterator<std::string>(oss, ", "));
+            classificationForDisplay[kv.first] = oss.str();
+        }
+    }
+    
+    return classificationForDisplay;
+}
+
+std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
+    DecisionTreeNode* node, const std::vector<std::string>& featureAndValues, 
+    std::map<std::string, std::vector<double>>& answer) 
+{
+    vector<shared_ptr<DecisionTreeNode>> children = node->GetChildren();
+
+    if (children.empty()) {
+        // If leaf node, assign class probabilities
+        std::vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
+        std::map<std::string, double> classProbabilities;
+        for (size_t i = 0; i < _classNames.size(); ++i) {
+            classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
+        }
+        answer["solution_path"].push_back(node->GetNextSerialNum());
+        return classProbabilities;
+    }
+
+    std::string featureTestedAtNode = node->GetFeature();
+    if (_debug3) {
+        std::cout << "\nCLRD1 Feature tested at node for classifcation: " << featureTestedAtNode << std::endl;
+    }
+
+    std::string valueForFeature;
+    bool pathFound = false;
+    std::regex pattern(R"((\S+)\s*=\s*(\S+))");
+    std::smatch match;
+
+    // Find the value for the feature being tested
+    for (const auto& featureAndValue : featureAndValues) {
+        if (std::regex_search(featureAndValue, match, pattern)) {
+            std::string feature = match[1].str();
+            std::string value = match[2].str();
+            if (feature == featureTestedAtNode) {
+                valueForFeature = convert(value);
+            }
+        }
+    }
+
+    // Handle missing feature values
+    if (valueForFeature.empty()) {
+        std::vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
+        std::map<std::string, double> classProbabilities;
+        for (size_t i = 0; i < _classNames.size(); ++i) {
+            classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
+        }
+        answer["solution_path"].push_back(node->GetNextSerialNum());
+        
+        return classProbabilities;
+    }
+
+    // Numeric feature case
+    if (_probDistributionNumericFeaturesDict.find(featureTestedAtNode) != _probDistributionNumericFeaturesDict.end()) {
+        if (_debug3) std::cout << "\nCLRD2 In the numeric section";
+        for (const auto& child : children) {
+            std::vector<std::string> branchFeaturesAndValues = child->GetBranchFeaturesAndValuesOrThresholds();
+            std::string lastFeatureAndValueOnBranch = branchFeaturesAndValues.back();
+            std::regex pattern1(R"((.+)<(.+))");
+            std::regex pattern2(R"((.+)>(.+))");
+
+            if (std::regex_search(lastFeatureAndValueOnBranch, match, pattern1)) {
+                std::string threshold = match[2].str();
+                if (std::stod(valueForFeature) <= std::stod(threshold)) {
+                    pathFound = true;
+                    auto result = recursiveDescentForClassification(child.get(), featureAndValues, answer);
+                    answer.insert(result.begin(), result.end());
+                    answer["solution_path"].push_back(node->GetNextSerialNum());
+                    break;
+                }
+            } else if (std::regex_search(lastFeatureAndValueOnBranch, match, pattern2)) {
+                std::string threshold = match[2].str();
+                if (std::stod(valueForFeature) > std::stod(threshold)) {
+                    pathFound = true;
+                    auto result = recursiveDescentForClassification(child.get(), featureAndValues, answer);
+                    answer.insert(result.begin(), result.end());
+                    answer["solution_path"].push_back(node->GetNextSerialNum());
+                    break;
+                }
+            }
+        }
+
+        if (pathFound) {
+            std::map<std::string, double> result;
+            for (const auto& kv : answer) {
+                if (kv.first != "solution_path") {
+                    result[kv.first] = kv.second.empty() ? 0.0 : kv.second[0];
+                }
+            }
+
+            return result;
+        }
+    } else { // Symbolic feature case
+        std::string featureValueCombo = featureTestedAtNode + "=" + valueForFeature;
+        if (_debug3) std::cout << "\nCLRD3 In the symbolic section with feature_value_combo: " << featureValueCombo;
+
+        for (const auto& child : children) {
+            std::vector<std::string> branch_features_and_values = child->GetBranchFeaturesAndValuesOrThresholds();
+            if (_debug3) std::cout << "\nCLRD4 branch features and values: " << branch_features_and_values.back();
+            std::string lastFeatureAndValueOnBranch = branch_features_and_values.back();
+
+            if (lastFeatureAndValueOnBranch == featureValueCombo) {
+                auto result = recursiveDescentForClassification(child.get(), featureAndValues, answer);
+                answer.insert(result.begin(), result.end());
+                answer["solution_path"].push_back(node->GetNextSerialNum());
+                pathFound = true;
+                break;
+            }
+        }
+
+        if (pathFound) {
+            std::map<std::string, double> result;
+            for (const auto& kv : answer) {
+                if (kv.first != "solution_path") {
+                    result[kv.first] = kv.second.empty() ? 0.0 : kv.second[0];
+                }
+            }
+
+            return result;
+        }
+    }
+
+    // If no path found, assign class probabilities from the current node
+    if (!pathFound) {
+        std::vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
+        for (size_t i = 0; i < _classNames.size(); ++i) {
+            answer[_classNames[i]].push_back(leafNodeClassProbabilities[i]);
+        }
+        answer["solution_path"].push_back(node->GetNextSerialNum());
+    }
+
+    std::map<std::string, double> result;
+    for (const auto& kv : answer) {
+        if (kv.first != "solution_path") {
+            result[kv.first] = kv.second.empty() ? 0.0 : kv.second[0];
+        }
+    }
+
+    return result;
 }
 
 
@@ -238,12 +449,16 @@ double DecisionTree::probabilityOfFeatureValue(const std::string& feature, const
     return 1.0;
 }
 
-double DecisionTree::probabilityOfFeatureValue(const std::string& feature, double sampling_point) {
+double DecisionTree::probabilityOfFeatureValue(const std::string& feature, double samplingPoint) {
     return 1.0;
 }
 
 
 //--------------- Class Based Utilities ----------------//
+
+bool DecisionTree::checkNamesUsed(const std::vector<std::string>& featuresAndValues) {
+    return true;
+}
 
 // Getters
 std::string DecisionTree::getTrainingDatafile() const {
@@ -300,6 +515,10 @@ std::vector<std::string> DecisionTree::getFeatureNames() const {
 
 std::map<std::string, std::vector<std::string>> DecisionTree::getTrainingDataDict() const {
     return _trainingDataDict;
+}
+
+std::map<std::string, std::set<std::string>> DecisionTree::getFeaturesAndValuesDict() const {
+    return _featuresAndValuesDict;
 }
 
 // Setters
