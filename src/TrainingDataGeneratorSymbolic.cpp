@@ -369,10 +369,10 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
     if (_debug1)
     {
         std::cout << "Mapping of class priors to unit interval:\n";
-        for (const auto &item : classPriorsToUnitIntervalMap)
-        {
-            std::cout << item.first << " ===> " << item.second.first << " to " << item.second.second << "\n";
-        }
+        // for (const auto &item : classPriorsToUnitIntervalMap)
+        // {
+        //     std::cout << item.first << " ===> " << item.second.first << " to " << item.second.second << "\n";
+        // }
     }
 
     std::map<std::string, std::map<std::string, std::map<std::string, std::pair<double, double>>>> classAndFeatureBasedValuePriorsToUnitIntervalMap;
@@ -403,16 +403,17 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
                 {
                     double noBias = 1.0 / values.size();
                     biasString = values[0] + "=" + std::to_string(noBias);
-
                 }
 
                 std::map<std::string, std::pair<double, double>> valuePriorsToUnitIntervalMap;
-                auto splits = splitByRegex(biasString, "'\\s*=\\s*'");
+                std::vector<std::string> splits = splitByRegex(biasString, "=");
                 std::string chosenForBiasValue = splits[0];
                 double chosenBias = std::stod(splits[1]);
                 double remainingBias = 1.0 - chosenBias;
                 double remainingPortionBias = remainingBias / (values.size() - 1);
                 double accumulated = 0.0;
+
+                std::cout << "123456" << std::endl;
 
                 for (int i = 0; i < values.size(); ++i)
                 {
@@ -428,19 +429,51 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
                     }
                 }
                 classAndFeatureBasedValuePriorsToUnitIntervalMap[className][feature.first] = valuePriorsToUnitIntervalMap;
-
-                if (_debug2)
-                {
-                    std::cout << "\nFor class " << className << ": Mapping feature value priors for feature '" << feature.first << "' to unit interval:\n";
-                    for (const auto &item : valuePriorsToUnitIntervalMap)
-                    {
-                        std::cout << "    " << item.first << " ===> [" << item.second.first << ", " << item.second.second << "]\n";
-                    }
-                }
             }
         }
         
         int eleIndex = 0;
+        while (eleIndex < howManyTrainingSamples)
+        {
+            std::string sample_name = "sample_" + std::to_string(eleIndex);
+            std::unordered_map<std::string, std::vector<int>> training_sample_records;
+            training_sample_records[sample_name] = {};
+
+            // Generate class label for the training sample
+            std::srand(static_cast<unsigned>(std::time(nullptr)));
+            float roll_the_dice = static_cast<float>(std::rand()) / RAND_MAX;
+            std::string classLabel;
+
+            for (const auto &className : classPriorsToUnitIntervalMap)
+            {
+                if (roll_the_dice >= className.second.first && roll_the_dice < className.second.second)
+                {
+                    classLabel = className.first;
+                    break;
+                }
+            }
+
+            for (const auto &feature : featuresAndValuesDict)
+            {
+                roll_the_dice = static_cast<float>(std::rand()) / RAND_MAX;
+                std::string valueLabel;
+                std::map<std::string, std::pair<double, double>> valuePriorsToUnitIntervalMap;
+
+                valuePriorsToUnitIntervalMap = classAndFeatureBasedValuePriorsToUnitIntervalMap[classLabel][feature.first];
+                for (const auto &valueName : valuePriorsToUnitIntervalMap)
+                {
+                    if (roll_the_dice >= valueName.second.first && roll_the_dice < valueName.second.second)
+                    {
+                        trainingSampleRecords[sample_name].push_back(feature.first + "=" + valueName.first);
+                        valueLabel = valueName.first;
+                        break;
+                    }
+                }
+            }
+            eleIndex++;
+        }
+        _trainingSampleRecords = trainingSampleRecords;
+
     }
 }
 

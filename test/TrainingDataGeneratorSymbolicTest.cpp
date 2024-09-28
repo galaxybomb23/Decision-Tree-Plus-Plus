@@ -20,8 +20,8 @@ protected:
         {"parameter_file", "../test/resources/param_symbolic.txt"},
         {"number_of_training_samples", "100"},
         {"write_to_file", "1"},
-        {"debug1", "1"},
-        {"debug2", "1"}};
+        {"debug1", "0"},
+        {"debug2", "0"}};
     TrainingDataGeneratorSymbolic tdgs = TrainingDataGeneratorSymbolic(kwargs);
 };
 
@@ -36,8 +36,8 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckParamsTdgs)
     ASSERT_EQ(tdgs.getParameterFile(), "../test/resources/param_symbolic.txt");
     ASSERT_EQ(tdgs.getNumberOfTrainingSamples(), 100);
     ASSERT_EQ(tdgs.getWriteToFile(), 1);
-    ASSERT_EQ(tdgs.getDebug1(), 1);
-    ASSERT_EQ(tdgs.getDebug2(), 1);
+    ASSERT_EQ(tdgs.getDebug1(), 0);
+    ASSERT_EQ(tdgs.getDebug2(), 0);
     ASSERT_NO_THROW(tdgs.ReadParameterFileSymbolic());
     ASSERT_NO_THROW(tdgs.GenerateTrainingDataSymbolic());
 }

@@ -21,7 +21,7 @@ private:
     int _writeToFile;
     int _debug1;
     int _debug2;
-    std::map<std::string, std::vector<double>> _trainingSampleRecords;
+    std::map<std::string, std::vector<std::string>> _trainingSampleRecords;
     std::map<std::string, std::vector<std::string>> _featuresAndValuesDict;
     std::map<std::string, std::map<std::string, std::vector<std::string>>> _biasDict;
     std::vector<std::string> _classNames;
