@@ -6,6 +6,10 @@
 #include <optional>
 #include <algorithm>
 #include <utility>
+#include <regex>
+#include <iostream>
+#include <tuple>
+#include <numeric>
 
 int sampleIndex(std::string sample_name);
 
