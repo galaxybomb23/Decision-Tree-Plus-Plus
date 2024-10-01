@@ -41,6 +41,8 @@ public:
 
 
     //--------------- Probability Calculators ----------------//
+    double priorProbabilityForClass(const std::string& className);
+    void calculate_class_priors();
     double probabilityOfFeatureValue(const std::string& feature, const std::string& value);
     double probabilityOfFeatureValue(const std::string& feature, double samplingPoint);
 

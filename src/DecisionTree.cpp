@@ -492,8 +492,17 @@ double DecisionTree::classEntropyOnPriors() {
 
 
 //--------------- Probability Calculators ----------------//
+double priorProbabilityForClass(const std::string& className) {
+    return 1.0;
+}
+
+void DecisionTree::calculate_class_priors() {
+    
+}
 
 double DecisionTree::probabilityOfFeatureValue(const std::string& feature, const std::string& value) {
+    double samplingPoint = convert(value);
+
     return 1.0;
 }
 
