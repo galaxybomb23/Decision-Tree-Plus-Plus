@@ -7,6 +7,7 @@ cd "$(dirname "$0")"
 # Function to perform the build
 build() {
     echo "Building..."   
+    mkdir -p build 
     cd build
     cmake ..
     make
