@@ -1,6 +1,7 @@
 #include "Utility.hpp"
 #include <regex>
 #include <iostream>
+#include <sstream>
 
 int sampleIndex(std::string sample_name)
 {
@@ -19,7 +20,7 @@ double convert(std::string const &str)
 
 std::string CleanupCsvString(const std::string &line)
 {
-    std::cout << "\nOriginal: " << line << std::endl;
+    std::cout << "\nOriginal: " << line << std::endl; 
     // Translate unwanted characters ":?/()[]{}'" to spaces
     std::string cleaned = std::regex_replace(line, std::regex("[:?/()\\[\\]{}']"), " ");
     std::cout << "Special-Chars: " << cleaned << "|" << std::endl;
@@ -52,19 +53,22 @@ std::string CleanupCsvString(const std::string &line)
     }
     std::cout << "Whitespace: " << cleaned << "|" << std::endl;
 
-    // Split the fields by commas and handle empty fields
-    std::regex fieldPattern(",");
-    std::vector<std::string> fields(std::sregex_token_iterator(cleaned.begin(), cleaned.end(), fieldPattern, -1),
-                                    std::sregex_token_iterator());
-
-    for (auto &field : fields)
-    {
-        std::cout << "Field: " << field << std::endl;
-        field = std::regex_replace(field, std::regex("^(\\s|_)+|(\\s|_)+$"), ""); // Trim
-        if (field.empty())
-        {
-            field = "NA";
+    // Split by comma, clean up fields
+    std::vector<std::string> fields;
+    std::string field;
+    std::stringstream ss(cleaned);
+    while (std::getline(ss, field, ',')) {
+        field = std::regex_replace(field, std::regex("^(\\s|_)+|(\\s|_)+$"), ""); // Trim whitespace
+        if (field == "") {
+            fields.push_back("NA");
+        } else {
+            fields.push_back(field);
         }
+    }
+
+    // If the string ends with an empty field, add "NA" to the end
+    if (cleaned.back() == ',') {
+        fields.push_back("NA");
     }
 
     // Join the fields back together with commas
