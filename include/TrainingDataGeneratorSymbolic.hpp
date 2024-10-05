@@ -45,13 +45,14 @@ public:
 
     void ReadParameterFileSymbolic();    // Read the parameter file for symbolic data
     void GenerateTrainingDataSymbolic(); // Generate the training data for symbolic data
+    void WriteTrainingDataToFile();
 
     // helpers
     std::vector<std::string> filterAndClean(const std::string &pattern, const std::vector<std::string> &input);
     std::vector<std::string> splitByRegex(const std::string &input, const std::string &pattern);
 
-        // getters
-        std::vector<double> getClassPriors()
+    // getters
+    std::vector<double> getClassPriors()
     {
         return _classPriors;
     }

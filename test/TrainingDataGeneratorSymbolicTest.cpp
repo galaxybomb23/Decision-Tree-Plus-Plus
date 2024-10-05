@@ -20,8 +20,8 @@ protected:
         {"parameter_file", "../test/resources/param_symbolic.txt"},
         {"number_of_training_samples", "100"},
         {"write_to_file", "1"},
-        {"debug1", "0"},
-        {"debug2", "0"}};
+        {"debug1", "1"},
+        {"debug2", "1"}};
     TrainingDataGeneratorSymbolic tdgs = TrainingDataGeneratorSymbolic(kwargs);
 };
 
@@ -36,8 +36,8 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckParamsTdgs)
     ASSERT_EQ(tdgs.getParameterFile(), "../test/resources/param_symbolic.txt");
     ASSERT_EQ(tdgs.getNumberOfTrainingSamples(), 100);
     ASSERT_EQ(tdgs.getWriteToFile(), 1);
-    ASSERT_EQ(tdgs.getDebug1(), 0);
-    ASSERT_EQ(tdgs.getDebug2(), 0);
+    ASSERT_EQ(tdgs.getDebug1(), 1);
+    ASSERT_EQ(tdgs.getDebug2(), 1);
     ASSERT_NO_THROW(tdgs.ReadParameterFileSymbolic());
     ASSERT_NO_THROW(tdgs.GenerateTrainingDataSymbolic());
 }
@@ -85,8 +85,7 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckBias)
         {"exercising", "fatIntake", "smoking", "videoAddiction"}};
     std::vector<std::vector<std::vector<std::string>>> expectedValues = {
         {{"never=0.2"}, {"heavy=0.2"}, {"heavy=0.2"}, {"heavy=0.2"}},
-        {{"never=0.8"}, {"heavy=0.2"}, {"heavy=0.2"}, {""}}
-    };
+        {{"never=0.8"}, {"heavy=0.8"}, {"heavy=0.8"}, {}}};
 
     int classIndex = 0;
     for (auto const &bias : biasDict)
@@ -97,7 +96,10 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckBias)
         {
             ASSERT_EQ(feature.first, expectedFeatures[classIndex][featureIndex]);
             ASSERT_EQ(feature.second.size(), expectedValues[classIndex][featureIndex].size());
-            ASSERT_EQ(feature.second.size(), 1);
+            for (int i = 0; i < feature.second.size(); i++)
+            {
+                ASSERT_EQ(feature.second[i], expectedValues[classIndex][featureIndex][i]);
+            }
             featureIndex++;
         }
         classIndex++;
