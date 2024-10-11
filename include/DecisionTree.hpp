@@ -87,6 +87,9 @@ class DecisionTree {
   void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
   void setRootNode(std::unique_ptr<DecisionTreeNode> rootNode);
 
+  // Utility Functions
+  void printStats();
+
  private:
   std::string _trainingDatafile;
   double _entropyThreshold;
@@ -103,8 +106,8 @@ class DecisionTree {
   std::map<std::string, double> _probabilityCache;
   std::map<std::string, double> _entropyCache;
   std::map<std::string, std::vector<std::string>> _trainingDataDict;
-  std::map<std::string, std::set<std::string>> _featuresAndValuesDict;
-  std::map<std::string, std::set<std::string>> _featuresAndUniqueValuesDict;
+  std::map<std::string, std::set<double>> _featuresAndValuesDict;
+  std::map<std::string, std::set<double>> _featuresAndUniqueValuesDict;
   std::map<std::string, std::string> _samplesClassLabelDict;
   std::map<std::string, double> _classPriorsDict;
   std::vector<std::string> _featureNames;

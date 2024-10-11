@@ -111,7 +111,13 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData) {
 
 // test Probability Calculators
 TEST_F(DecisionTreeTest, ProbabilityCalculators) {
-  ASSERT_NEAR(dt.priorProbabilityForClass("benign"), 0.62, 0.005);
+  kwargs = {
+    {"training_datafile", "../test/resources/training_symbolic.csv"},
+    {"csv_class_column_index", "1"}, {"csv_columns_for_features", {2, 3, 4, 5}},
+    {"max_depth_desired", "5"},
+    {"entropy_threshold", "0.1"}}
+   dt = DecisionTree(kwargs)
+        ASSERT_NEAR(dt.priorProbabilityForClass("benign"), 0.62, 0.005);
   ASSERT_NEAR(dt.priorProbabilityForClass("malignant"), 0.38, 0.005);
   ASSERT_NEAR(dt.probabilityOfFeatureValue("smoking", "heavy"), 0.44, 0.005);
 }

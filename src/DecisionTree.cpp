@@ -566,19 +566,18 @@ void DecisionTree::calculate_class_priors() {
   if (_samplesClassLabelDict.size() > 1) {
     return;
   }
+
+  //
   for (const auto& className : _classNames) {
     priorProbabilityForClass(className, true);
   }
   if (_debug2) {
-    std::cout << "\nClass priors calculated:\n" << _classPriorsDict;
+    std::cout << "\nClass priors calculated:\n" << std::endl;
+    for (const auto& className : _classNames) {
+      std::cout << className << " = " << priorProbabilityForClass(className)
+                << std::endl;
+    }
   }
-}
-
-double DecisionTree::probabilityOfFeatureValue(const std::string& feature,
-                                               const std::string& value) {
-  double samplingPoint = convert(value);
-
-  return 1.0;
 }
 
 double DecisionTree::probabilityOfFeatureValue(const std::string& feature,
@@ -688,4 +687,43 @@ void DecisionTree::setDebug3(int debug3) { _debug3 = debug3; }
 
 void DecisionTree::setRootNode(std::unique_ptr<DecisionTreeNode> rootNode) {
   _rootNode = std::move(rootNode);
+}
+
+// print the stree variables
+void DecisionTree::printStats() {
+  std::cout << "Training Datafile: " << _trainingDatafile << std::endl;
+  std::cout << "Entropy Threshold: " << _entropyThreshold << std::endl;
+  std::cout << "Max Depth Desired: " << _maxDepthDesired << std::endl;
+  std::cout << "CSV Class Column Index: " << _csvClassColumnIndex << std::endl;
+  std::cout << "Symbolic To Numeric Cardinality Threshold: "
+            << _symbolicToNumericCardinalityThreshold << std::endl;
+  std::cout << "Number Of Histogram Bins: " << _numberOfHistogramBins
+            << std::endl;
+  std::cout << "CSV Cleanup Needed: " << _csvCleanupNeeded << std::endl;
+  std::cout << "Debug1: " << _debug1 << std::endl;
+  std::cout << "Debug2: " << _debug2 << std::endl;
+  std::cout << "Debug3: " << _debug3 << std::endl;
+  std::cout << "How Many Total Training Samples: "
+            << _howManyTotalTrainingSamples << std::endl;
+  std::cout << "Feature Names: ";
+  for (const auto& feature : _featureNames) {
+    std::cout << feature << " ";
+  }
+  std::cout << std::endl;
+  std::cout << "Training Data Dict: ";
+  for (const auto& kv : _trainingDataDict) {
+    std::cout << kv.first << ": ";
+    for (const auto& v : kv.second) {
+      std::cout << v << " ";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << "Features And Values Dict: ";
+  for (const auto& kv : _featuresAndValuesDict) {
+    std::cout << kv.first << ": ";
+    for (const auto& v : kv.second) {
+      std::cout << v << " ";
+    }
+    std::cout << std::endl;
+  }
 }
