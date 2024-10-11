@@ -38,6 +38,10 @@ class DecisionTree {
 
   //--------------- Entropy Calculators ----------------//
   double classEntropyOnPriors();
+  void entropyScannerForANumericFeature(const std::string& feature);
+  double classEntropyForLessThanThresholdForFeature(const std::vector<std::string>& attributes, const std::string& feature, double point);
+  double classEntropyForGreaterThanThresholdForFeature(const std::vector<std::string>& attributes, const std::string& feature, double point);
+  double classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(const std::vector<std::string>& arrayOfFeaturesAndValuesOrThresholds);
 
   //--------------- Probability Calculators ----------------//
   double priorProbabilityForClass(const std::string& className,

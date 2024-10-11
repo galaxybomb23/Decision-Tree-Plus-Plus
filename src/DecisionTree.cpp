@@ -514,7 +514,85 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node) {}
 
 //--------------- Entropy Calculators ----------------//
 
-double DecisionTree::classEntropyOnPriors() { return 0.0; }
+double DecisionTree::classEntropyOnPriors() { 
+  // Check if the entropy for 'priors' is already cached
+  if (_entropyCache.find("priors") != _entropyCache.end()) {
+      return _entropyCache["priors"];
+  }
+
+  double entropy = 0.0;  // Initialize entropy
+
+  // Calculate entropy based on class priors
+  for (const auto& className : _classNames) {
+      double prob = priorProbabilityForClass(className);
+
+      double logProb = 0.0;
+      if (prob >= 0.0001 && prob <= 0.999) {
+          logProb = std::log2(prob);
+      }
+
+      if (prob < 0.0001 || prob > 0.999) {
+          logProb = 0.0;
+      }
+
+      // Calculate entropy incrementally
+      entropy += -1.0 * prob * logProb;
+  }
+
+  if (std::abs(entropy) < 0.0000001) {
+      entropy = 0.0;
+  }
+
+  // Cache the calculated entropy
+  _entropyCache["priors"] = entropy;
+
+  return entropy;
+ }
+
+void DecisionTree::entropyScannerForANumericFeature(const std::string& feature) {
+  // Retrieve all sampling points for the feature
+  std::vector<double> allSamplingPoints = _samplingPointsForNumericFeatureDict[feature];
+  std::vector<double> entropiesForLessThanThresholds;
+  std::vector<double> entropiesForGreaterThanThresholds;
+
+  // Iterate over all sampling points and calculate entropies
+  for (double point : allSamplingPoints) {
+      entropiesForLessThanThresholds.push_back(
+          classEntropyForLessThanThresholdForFeature({}, feature, point));
+      entropiesForGreaterThanThresholds.push_back(
+          classEntropyForGreaterThanThresholdForFeature({}, feature, point));
+  }
+
+  // Output the results
+  std::cout << "\nSCANNER: All entropies less than thresholds for feature " << feature << " are: [";
+  for (const auto& entropy : entropiesForLessThanThresholds) {
+      std::cout << entropy << " ";
+  }
+  std::cout << "]" << std::endl;
+
+  std::cout << "\nSCANNER: All entropies greater than thresholds for feature " << feature << " are: [";
+  for (const auto& entropy : entropiesForGreaterThanThresholds) {
+      std::cout << entropy << " ";
+  }
+  std::cout << "]" << std::endl;
+}
+
+double DecisionTree::classEntropyForLessThanThresholdForFeature(
+    const std::vector<std::string>& attributes, const std::string& feature,
+    double point) {
+  return 0.0;
+}
+
+double DecisionTree::classEntropyForGreaterThanThresholdForFeature(
+    const std::vector<std::string>& attributes, const std::string& feature,
+    double point) {
+  return 0.0;
+}
+
+double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
+  const std::vector<std::string>& arrayOfFeaturesAndValuesOrThresholds) {
+  return 0.0;
+}
 
 //--------------- Probability Calculators ----------------//
 double DecisionTree::priorProbabilityForClass(const std::string& className,

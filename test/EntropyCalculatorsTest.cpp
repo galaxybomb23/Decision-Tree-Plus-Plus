@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "DecisionTree.hpp"
 
-class ClassifyTest : public ::testing::Test
+class EntropyCalculatorsTest : public ::testing::Test
 {
 protected:
     void SetUp() override
@@ -31,28 +31,18 @@ protected:
     DecisionTreeNode node = DecisionTreeNode("feature", 0.0, {0.0}, {"branch"}, dt, true);
 };
 
-TEST_F(ClassifyTest, CheckdtExists)
+TEST_F(EntropyCalculatorsTest, CheckdtExists)
 {
     ASSERT_NE(&dt, nullptr);
 }
 
-TEST_F(ClassifyTest, ConstructorInitializesNode)
+TEST_F(EntropyCalculatorsTest, ConstructorInitializesNode)
 {
     ASSERT_NE(&node, nullptr);
 }
 
-TEST_F(ClassifyTest, ClassifyFunction)
+TEST_F(EntropyCalculatorsTest, EntropyTest)
 {
-    // Construct the features and values vector out of the features and values dictionary
-    std::vector<std::string> featuresAndValues;
-    for (const auto& kv : dt.getFeaturesAndValuesDict())
-    {
-        for (const auto& value : kv.second)
-        {
-            featuresAndValues.push_back(kv.first + "=" + value);
-        }
-    }
-
-    std::map<std::string, std::string> classification = dt.classify(&node, featuresAndValues);
-    ASSERT_NE(&classification, nullptr);
+    double expectedEntropyOnPriors = 0.0;
+    ASSERT_EQ(dt.classEntropyOnPriors(), expectedEntropyOnPriors);
 }
