@@ -69,20 +69,20 @@ TEST_F(UtilityTest, ClosestSamplingPoint)
     ASSERT_EQ(result2.value(), 4.0);
 }
 
-TEST_F(UtilityTest, CleanupCsvString)
+// test the cleanup CSV function
+TEST_F(UtilityTest, cleanupCSV)
 {
     // Test the CleanupCsvString function on a string
-    std::string str = "hello, world, this, is, a, test";
-    std::string result = CleanupCsvString(str);
-    ASSERT_EQ(result, "hello world this is a test");
+    std::vector<std::tuple<std::string, std::string>> tests = {
+        {"hello, world, this, is, a, test", "hello,world,this,is,a,test"},
+        {"hello, , world, , test", "hello,NA,world,NA,test"},
+        {"hello, \"quoted, text\", world", "hello,quoted_text,world"},
+        {"hello, world, this, is, a, test, ", "hello,world,this,is,a,test,NA"},
+        {"hello, world, this, is, a, test, ,", "hello,world,this,is,a,test,NA,NA"}};
 
-    // Test the CleanupCsvString function on a string
-    std::string str2 = "hello, world, this, is, a, test";
-    std::string result2 = CleanupCsvString(str2);
-    ASSERT_EQ(result2, "hello world this is a test");
-
-    // Test the CleanupCsvString function on a string
-    std::string str3 = "hello, world, this, is, a, test";
-    std::string result3 = CleanupCsvString(str3);
-    ASSERT_EQ(result3, "hello world this is a test");
+    for (auto const &test : tests)
+    {
+        std::string result = CleanupCsvString(std::get<0>(test));
+        ASSERT_EQ(result, std::get<1>(test));
+    }
 }

@@ -1,6 +1,7 @@
 #include "Utility.hpp"
 #include <regex>
 #include <iostream>
+#include <sstream>
 
 int sampleIndex(std::string sample_name)
 {
@@ -11,117 +12,75 @@ int sampleIndex(std::string sample_name)
     return std::stoi(match[1]);
 };
 
-// template <typename T>
-// std::vector<T> deepCopy(std::vector<T> const &vec)
-// {
-//     // The purpose of this function is to create a deep copy of a vector.
-//     std::vector<T> copy;
-//     for (T const &elem : vec)
-//     {
-//         copy.push_back(elem);
-//     }
-//     return copy;
-// }
-
-// template <typename T>
-// std::pair<T, size_t> minimum(std::vector<T> const &vec)
-// {
-//     T min = vec[0];
-//     size_t index = 0;
-//     for (size_t i = 1; i < vec.size(); ++i)
-//     {
-//         if (vec[i] < min)
-//         {
-//             min = vec[i];
-//             index = i;
-//         }
-//     }
-//     return std::make_pair(min, index);
-// }
-
 double convert(std::string const &str)
 {
     // The purpose of this function is to convert a string to a double.
     return std::stod(str);
 }
 
-// template <typename T>
-// std::optional<T> ClosestSamplingPoint(std::vector<T> const &vec, T const &val)
-// {
-//     // try to cast the val to a floating point number
-//     double value = static_cast<double>(val);
-
-//     // find the closest sampling point
-//     double min_diff = std::abs(value - vec[0]);
-//     size_t index = 0;
-//     for (size_t i = 1; i < vec.size(); ++i)
-//     {
-//         double diff = std::abs(value - vec[i]);
-//         if (diff < min_diff)
-//         {
-//             min_diff = diff;
-//             index = i;
-//         }
-//     }
-
-//     // return the closest sampling point
-//     return vec[index];
-// };
-
-std::string CleanupCsvString(std::string const &lineIn)
+std::string CleanupCsvString(const std::string &line)
 {
-    // The purpose of this function is to clean up a CSV string.
-    // Replace special characters with spaces
-    std::regex special_chars(":?/()[]{}'");
-    std::string line = std::regex_replace(lineIn, special_chars, "          ");
+    std::cout << "\nOriginal: " << line << std::endl; 
+    // Translate unwanted characters ":?/()[]{}'" to spaces
+    std::string cleaned = std::regex_replace(line, std::regex("[:?/()\\[\\]{}']"), " ");
+    std::cout << "Special-Chars: " << cleaned << "|" << std::endl;
 
-    // Replace double-quoted strings with cleaned versions
-    std::regex double_quoted("\"[^\"]+\"");
-    std::smatch match;
-    while (std::regex_search(line, match, double_quoted))
+    // Handle double-quoted text
+    std::regex doubleQuotedPattern(R"("[^"]+")");
+    auto words_begin = std::sregex_iterator(cleaned.begin(), cleaned.end(), doubleQuotedPattern);
+    auto words_end = std::sregex_iterator();
+    for (std::sregex_iterator i = words_begin; i != words_end; ++i)
     {
-        std::string item = match.str();
-        std::string clean = std::regex_replace(item.substr(1, item.length() - 2), std::regex(","), "");
-        std::regex whitespace("\\s+");
-        clean = std::regex_replace(clean, whitespace, "_");
-        clean = std::regex_replace(clean, std::regex("^_|_$"), "");
-        line = std::regex_replace(line, double_quoted, clean);
+        std::string match = (*i).str();
+        std::string cleanMatch = std::regex_replace(match.substr(1, match.size() - 2), std::regex(","), "");
+        cleanMatch = std::regex_replace(cleanMatch, std::regex("\\s+"), "_");
+        cleaned = std::regex_replace(cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), cleanMatch);
     }
+    std::cout << "Double-quoted: " << cleaned << "|" << std::endl;
 
-    // Replace white-spaced items between commas with cleaned versions
-    std::regex white_spaced(",\\s*[^,]+(?=,|$)");
-    while (std::regex_search(line, match, white_spaced))
+    // Handle whitespace between commas
+    std::regex whitespacePattern(R"(,(\s*[^,]+)(?=,|$)$)");
+    words_begin = std::sregex_iterator(cleaned.begin(), cleaned.end(), whitespacePattern);
+    for (std::sregex_iterator i = words_begin; i != words_end; ++i)
     {
-        std::string item = match.str();
-        std::string litem = item;
-        std::regex whitespace("\\s+");
-        litem = std::regex_replace(litem, whitespace, "_");
-        litem = std::regex_replace(litem, std::regex("^\\s*_|_\\s*$"), "");
-        line = line.substr(0, line.find(item)) + "," + litem + line.substr(line.find(item) + item.length());
+        std::string match = (*i).str();
+        std::cout << "Match: " << match << std::endl;
+        std::string cleanMatch = std::regex_replace(match, std::regex("\\s+"), "_");
+        std::cout << "Clean-Match: " << cleanMatch << std::endl;
+        cleanMatch = std::regex_replace(cleanMatch, std::regex("^\\s*_|_\\s*$"), "");
+        std::cout << "Clean-Match: " << cleanMatch << std::endl;
+        cleaned = std::regex_replace(cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), " " + cleanMatch);
     }
+    std::cout << "Whitespace: " << cleaned << "|" << std::endl;
 
-    // Split the line into fields separated by commas
-    std::regex fields(",");
-    std::vector<std::string> newfields;
-    std::sregex_token_iterator iter(line.begin(), line.end(), fields, -1);
-    std::sregex_token_iterator end;
-    for (; iter != end; ++iter)
-    {
-        std::string field = iter->str();
-        std::string newfield = field;
-        if (newfield.empty())
-        {
-            newfields.push_back("NA");
-        }
-        else
-        {
-            newfields.push_back(newfield);
+    // Split by comma, clean up fields
+    std::vector<std::string> fields;
+    std::string field;
+    std::stringstream ss(cleaned);
+    while (std::getline(ss, field, ',')) {
+        field = std::regex_replace(field, std::regex("^(\\s|_)+|(\\s|_)+$"), ""); // Trim whitespace
+        if (field == "") {
+            fields.push_back("NA");
+        } else {
+            fields.push_back(field);
         }
     }
 
-    // Replace fields with commas
-    line = std::regex_replace(line, fields, ",");
+    // If the string ends with an empty field, add "NA" to the end
+    if (cleaned.back() == ',') {
+        fields.push_back("NA");
+    }
 
-    // Return the cleaned up line
-    return line;
+    // Join the fields back together with commas
+    std::string result;
+    for (size_t i = 0; i < fields.size(); ++i)
+    {
+        result += fields[i];
+        if (i < fields.size() - 1)
+        {
+            result += ",";
+        }
+    }
+
+    return result;
 }
