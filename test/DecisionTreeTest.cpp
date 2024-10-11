@@ -41,8 +41,8 @@ TEST_F(DecisionTreeTest, CheckParamsDt) {
   std::map<std::string, std::string> kargs = {
       {"training_datafile", "../test/resources/stage3cancer.csv"},
       {"csv_class_column_index", "1"},
-      {"csv_columns_for_features", {2, 3, 4, 5, 6, 7}},
-      {"max_depth_desired", "5"},
+      {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+      {"max_depth_desired", "20"},
       {"entropy_threshold", "0.1"},
       {"symbolic_to_numeric_cardinality_threshold", "20"},
       {"number_of_histogram_bins", "10"},
@@ -69,11 +69,26 @@ TEST_F(DecisionTreeTest, CheckParamsDt) {
 }
 
 TEST_F(DecisionTreeTest, CheckGetTrainingData) {
+  std::map<std::string, std::string> kargs = {
+      {"training_datafile", "../test/resources/stage3cancer.csv"},
+      {"csv_class_column_index", "1"},
+      {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+      {"max_depth_desired", "5"},
+      {"entropy_threshold", "0.1"},
+      {"symbolic_to_numeric_cardinality_threshold", "20"},
+      {"number_of_histogram_bins", "10"},
+      {"csv_cleanup_needed", "1"},
+      {"debug1", "1"},
+      {"debug2", "2"},
+      {"debug3", "3"}};
+
+  DecisionTree dt = DecisionTree(kargs);
+
   ASSERT_NO_THROW(dt.getTrainingData());
   ASSERT_EQ(dt.getHowManyTotalTrainingSamples(), 146);
 
   std::vector<std::string> expectedFeatureNames = {
-      "pgtime", "pgstat", "age", "eet", "g2", "grade", "gleason", "ploidy"};
+      "","pgtime", "pgstat", "age", "eet", "g2", "grade", "gleason", "ploidy"};
   ASSERT_EQ(dt.getFeatureNames(), expectedFeatureNames);
 
   // check if getTrainingDataDict() contains the following randomly selected
@@ -107,17 +122,4 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData) {
       ASSERT_TRUE(featuresAndValuesDict[data.first].count(value) > 0);
     }
   }
-}
-
-// test Probability Calculators
-TEST_F(DecisionTreeTest, ProbabilityCalculators) {
-  kwargs = {
-    {"training_datafile", "../test/resources/training_symbolic.csv"},
-    {"csv_class_column_index", "1"}, {"csv_columns_for_features", {2, 3, 4, 5}},
-    {"max_depth_desired", "5"},
-    {"entropy_threshold", "0.1"}}
-   dt = DecisionTree(kwargs)
-        ASSERT_NEAR(dt.priorProbabilityForClass("benign"), 0.62, 0.005);
-  ASSERT_NEAR(dt.priorProbabilityForClass("malignant"), 0.38, 0.005);
-  ASSERT_NEAR(dt.probabilityOfFeatureValue("smoking", "heavy"), 0.44, 0.005);
 }

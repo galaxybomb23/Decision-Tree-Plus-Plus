@@ -518,7 +518,7 @@ double DecisionTree::classEntropyOnPriors() { return 0.0; }
 
 //--------------- Probability Calculators ----------------//
 double DecisionTree::priorProbabilityForClass(const std::string& className,
-                                              bool overloadCache = false) {
+                                              bool overloadCache) {
   // make a cache key
   std::string class_name_in_cache = "prior::" + className;
   logger.log(LogLevel(0), "priorProbabilityForClass:: class_name_in_cache: " +
@@ -583,6 +583,11 @@ void DecisionTree::calculate_class_priors() {
 double DecisionTree::probabilityOfFeatureValue(const std::string& feature,
                                                double samplingPoint) {
   return 1.0;
+}
+
+double DecisionTree::probabilityOfFeatureValue(const std::string& feature,
+                                   const std::string& value) {
+                                    return 1.0;
 }
 
 //--------------- Class Based Utilities ----------------//

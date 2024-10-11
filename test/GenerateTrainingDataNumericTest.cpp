@@ -186,5 +186,8 @@ TEST_F(TrainingDataGeneratorNumericTest, TestGenerateTrainingDataNumeric)
     ASSERT_NEAR(goodtimesSum2 / goodtimes_count, 60.0, 5);
 
     file.close();
+
+    // remove the output file
+    std::remove("../test/resources/param_numeric_out.txt");
 }
 
