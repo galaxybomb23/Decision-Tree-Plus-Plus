@@ -71,7 +71,7 @@ TEST_F(DecisionTreeTest, CheckParamsDt) {
 TEST_F(DecisionTreeTest, CheckGetTrainingData) {
   std::map<std::string, std::string> kargs = {
       {"training_datafile", "../test/resources/stage3cancer.csv"},
-      {"csv_class_column_index", "1"},
+      {"csv_class_column_index", "8"},
       {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
       {"max_depth_desired", "5"},
       {"entropy_threshold", "0.1"},
@@ -122,4 +122,8 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData) {
       ASSERT_TRUE(featuresAndValuesDict[data.first].count(value) > 0);
     }
   }
+
+  // check if _classNames is set correctly
+  std::vector<std::string> expectedClassNames = { "aneuploid", "diploid", "tetraploid" };
+  ASSERT_EQ(dt._classNames, expectedClassNames);
 }
