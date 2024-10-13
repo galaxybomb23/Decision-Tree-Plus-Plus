@@ -428,7 +428,96 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
     }
 }
 
+std::string TrainingDataGeneratorSymbolic::sampleIndex(const std::string &sampleName)
+{
+    // Extract the integer part after "sample_"
+    return sampleName.substr(sampleName.find('_') + 1);
+}
+
 void TrainingDataGeneratorSymbolic::WriteTrainingDataToFile()
 {
-    
+    std::string outputFile = _outputDatafile;
+    std::map<std::string, std::vector<std::string>> trainingSampleRecords = _trainingSampleRecords;
+    std::ofstream file(outputFile); // Open file for writing
+
+    // Get feature names from featuresAndValuesDict
+    std::map<std::string, std::vector<std::string>> featuresAndValuesDict = _featuresAndValuesDict;
+    std::vector<std::string> features;
+
+    for (const auto &pair : featuresAndValuesDict)
+    {
+        features.push_back(pair.first);
+    }
+
+    // Sort features alphabetically
+    std::sort(features.begin(), features.end());
+
+    // Prepare title string for the CSV header (features + class column)
+    std::string titleString = ",class";
+    for (const auto &featureName : features)
+    {
+        titleString += "," + featureName;
+    }
+
+    // Write header to the file
+    file << titleString << "\n";
+
+    // Get sample names and sort them based on the integer part
+    std::vector<std::string> sampleNames;
+    for (const auto &pair : trainingSampleRecords)
+    {
+        sampleNames.push_back(pair.first);
+    }
+
+    // Sort sample names based on the integer part of 'sample_'
+    std::sort(sampleNames.begin(), sampleNames.end(), [](const std::string &a, const std::string &b)
+              { return std::stoi(a.substr(a.find('_') + 1)) < std::stoi(b.substr(b.find('_') + 1)); });
+
+    // Prepare and write records to the file
+    for (const auto &sampleName : sampleNames)
+    {
+        std::string recordString = sampleIndex(sampleName) + ",";
+        std::vector<std::string> record = trainingSampleRecords[sampleName];
+        std::map<std::string, std::string> itemPartsDict;
+
+        // Split each record item on '=' and store in itemPartsDict
+        for (const auto &item : record)
+        {
+            std::vector<std::string> splits;
+            std::regex re("=");
+            std::copy(std::sregex_token_iterator(item.begin(), item.end(), re, -1),
+                      std::sregex_token_iterator(),
+                      std::back_inserter(splits));
+
+            // Assuming that splits[0] is the key and splits[1] is the value
+            if (splits.size() == 2)
+            {
+                itemPartsDict[splits[0]] = splits[1];
+            }
+        }
+
+        // Write class to the record string
+        recordString += itemPartsDict["class"];
+        itemPartsDict.erase("class");
+
+        // Sort the remaining keys and write the corresponding values
+        std::vector<std::string> keys;
+        for (const auto &pair : itemPartsDict)
+        {
+            keys.push_back(pair.first);
+        }
+
+        std::sort(keys.begin(), keys.end());
+
+        for (const auto &key : keys)
+        {
+            recordString += "," + itemPartsDict[key];
+        }
+
+        // Write record string to the file
+        file << recordString << "\n";
+    }
+
+    // Close the file
+    file.close();
 }

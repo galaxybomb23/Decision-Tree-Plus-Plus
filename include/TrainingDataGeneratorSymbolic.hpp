@@ -46,8 +46,9 @@ public:
     void ReadParameterFileSymbolic();    // Read the parameter file for symbolic data
     void GenerateTrainingDataSymbolic(); // Generate the training data for symbolic data
     void WriteTrainingDataToFile();
-
+    
     // helpers
+    std::string sampleIndex(const std::string &sampleName);
     std::vector<std::string> filterAndClean(const std::string &pattern, const std::vector<std::string> &input);
     std::vector<std::string> splitByRegex(const std::string &input, const std::string &pattern);
 

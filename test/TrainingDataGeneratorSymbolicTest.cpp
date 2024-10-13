@@ -40,6 +40,7 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckParamsTdgs)
     ASSERT_EQ(tdgs.getDebug2(), 1);
     ASSERT_NO_THROW(tdgs.ReadParameterFileSymbolic());
     ASSERT_NO_THROW(tdgs.GenerateTrainingDataSymbolic());
+    ASSERT_NO_THROW(tdgs.WriteTrainingDataToFile());
 }
 
 TEST_F(TrainingDataGeneratorSymbolicTest, CheckFeaturesAndValues)
