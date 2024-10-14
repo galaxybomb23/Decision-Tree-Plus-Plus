@@ -299,11 +299,11 @@ void DecisionTree::showTrainingData() const
       }
       i++;
     }
-    std::cout << ")";
+    std::cout << ")\n";
   }
 
   // Print samples vs. class labels
-  std::cout << "\n\nSamples vs. Class Labels:\n\n";
+  std::cout << "\nSamples vs. Class Labels:\n\n";
   for (const auto &sample : _samplesClassLabelDict)
   {
     std::cout << "sample_" << sample.first << " => " << sample.second << "\n";
