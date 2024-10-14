@@ -20,8 +20,10 @@ double convert(std::string const &str)
 
 std::string CleanupCsvString(const std::string &line)
 {
+    std::cout << "\nOriginal: " << line << std::endl;
     // Translate unwanted characters ":?/()[]{}'" to spaces
     std::string cleaned = std::regex_replace(line, std::regex("[:?/()\\[\\]{}']"), " ");
+    std::cout << "Special-Chars: " << cleaned << "|" << std::endl;
 
     // Handle double-quoted text
     std::regex doubleQuotedPattern(R"("[^"]+")");
@@ -34,6 +36,7 @@ std::string CleanupCsvString(const std::string &line)
         cleanMatch = std::regex_replace(cleanMatch, std::regex("\\s+"), "_");
         cleaned = std::regex_replace(cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), cleanMatch);
     }
+    std::cout << "Double-quoted: " << cleaned << "|" << std::endl;
 
     // Handle whitespace between commas
     std::regex whitespacePattern(R"(,(\s*[^,]+)(?=,|$)$)");
@@ -41,26 +44,35 @@ std::string CleanupCsvString(const std::string &line)
     for (std::sregex_iterator i = words_begin; i != words_end; ++i)
     {
         std::string match = (*i).str();
+        std::cout << "Match: " << match << std::endl;
         std::string cleanMatch = std::regex_replace(match, std::regex("\\s+"), "_");
+        std::cout << "Clean-Match: " << cleanMatch << std::endl;
         cleanMatch = std::regex_replace(cleanMatch, std::regex("^\\s*_|_\\s*$"), "");
+        std::cout << "Clean-Match: " << cleanMatch << std::endl;
         cleaned = std::regex_replace(cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), " " + cleanMatch);
     }
+    std::cout << "Whitespace: " << cleaned << "|" << std::endl;
 
     // Split by comma, clean up fields
     std::vector<std::string> fields;
     std::string field;
     std::stringstream ss(cleaned);
-    while (std::getline(ss, field, ',')) {
+    while (std::getline(ss, field, ','))
+    {
         field = std::regex_replace(field, std::regex("^(\\s|_)+|(\\s|_)+$"), ""); // Trim whitespace
-        if (field == "") {
+        if (field == "")
+        {
             fields.push_back("NA");
-        } else {
+        }
+        else
+        {
             fields.push_back(field);
         }
     }
 
     // If the string ends with an empty field, add "NA" to the end
-    if (cleaned.back() == ',') {
+    if (cleaned.back() == ',')
+    {
         fields.push_back("NA");
     }
 

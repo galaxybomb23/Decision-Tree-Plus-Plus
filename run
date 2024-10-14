@@ -33,8 +33,21 @@ test() {
     cd ..
 }
 
+# Function to compile python code
+compile_python() {
+    echo "Compiling python code..."
+    python3 Python-build/setup.py build_ext --inplace
+}
+
 # Main script execution
 case $1 in
+  demo)
+    compile_python
+    python3 Python-build/demo.py
+    ;;
+  python)
+    compile_python
+    ;;
   build)
     build
     ;;
