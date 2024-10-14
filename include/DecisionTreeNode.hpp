@@ -1,13 +1,13 @@
 #ifndef DECISION_TREE_NODE_HPP
 #define DECISION_TREE_NODE_HPP
 
+#include "DecisionTree.hpp"
 #include <memory>
 #include <vector>
 #include <string>
 #include <sstream>
 #include <iostream>
 #include <iomanip>
-#include "DecisionTree.hpp"
 // Forward declaration
 class DecisionTree;
 
