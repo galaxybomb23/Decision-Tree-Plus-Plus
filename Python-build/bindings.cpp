@@ -78,6 +78,35 @@ void doughnut(int fps, int distance, float increment, int refreshRate, int xpos,
     }
 }
 
+void display_decision_treeDemo()
+{
+    // Create a decision tree node
+    // Class members to be used in tests
+    std::map<std::string, std::string> kwargs = {
+        {"training_datafile", "../test/resources/stage3cancer.csv"},
+        {"entropy_threshold", "0.1"},
+        {"max_depth_desired", "20"},
+        {"csv_class_column_index", "1"},
+        {"symbolic_to_numeric_cardinality_threshold", "20"},
+        {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+        {"number_of_histogram_bins", "10"},
+        {"csv_cleanup_needed", "1"},
+        {"debug1", "1"},
+        {"debug2", "2"},
+        {"debug3", "3"}};
+    DecisionTree dt = DecisionTree(kwargs);
+    DecisionTreeNode node("feature", 0.1, {0.2}, {"branch"}, dt, true);
+
+    // Add child nodes
+    std::shared_ptr<DecisionTreeNode> child1 = std::make_shared<DecisionTreeNode>(dt);
+    std::shared_ptr<DecisionTreeNode> child2 = std::make_shared<DecisionTreeNode>(dt);
+    node.AddChildLink(child1);
+    node.AddChildLink(child2);
+
+    // Display the decision tree
+    node.DisplayDecisionTree("");
+}
+
 #define PYTHON_BUILD
 
 namespace py = pybind11;
@@ -91,8 +120,9 @@ PYBIND11_MODULE(DecisionTreePP, m)
     m.doc() = "Decision Tree Plus Plus Module"; // Optional module documentation
 
     py::class_<DecisionTreeNode>(m, "DecisionTreeNode")
-        .def(py::init<DecisionTree &>(), "Constructor with DecisionTree reference")
+        .def(py::init<DecisionTree &>(), py::arg("dt"), "Constructor with DecisionTree reference")
         .def(py::init<const std::string &, double, const std::vector<double> &, const std::vector<std::string> &, DecisionTree &, bool>(),
+             py::arg("feature"), py::arg("entropy"), py::arg("class_probabilities"), py::arg("branch_features_and_values_or_thresholds"), py::arg("dt"), py::arg("root_or_not"),
              "Constructor with feature, entropy, class probabilities, branch features, DecisionTree reference, and root flag")
         .def("HowManyNodes", &DecisionTreeNode::HowManyNodes, "Get number of nodes")
         .def("GetClassNames", &DecisionTreeNode::GetClassNames, "Get class names")
@@ -103,14 +133,12 @@ PYBIND11_MODULE(DecisionTreePP, m)
         .def("GetBranchFeaturesAndValuesOrThresholds", &DecisionTreeNode::GetBranchFeaturesAndValuesOrThresholds, "Get branch features and values or thresholds")
         .def("GetChildren", &DecisionTreeNode::GetChildren, "Get child nodes")
         .def("GetSerialNum", &DecisionTreeNode::GetSerialNum, "Get serial number")
-        .def("SetClassNames", &DecisionTreeNode::SetClassNames, "Set class names")
-        .def("SetNodeCreationEntropy", &DecisionTreeNode::SetNodeCreationEntropy, "Set node creation entropy")
-        .def("AddChildLink", &DecisionTreeNode::AddChildLink, "Add a child link")
+        .def("SetClassNames", &DecisionTreeNode::SetClassNames, py::arg("class_names_list"), "Set class names")
+        .def("SetNodeCreationEntropy", &DecisionTreeNode::SetNodeCreationEntropy, py::arg("entropy"), "Set node creation entropy")
+        .def("AddChildLink", &DecisionTreeNode::AddChildLink, py::arg("new_node"), "Add a child link")
         .def("DeleteAllLinks", &DecisionTreeNode::DeleteAllLinks, "Delete all child links")
-        .def("DisplayNode", &DecisionTreeNode::DisplayNode, "Display node information", py::arg("offset"))
-        .def("DisplayDecisionTree", &DecisionTreeNode::DisplayDecisionTree, "Display decision tree structure", py::arg("offset"));
-
-    // Define the DecisionTree module
+        .def("DisplayNode", &DecisionTreeNode::DisplayNode, "Display node information")
+        .def("DisplayDecisionTree", &DecisionTreeNode::DisplayDecisionTree, py::arg("offset"), "Display decision tree structure");
 
     // Bind the DecisionTree class
     py::class_<DecisionTree>(m, "DecisionTree")
@@ -196,4 +224,7 @@ PYBIND11_MODULE(DecisionTreePP, m)
 
     // Bind the doughnut function
     m.def("doughnut", &doughnut, "Display a doughnut on the screen", py::arg("fps"), py::arg("distance"), py::arg("increment"), py::arg("refreshRate"), py::arg("xpos"), py::arg("ypos"), py::arg("numupdates"));
+
+    // Bind the display_decision_treeDemo function
+    m.def("display_decision_treeDemo", &display_decision_treeDemo, "Display a decision tree for demonstration purposes");
 }
