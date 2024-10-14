@@ -1,30 +1,86 @@
 #include "Utility.hpp"
+#include <regex>
+#include <iostream>
+#include <sstream>
 
-int sampleIndex(std::string sample_name) {
+int sampleIndex(std::string sample_name)
+{
     // The purpose of this function is to return the identifying integer associated with a data record.return -1;
+    std::regex regex("_(.+)$");
+    std::smatch match;
+    std::regex_search(sample_name, match, regex);
+    return std::stoi(match[1]);
 };
 
-template <typename T>
-std::vector<T> deepCopy(std::vector<T> const &vec)
+double convert(std::string const &str)
 {
-    // The purpose of this function is to create a deep copy of a vector.
-}
-
-template <typename T>
-std::pair<T, size_t> minimum(std::vector<T> const &vec)
-{
-    // The purpose of this function is to return the minimum value and its index in a vector.
-}
-
-double convert(std::string const &str) {
     // The purpose of this function is to convert a string to a double.
-};
+    return std::stod(str);
+}
 
-template <typename T>
-std::optional<T> ClosestSamplingPoint(std::vector<T> const &vec, T const &val) {
-    // The purpose of this function is to return the closest sampling point to a given value.
-};
+std::string CleanupCsvString(const std::string &line)
+{
+    std::cout << "\nOriginal: " << line << std::endl; 
+    // Translate unwanted characters ":?/()[]{}'" to spaces
+    std::string cleaned = std::regex_replace(line, std::regex("[:?/()\\[\\]{}']"), " ");
+    std::cout << "Special-Chars: " << cleaned << "|" << std::endl;
 
-std::string CleanupCsvString(std::string const &str) {
-    // The purpose of this function is to clean up a CSV string.
-};
+    // Handle double-quoted text
+    std::regex doubleQuotedPattern(R"("[^"]+")");
+    auto words_begin = std::sregex_iterator(cleaned.begin(), cleaned.end(), doubleQuotedPattern);
+    auto words_end = std::sregex_iterator();
+    for (std::sregex_iterator i = words_begin; i != words_end; ++i)
+    {
+        std::string match = (*i).str();
+        std::string cleanMatch = std::regex_replace(match.substr(1, match.size() - 2), std::regex(","), "");
+        cleanMatch = std::regex_replace(cleanMatch, std::regex("\\s+"), "_");
+        cleaned = std::regex_replace(cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), cleanMatch);
+    }
+    std::cout << "Double-quoted: " << cleaned << "|" << std::endl;
+
+    // Handle whitespace between commas
+    std::regex whitespacePattern(R"(,(\s*[^,]+)(?=,|$)$)");
+    words_begin = std::sregex_iterator(cleaned.begin(), cleaned.end(), whitespacePattern);
+    for (std::sregex_iterator i = words_begin; i != words_end; ++i)
+    {
+        std::string match = (*i).str();
+        std::cout << "Match: " << match << std::endl;
+        std::string cleanMatch = std::regex_replace(match, std::regex("\\s+"), "_");
+        std::cout << "Clean-Match: " << cleanMatch << std::endl;
+        cleanMatch = std::regex_replace(cleanMatch, std::regex("^\\s*_|_\\s*$"), "");
+        std::cout << "Clean-Match: " << cleanMatch << std::endl;
+        cleaned = std::regex_replace(cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), " " + cleanMatch);
+    }
+    std::cout << "Whitespace: " << cleaned << "|" << std::endl;
+
+    // Split by comma, clean up fields
+    std::vector<std::string> fields;
+    std::string field;
+    std::stringstream ss(cleaned);
+    while (std::getline(ss, field, ',')) {
+        field = std::regex_replace(field, std::regex("^(\\s|_)+|(\\s|_)+$"), ""); // Trim whitespace
+        if (field == "") {
+            fields.push_back("NA");
+        } else {
+            fields.push_back(field);
+        }
+    }
+
+    // If the string ends with an empty field, add "NA" to the end
+    if (cleaned.back() == ',') {
+        fields.push_back("NA");
+    }
+
+    // Join the fields back together with commas
+    std::string result;
+    for (size_t i = 0; i < fields.size(); ++i)
+    {
+        result += fields[i];
+        if (i < fields.size() - 1)
+        {
+            result += ",";
+        }
+    }
+
+    return result;
+}
