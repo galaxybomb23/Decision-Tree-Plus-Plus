@@ -41,6 +41,10 @@ compile_python() {
 
 # Main script execution
 case $1 in
+  demo)
+    compile_python
+    python3 Python-build/demo.py
+    ;;
   python)
     compile_python
     ;;

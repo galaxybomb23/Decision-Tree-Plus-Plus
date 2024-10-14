@@ -11,108 +11,108 @@
 //--------------- Constructors and Destructors ----------------//
 DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
 {
-    if (kwargs.empty())
+  if (kwargs.empty())
+  {
+    throw std::invalid_argument("Missing training datafile.");
+  }
+
+  // Allowed keys for the kwargs
+  std::vector<std::string> allowedKeys = {
+      "training_datafile",
+      "entropy_threshold",
+      "max_depth_desired",
+      "csv_class_column_index",
+      "symbolic_to_numeric_cardinality_threshold",
+      "csv_columns_for_features",
+      "number_of_histogram_bins",
+      "csv_cleanup_needed",
+      "debug1",
+      "debug2",
+      "debug3"};
+
+  // Set default values
+  _entropyThreshold = 0.01;
+  _symbolicToNumericCardinalityThreshold = 10;
+  _csvCleanupNeeded = 0;
+  _csvColumnsForFeatures = {};
+  _debug1 = _debug2 = _debug3 = 0;
+  _maxDepthDesired = _csvClassColumnIndex = _numberOfHistogramBins = -1;
+  _rootNode = nullptr;
+  _howManyTotalTrainingSamples = 0;
+  _probabilityCache = {};
+  _entropyCache = {};
+  _trainingDataDict = {};
+  _featuresAndValuesDict = {};
+  _featuresAndUniqueValuesDict = {};
+  _samplesClassLabelDict = {};
+  _classNames = {};
+  _classPriorsDict = {};
+  _featureNames = {};
+  _numericFeaturesValueRangeDict = {};
+  _samplingPointsForNumericFeatureDict = {};
+  _featureValuesHowManyUniquesDict = {};
+  _probDistributionNumericFeaturesDict = {};
+  _histogramDeltaDict = {};
+  _numOfHistogramBinsDict = {};
+
+  // Check and set keyword arguments
+  for (const auto &kv : kwargs)
+  {
+    const std::string &key = kv.first;
+    const std::string &value = kv.second;
+
+    if (key == "training_datafile")
     {
-        throw std::invalid_argument("Missing training datafile.");
+      _trainingDatafile = value;
     }
-
-    // Allowed keys for the kwargs
-    std::vector<std::string> allowedKeys = {
-        "training_datafile",
-        "entropy_threshold",
-        "max_depth_desired",
-        "csv_class_column_index",
-        "symbolic_to_numeric_cardinality_threshold",
-        "csv_columns_for_features",
-        "number_of_histogram_bins",
-        "csv_cleanup_needed",
-        "debug1",
-        "debug2",
-        "debug3"};
-
-    // Set default values
-    _entropyThreshold = 0.01;
-    _symbolicToNumericCardinalityThreshold = 10;
-    _csvCleanupNeeded = 0;
-    _csvColumnsForFeatures = {};
-    _debug1 = _debug2 = _debug3 = 0;
-    _maxDepthDesired = _csvClassColumnIndex = _numberOfHistogramBins = -1;
-    _rootNode = nullptr;
-    _howManyTotalTrainingSamples = 0;
-    _probabilityCache = {};
-    _entropyCache = {};
-    _trainingDataDict = {};
-    _featuresAndValuesDict = {};
-    _featuresAndUniqueValuesDict = {};
-    _samplesClassLabelDict = {};
-    _classNames = {};
-    _classPriorsDict = {};
-    _featureNames = {};
-    _numericFeaturesValueRangeDict = {};
-    _samplingPointsForNumericFeatureDict = {};
-    _featureValuesHowManyUniquesDict = {};
-    _probDistributionNumericFeaturesDict = {};
-    _histogramDeltaDict = {};
-    _numOfHistogramBinsDict = {};
-
-    // Check and set keyword arguments
-    for (const auto &kv : kwargs)
+    else if (key == "entropy_threshold")
     {
-        const std::string &key = kv.first;
-        const std::string &value = kv.second;
-
-        if (key == "training_datafile")
-        {
-            _trainingDatafile = value;
-        }
-        else if (key == "entropy_threshold")
-        {
-            _entropyThreshold = std::stod(value);
-        }
-        else if (key == "max_depth_desired")
-        {
-            _maxDepthDesired = std::stoi(value);
-        }
-        else if (key == "csv_class_column_index")
-        {
-            _csvClassColumnIndex = std::stoi(value);
-        }
-        else if (key == "csv_columns_for_features")
-        {
-            for (const auto &c : value)
-            {
-                _csvColumnsForFeatures.push_back(c);
-            }
-        }
-        else if (key == "symbolic_to_numeric_cardinality_threshold")
-        {
-            _symbolicToNumericCardinalityThreshold = std::stoi(value);
-        }
-        else if (key == "number_of_histogram_bins")
-        {
-            _numberOfHistogramBins = std::stoi(value);
-        }
-        else if (key == "csv_cleanup_needed")
-        {
-            _csvCleanupNeeded = std::stoi(value);
-        }
-        else if (key == "debug1")
-        {
-            _debug1 = std::stoi(value);
-        }
-        else if (key == "debug2")
-        {
-            _debug2 = std::stoi(value);
-        }
-        else if (key == "debug3")
-        {
-            _debug3 = std::stoi(value);
-        }
-        else
-        {
-            throw std::invalid_argument(key + ": Wrong keyword used --- check spelling");
-        }
+      _entropyThreshold = std::stod(value);
     }
+    else if (key == "max_depth_desired")
+    {
+      _maxDepthDesired = std::stoi(value);
+    }
+    else if (key == "csv_class_column_index")
+    {
+      _csvClassColumnIndex = std::stoi(value);
+    }
+    else if (key == "csv_columns_for_features")
+    {
+      for (const auto &c : value)
+      {
+        _csvColumnsForFeatures.push_back(c);
+      }
+    }
+    else if (key == "symbolic_to_numeric_cardinality_threshold")
+    {
+      _symbolicToNumericCardinalityThreshold = std::stoi(value);
+    }
+    else if (key == "number_of_histogram_bins")
+    {
+      _numberOfHistogramBins = std::stoi(value);
+    }
+    else if (key == "csv_cleanup_needed")
+    {
+      _csvCleanupNeeded = std::stoi(value);
+    }
+    else if (key == "debug1")
+    {
+      _debug1 = std::stoi(value);
+    }
+    else if (key == "debug2")
+    {
+      _debug2 = std::stoi(value);
+    }
+    else if (key == "debug3")
+    {
+      _debug3 = std::stoi(value);
+    }
+    else
+    {
+      throw std::invalid_argument(key + ": Wrong keyword used --- check spelling");
+    }
+  }
 }
 
 DecisionTree::~DecisionTree()
@@ -124,164 +124,243 @@ DecisionTree::~DecisionTree()
 // Get training data
 void DecisionTree::getTrainingData()
 {
-    // Check if training data file is a CSV file
-    if (_trainingDatafile.find(".csv") == std::string::npos)
-    { // std::string.find() returns std::string::npos if not found
-        throw std::invalid_argument("Aborted. get_training_data_from_csv() is only for CSV files");
-    }
+  // Check if training data file is a CSV file
+  if (_trainingDatafile.find(".csv") == std::string::npos)
+  { // std::string.find() returns std::string::npos if not found
+    throw std::invalid_argument("Aborted. get_training_data_from_csv() is only for CSV files");
+  }
 
-    _classNames = {};
+  _classNames = {};
 
-    // Open the file
-    std::ifstream file(_trainingDatafile); // std::ifstream is used to read input from a file
-    if (!file.is_open())
+  // Open the file
+  std::ifstream file(_trainingDatafile); // std::ifstream is used to read input from a file
+  if (!file.is_open())
+  {
+    throw std::invalid_argument("Could not open file: " + _trainingDatafile);
+  }
+
+  // Read the header
+  std::string line;
+  if (std::getline(file, line))
+  {
+    std::istringstream ss(line);
+    std::string token;
+    while (std::getline(ss, token, ','))
     {
-        throw std::invalid_argument("Could not open file: " + _trainingDatafile);
+      // strip leading/trailing whitespaces and \" from the token
+      token.erase(0, token.find_first_not_of(" \""));
+      token.erase(token.find_last_not_of(" \"") + 1);
+      _featureNames.push_back(token); // Get the feature names
     }
+  }
 
-    // Read the header
-    std::string line;
-    if (std::getline(file, line))
+  // Read the data
+  while (std::getline(file, line))
+  {
+    std::istringstream ss(line);
+    std::string token;
+    std::vector<std::string> row;
+    while (std::getline(ss, token, ','))
     {
-        std::istringstream ss(line);
-        std::string token;
-        while (std::getline(ss, token, ','))
-        {
-            // strip leading/trailing whitespaces and \" from the token
-            token.erase(0, token.find_first_not_of(" \""));
-            token.erase(token.find_last_not_of(" \"") + 1);
-            _featureNames.push_back(token); // Get the feature names
-        }
+      // strip leading/trailing whitespaces and \" from the token
+      token.erase(0, token.find_first_not_of(" \""));
+      token.erase(token.find_last_not_of(" \"") + 1);
+      row.push_back(token);
     }
 
-    // Read the data
-    while (std::getline(file, line))
+    // remove the first element from the row
+    int uniqueId = std::stoi(row.front());
+    // row.erase(row.begin());
+    _trainingDataDict[uniqueId] = row;
+    _samplesClassLabelDict[uniqueId] = row[_csvClassColumnIndex];
+    _classNames.push_back(row[_csvClassColumnIndex]);
+  }
+
+  // Close the file
+  file.close();
+
+  // Get the unique class labels
+  std::sort(_classNames.begin(), _classNames.end());
+  _classNames.erase(std::unique(_classNames.begin(), _classNames.end()), _classNames.end());
+
+  // Get the number of unique class labels
+  int numUniqueClassLabels = _classNames.size();
+
+  // Get the number of training samples
+  _howManyTotalTrainingSamples = _trainingDataDict.size();
+
+  // Get the features and their values
+  for (int i = 1; i < _featureNames.size(); i++)
+  {
+    std::vector<std::string> allValues;
+    std::set<std::string> uniqueValues;
+    for (const auto &kv : _trainingDataDict)
     {
-        std::istringstream ss(line);
-        std::string token;
-        std::vector<std::string> row;
-        while (std::getline(ss, token, ','))
-        {
-            // strip leading/trailing whitespaces and \" from the token
-            token.erase(0, token.find_first_not_of(" \""));
-            token.erase(token.find_last_not_of(" \"") + 1);
-            row.push_back(token);
-        }
-        _trainingDataDict[row[0]] = row;
-        _classNames.push_back(row[_csvClassColumnIndex]);
+      allValues.push_back(kv.second[i]);
+      uniqueValues.insert(kv.second[i]);
     }
+    _featuresAndValuesDict[_featureNames[i]] = allValues;
+    _featuresAndUniqueValuesDict[_featureNames[i]] = uniqueValues;
+  }
 
-    // Close the file
-    file.close();
-
-    // Get the unique class labels
-    std::sort(_classNames.begin(), _classNames.end());
-    _classNames.erase(std::unique(_classNames.begin(), _classNames.end()), _classNames.end());
-
-    // Get the number of unique class labels
-    int numUniqueClassLabels = _classNames.size();
-
-    // Get the number of training samples
-    _howManyTotalTrainingSamples = _trainingDataDict.size();
-
-    // Get the unique values for each feature
-    for (int i = 1; i < _featureNames.size(); i++)
-    {
-        std::set<std::string> uniqueValues;
-        for (const auto &kv : _trainingDataDict)
-        {
-            uniqueValues.insert(kv.second[i]);
-        }
-        _featuresAndValuesDict[_featureNames[i]] = uniqueValues;
-    }
+  // itterate the _trainingDataDict remove the first element from the row
+  for (auto &kv : _trainingDataDict)
+  {
+    kv.second.erase(kv.second.begin());
+  }
 }
 
 // Calculate first order probabilities
 void DecisionTree::calculateFirstOrderProbabilities()
 {
-    std::cout << "\nEstimating probabilities...\n";
-    for (const auto &feature : _featureNames)
-    {
-        // Calculate probability for the feature's value
-        probabilityOfFeatureValue(feature, "");
+  std::cout << "\nEstimating probabilities...\n";
+  for (const auto &feature : _featureNames)
+  {
+    // Calculate probability for the feature's value
+    probabilityOfFeatureValue(feature, "");
 
-        // Debug output if debug2 is enabled
-        if (_debug2)
+    // Debug output if debug2 is enabled
+    if (_debug2)
+    {
+      // Check if the feature has a probability distribution for numeric values
+      if (_probDistributionNumericFeaturesDict.find(feature) != _probDistributionNumericFeaturesDict.end())
+      {
+        std::cout << "\nPresenting probability distribution for a feature considered to be numeric:\n";
+        // Output sorted sampling points and their probabilities
+        for (auto it = _probDistributionNumericFeaturesDict[feature].begin(); it != _probDistributionNumericFeaturesDict[feature].end(); ++it)
         {
-            // Check if the feature has a probability distribution for numeric values
-            if (_probDistributionNumericFeaturesDict.find(feature) != _probDistributionNumericFeaturesDict.end())
-            {
-                std::cout << "\nPresenting probability distribution for a feature considered to be numeric:\n";
-                // Output sorted sampling points and their probabilities
-                for (auto it = _probDistributionNumericFeaturesDict[feature].begin(); it != _probDistributionNumericFeaturesDict[feature].end(); ++it)
-                {
-                    double samplingPoint = *it;
-                    double prob = probabilityOfFeatureValue(feature, samplingPoint);
-                    std::cout << feature << "::" << samplingPoint << " = "
-                              << std::setprecision(5) << prob << "\n";
-                }
-            }
-            else
-            {
-                // Output probabilities for symbolic feature values
-                std::cout << "\nPresenting probabilities for the values of a feature considered to be symbolic:\n";
-                const auto &values_for_feature = _featuresAndUniqueValuesDict[feature];
-                for (const auto &value : values_for_feature)
-                {
-                    double prob = probabilityOfFeatureValue(feature, value);
-                    std::cout << feature << "::" << value << " = "
-                              << std::setprecision(5) << prob << "\n";
-                }
-            }
+          double samplingPoint = *it;
+          double prob = probabilityOfFeatureValue(feature, samplingPoint);
+          std::cout << feature << "::" << samplingPoint << " = "
+                    << std::setprecision(5) << prob << "\n";
         }
+      }
+      else
+      {
+        // Output probabilities for symbolic feature values
+        std::cout << "\nPresenting probabilities for the values of a feature considered to be symbolic:\n";
+        const auto &values_for_feature = _featuresAndUniqueValuesDict[feature];
+        for (const auto &value : values_for_feature)
+        {
+          double prob = probabilityOfFeatureValue(feature, value);
+          std::cout << feature << "::" << value << " = "
+                    << std::setprecision(5) << prob << "\n";
+        }
+      }
     }
+  }
 }
 
 // Show training data
 void DecisionTree::showTrainingData() const
 {
-    for (const auto &kv : _trainingDataDict)
+  std::cout << "Class names: ";
+  for (const auto &className : _classNames)
+  {
+    std::cout << className << " ";
+  }
+
+  // Print features and their values
+  std::cout << "\n\nFeatures and Their Values:\n\n";
+  for (const auto &featurePair : _featuresAndValuesDict)
+  {
+    std::cout << featurePair.first << " ---> (";
+    for (const auto &value : featurePair.second)
     {
-        std::cout << kv.first << ": ";
-        for (const auto &v : kv.second)
-        {
-            std::cout << v << " ";
-        }
-        std::cout << std::endl;
+      if (value == featurePair.second.back())
+      {
+        std::cout << value;
+      }
+      else
+      {
+        std::cout << value << ", ";
+      }
     }
+    std::cout << ")\n";
+  }
+
+  std::cout << "\n";
+
+  // Print Features and their unique values
+  std::cout << "\nFeatures and their unique values:\n\n";
+  for (auto &featurePair : _featuresAndUniqueValuesDict)
+  {
+    int i = 0;
+    std::cout << featurePair.first << " ---> (";
+    for (const auto &value : featurePair.second)
+    {
+      if (i == featurePair.second.size() - 1)
+      {
+        std::cout << value;
+      }
+      else
+      {
+        std::cout << value << ", ";
+      }
+      i++;
+    }
+    std::cout << ")";
+  }
+
+  // Print samples vs. class labels
+  std::cout << "\n\nSamples vs. Class Labels:\n\n";
+  for (const auto &sample : _samplesClassLabelDict)
+  {
+    std::cout << "sample_" << sample.first << " => " << sample.second << "\n";
+  }
+  std::cout << "\n";
+
+  // Print training samples
+  // sample_1 => [feature_1: value_1, feature_2: value_2, ..., feature_n: value_n]
+  std::cout << "Training Samples:\n\n";
+  for (const auto &sample : _trainingDataDict)
+  {
+    std::cout << "sample_" << sample.first << " => ";
+    int featureIndex = 0;
+    for (const auto &value : sample.second)
+    {
+      std::cout << _featureNames[featureIndex] << ": " << value;
+      featureIndex++;
+      if (featureIndex < sample.second.size())
+      {
+        std::cout << ", ";
+      }
+    }
+    std::cout << "\n";
+  }
 }
 
 //--------------- Classify ----------------//
 
 std::map<std::string, std::string> DecisionTree::classify(void *root_node, const std::vector<std::string> &features_and_values)
 {
-    return {};
+  return {};
 }
 
 //--------------- Construct Tree ----------------//
 
 DecisionTreeNode *DecisionTree::constructDecisionTreeClassifier()
 {
-    return nullptr;
+  return nullptr;
 }
 
 //--------------- Entropy Calculators ----------------//
 
 double DecisionTree::classEntropyOnPriors()
 {
-    return 0.0;
+  return 0.0;
 }
 
 //--------------- Probability Calculators ----------------//
 
 double DecisionTree::probabilityOfFeatureValue(const std::string &feature, const std::string &value)
 {
-    return 1.0;
+  return 1.0;
 }
 
 double DecisionTree::probabilityOfFeatureValue(const std::string &feature, double sampling_point)
 {
-    return 1.0;
+  return 1.0;
 }
 
 //--------------- Class Based Utilities ----------------//
@@ -289,126 +368,131 @@ double DecisionTree::probabilityOfFeatureValue(const std::string &feature, doubl
 // Getters
 std::string DecisionTree::getTrainingDatafile() const
 {
-    return _trainingDatafile;
+  return _trainingDatafile;
 }
 
 double DecisionTree::getEntropyThreshold() const
 {
-    return _entropyThreshold;
+  return _entropyThreshold;
 }
 
 int DecisionTree::getMaxDepthDesired() const
 {
-    return _maxDepthDesired;
+  return _maxDepthDesired;
 }
 
 int DecisionTree::getCsvClassColumnIndex() const
 {
-    return _csvClassColumnIndex;
+  return _csvClassColumnIndex;
 }
 
 std::vector<int> DecisionTree::getCsvColumnsForFeatures() const
 {
-    return _csvColumnsForFeatures;
+  return _csvColumnsForFeatures;
 }
 
 int DecisionTree::getSymbolicToNumericCardinalityThreshold() const
 {
-    return _symbolicToNumericCardinalityThreshold;
+  return _symbolicToNumericCardinalityThreshold;
 }
 
 int DecisionTree::getNumberOfHistogramBins() const
 {
-    return _numberOfHistogramBins;
+  return _numberOfHistogramBins;
 }
 
 int DecisionTree::getCsvCleanupNeeded() const
 {
-    return _csvCleanupNeeded;
+  return _csvCleanupNeeded;
 }
 
 int DecisionTree::getDebug1() const
 {
-    return _debug1;
+  return _debug1;
 }
 
 int DecisionTree::getDebug2() const
 {
-    return _debug2;
+  return _debug2;
 }
 
 int DecisionTree::getDebug3() const
 {
-    return _debug3;
+  return _debug3;
 }
 
 int DecisionTree::getHowManyTotalTrainingSamples() const
 {
-    return _howManyTotalTrainingSamples;
+  return _howManyTotalTrainingSamples;
 }
 
 std::vector<std::string> DecisionTree::getFeatureNames() const
 {
-    return _featureNames;
+  return _featureNames;
 }
 
-std::map<std::string, std::vector<std::string>> DecisionTree::getTrainingDataDict() const
+std::map<int, std::vector<std::string>> DecisionTree::getTrainingDataDict() const
 {
-    return _trainingDataDict;
+  return _trainingDataDict;
 }
 
 // Setters
 void DecisionTree::setTrainingDatafile(const std::string &trainingDatafile)
 {
-    _trainingDatafile = trainingDatafile;
+  _trainingDatafile = trainingDatafile;
 }
 
 void DecisionTree::setEntropyThreshold(double entropyThreshold)
 {
-    _entropyThreshold = entropyThreshold;
+  _entropyThreshold = entropyThreshold;
 }
 
 void DecisionTree::setMaxDepthDesired(int maxDepthDesired)
 {
-    _maxDepthDesired = maxDepthDesired;
+  _maxDepthDesired = maxDepthDesired;
 }
 
 void DecisionTree::setCsvClassColumnIndex(int csvClassColumnIndex)
 {
-    _csvClassColumnIndex = csvClassColumnIndex;
+  _csvClassColumnIndex = csvClassColumnIndex;
 }
 
 void DecisionTree::setCsvColumnsForFeatures(const std::vector<int> &csvColumnsForFeatures)
 {
-    _csvColumnsForFeatures = csvColumnsForFeatures;
+  _csvColumnsForFeatures = csvColumnsForFeatures;
 }
 
 void DecisionTree::setSymbolicToNumericCardinalityThreshold(int symbolicToNumericCardinalityThreshold)
 {
-    _symbolicToNumericCardinalityThreshold = symbolicToNumericCardinalityThreshold;
+  _symbolicToNumericCardinalityThreshold = symbolicToNumericCardinalityThreshold;
 }
 
 void DecisionTree::setNumberOfHistogramBins(int numberOfHistogramBins)
 {
-    _numberOfHistogramBins = numberOfHistogramBins;
+  _numberOfHistogramBins = numberOfHistogramBins;
 }
 
 void DecisionTree::setCsvCleanupNeeded(int csvCleanupNeeded)
 {
-    _csvCleanupNeeded = csvCleanupNeeded;
+  _csvCleanupNeeded = csvCleanupNeeded;
 }
 
 void DecisionTree::setDebug1(int debug1)
 {
-    _debug1 = debug1;
+  _debug1 = debug1;
 }
 
 void DecisionTree::setDebug2(int debug2)
 {
-    _debug2 = debug2;
+  _debug2 = debug2;
 }
 
 void DecisionTree::setDebug3(int debug3)
 {
-    _debug3 = debug3;
+  _debug3 = debug3;
+}
+
+void DecisionTree::setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples)
+{
+  _howManyTotalTrainingSamples = howManyTotalTrainingSamples;
 }
