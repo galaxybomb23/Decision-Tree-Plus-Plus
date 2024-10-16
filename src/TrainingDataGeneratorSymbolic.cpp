@@ -178,7 +178,7 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     }
 
     // Now match Feature and bias
-    std::regex featureAndBiasPattern("(feature:[\\s\\S]*?)(?=\\s*bias:)((?=bias:)[\\s\\S]*)"); 
+    std::regex featureAndBiasPattern("(feature:[\\s\\S]*?)(?=\\s*bias:)((?=bias:)[\\s\\S]*)");
     std::smatch mFeatureBias;
     std::string featureString;
     std::string biasString;
@@ -193,7 +193,10 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
         // for each feature
         for (const auto &feature : features)
         {
-            if (feature.substr(0, 7) == "feature") { continue; }
+            if (feature.substr(0, 7) == "feature")
+            {
+                continue;
+            }
 
             std::vector<std::string> splits = filterAndClean("", splitByRegex(feature, " "));
 
@@ -201,7 +204,8 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
             for (int i = 0; i < splits.size(); i++)
             {
                 // if first item, then create a new key in the dictionary
-                if (i == 0) {
+                if (i == 0)
+                {
                     // remove anything after newline
                     std::regex newlineRegex("(.*)\\n");
                     std::smatch newlineMatch;
@@ -211,9 +215,13 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
                     }
                     featuresAndValuesDict[splits[0]] = {};
                 }
-                else {
+                else
+                {
                     // otherwise, add the value to the dictionary
-                    if (splits[i].substr(0, 6) == "values") { continue; }
+                    if (splits[i].substr(0, 6) == "values")
+                    {
+                        continue;
+                    }
                     // remove newline
                     std::regex newlineRegex("(.*)\\n");
                     std::smatch newlineMatch;
@@ -227,7 +235,8 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
             }
         }
     }
-    else {
+    else
+    {
         throw std::invalid_argument("Feature and bias not found.");
     }
     _featuresAndValuesDict = featuresAndValuesDict;
@@ -303,221 +312,199 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
 
 void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
 {
-    std::vector<std::string> classNames = _classNames;
-    std::vector<double> classPriors = _classPriors;
-    int howManyTrainingSamples = _numberOfTrainingSamples;
-    std::map<std::string, std::vector<std::string>> featuresAndValuesDict = _featuresAndValuesDict;
-    std::map<std::string, std::map<std::string, std::vector<std::string>>> biasDict = _biasDict;
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    std::map<std::string, std::vector<std::string>> trainingSampleRecords;
+    std::vector<std::string> classNames = this->_classNames;
+    std::vector<double> classPriors = this->_classPriors;
+    std::map<std::string, std::vector<std::string>> featuresAndValuesDict = this->_featuresAndValuesDict;
+    std::map<std::string, std::map<std::string, std::vector<std::string>>> biasDict = this->_biasDict;
+    int howManyTrainingSamples = this->_numberOfTrainingSamples;
+
     std::map<std::string, std::pair<double, double>> classPriorsToUnitIntervalMap;
     double accumulatedInterval = 0.0;
 
-    // Create a map of class names to their corresponding unit intervals
+    // Map class priors to unit interval
     for (size_t i = 0; i < classNames.size(); ++i)
     {
-        accumulatedInterval += classPriors[i];
         classPriorsToUnitIntervalMap[classNames[i]] = std::make_pair(accumulatedInterval, accumulatedInterval + classPriors[i]);
+        accumulatedInterval += classPriors[i];
     }
 
-    if (_debug1)
+    // Debugging output
+    if (this->_debug1)
     {
-        std::cout << "Mapping of class priors to unit interval:\n";
+        std::cout << "Mapping of class priors to unit interval:" << std::endl;
         for (const auto &item : classPriorsToUnitIntervalMap)
         {
-            std::cout << item.first << " ===> " << item.second.first << " to " << item.second.second << "\n";
+            std::cout << item.first << " ===> (" << item.second.first << ", " << item.second.second << ")" << std::endl;
         }
     }
 
     std::map<std::string, std::map<std::string, std::map<std::string, std::pair<double, double>>>> classAndFeatureBasedValuePriorsToUnitIntervalMap;
+
+    // Initialize maps for each class and feature
     for (const auto &className : classNames)
     {
-        // Add entry for each class
         classAndFeatureBasedValuePriorsToUnitIntervalMap[className] = {};
-        // for each feature in the featuresAndValuesDict
         for (const auto &feature : featuresAndValuesDict)
         {
-            // Add entry for each feature
             classAndFeatureBasedValuePriorsToUnitIntervalMap[className][feature.first] = {};
         }
+    }
 
-        // for each class
-        for (const auto &className : classNames)
+    // Process bias for each class and feature
+    for (const auto &className : classNames)
+    {
+        for (const auto &feature : featuresAndValuesDict)
         {
-            // for each feature in the featuresAndValuesDict
-            for (const auto &feature : featuresAndValuesDict)
+            const std::vector<std::string> &values = featuresAndValuesDict[feature.first];
+            std::string biasString;
+
+            if (!biasDict[className][feature.first].empty())
             {
-                auto values = featuresAndValuesDict[feature.first];
-                std::string biasString;
-                if (!biasDict[className][feature.first].empty())
+                biasString = biasDict[className][feature.first][0];
+            }
+            else
+            {
+                double noBias = 1.0 / values.size();
+                biasString = values[0] + "=" + std::to_string(noBias);
+            }
+
+            std::map<std::string, std::pair<double, double>> valuePriorsToUnitIntervalMap;
+            std::vector<std::string> splits = splitByRegex(biasString, "=");
+            std::string chosenForBiasValue = splits[0];
+            double chosenBias = std::stod(splits[1]);
+            double remainingBias = 1.0 - chosenBias;
+            double remainingPortionBias = remainingBias / (values.size() - 1);
+            double accumulated = 0.0;
+
+            // Assign intervals for each value
+            for (size_t i = 0; i < values.size(); ++i)
+            {
+                if (values[i] == chosenForBiasValue)
                 {
-                    biasString = biasDict[className][feature.first][0];
+                    valuePriorsToUnitIntervalMap[values[i]] = {accumulated, accumulated + chosenBias};
+                    accumulated += chosenBias;
                 }
                 else
                 {
-                    double noBias = 1.0 / values.size();
-                    biasString = values[0] + "=" + std::to_string(noBias);
+                    valuePriorsToUnitIntervalMap[values[i]] = {accumulated, accumulated + remainingPortionBias};
+                    accumulated += remainingPortionBias;
                 }
+            }
 
-                std::map<std::string, std::pair<double, double>> valuePriorsToUnitIntervalMap;
-                std::vector<std::string> splits = splitByRegex(biasString, "=");
-                std::string chosenForBiasValue = splits[0];
-                double chosenBias = std::stod(splits[1]);
-                double remainingBias = 1.0 - chosenBias;
-                double remainingPortionBias = remainingBias / (values.size() - 1);
-                double accumulated = 0.0;
+            classAndFeatureBasedValuePriorsToUnitIntervalMap[className][feature.first] = valuePriorsToUnitIntervalMap;
 
-                for (int i = 0; i < values.size(); ++i)
+            // Debugging output
+            if (this->_debug2)
+            {
+                std::cout << "For class " << className << ": Mapping feature value priors for feature '" << feature.first << "' to unit interval: " << std::endl;
+                for (const auto &item : valuePriorsToUnitIntervalMap)
                 {
-                    if (values[i] == chosenForBiasValue)
-                    {
-                        valuePriorsToUnitIntervalMap[values[i]] = {accumulated, accumulated + chosenBias};
-                        accumulated += chosenBias;
-                    }
-                    else
-                    {
-                        valuePriorsToUnitIntervalMap[values[i]] = {accumulated, accumulated + remainingPortionBias};
-                        accumulated += remainingPortionBias;
-                    }
+                    std::cout << "    " << item.first << " ===> (" << item.second.first << ", " << item.second.second << ")" << std::endl;
                 }
-                classAndFeatureBasedValuePriorsToUnitIntervalMap[className][feature.first] = valuePriorsToUnitIntervalMap;
             }
         }
-        
-        int eleIndex = 0;
-        while (eleIndex < howManyTrainingSamples)
+    }
+
+    std::map<int, std::vector<std::string>> trainingSampleRecords;
+    int eleIndex = 0;
+
+    // Generate training samples
+    while (eleIndex < howManyTrainingSamples)
+    {
+        int sampleName = eleIndex;
+        trainingSampleRecords[sampleName] = {};
+
+        // Generate class label for the sample
+        double roll_the_dice = randomDouble(0.0, 1.0);
+        std::string classLabel;
+        for (const auto &classEntry : classPriorsToUnitIntervalMap)
         {
-            std::string sample_name = "sample_" + std::to_string(eleIndex);
-            std::unordered_map<std::string, std::vector<int>> training_sample_records;
-            training_sample_records[sample_name] = {};
-
-            // Generate class label for the training sample
-            std::srand(static_cast<unsigned>(std::time(nullptr)));
-            float roll_the_dice = static_cast<float>(std::rand()) / RAND_MAX;
-            std::string classLabel;
-
-            for (const auto &className : classPriorsToUnitIntervalMap)
+            const std::pair<double, double> &interval = classEntry.second;
+            if (roll_the_dice >= interval.first && roll_the_dice <= interval.second)
             {
-                if (roll_the_dice >= className.second.first && roll_the_dice < className.second.second)
+                trainingSampleRecords[sampleName].push_back(classEntry.first);
+                classLabel = classEntry.first;
+                break;
+            }
+        }
+
+        // Generate feature values for the sample
+        for (const auto &feature : featuresAndValuesDict)
+        {
+            roll_the_dice = randomDouble(0.0, 1.0);
+            const auto &valuePriorsToUnitIntervalMap = classAndFeatureBasedValuePriorsToUnitIntervalMap[classLabel][feature.first];
+            for (const auto &valueEntry : valuePriorsToUnitIntervalMap)
+            {
+                const std::pair<double, double> &interval = valueEntry.second;
+                if (roll_the_dice >= interval.first && roll_the_dice <= interval.second)
                 {
-                    classLabel = className.first;
+                    trainingSampleRecords[sampleName].push_back(valueEntry.first);
                     break;
                 }
             }
-
-            for (const auto &feature : featuresAndValuesDict)
-            {
-                roll_the_dice = static_cast<float>(std::rand()) / RAND_MAX;
-                std::string valueLabel;
-                std::map<std::string, std::pair<double, double>> valuePriorsToUnitIntervalMap;
-
-                valuePriorsToUnitIntervalMap = classAndFeatureBasedValuePriorsToUnitIntervalMap[classLabel][feature.first];
-                for (const auto &valueName : valuePriorsToUnitIntervalMap)
-                {
-                    if (roll_the_dice >= valueName.second.first && roll_the_dice < valueName.second.second)
-                    {
-                        trainingSampleRecords[sample_name].push_back(feature.first + "=" + valueName.first);
-                        valueLabel = valueName.first;
-                        break;
-                    }
-                }
-            }
-            eleIndex++;
         }
-        _trainingSampleRecords = trainingSampleRecords;
+
+        eleIndex++;
+    }
+
+    this->_trainingSampleRecords = trainingSampleRecords;
+
+    // Debugging output for the generated records
+    if (this->_debug2)
+    {
+        std::cout << "\n\nTERMINAL DISPLAY OF TRAINING RECORDS:\n\n";
+        for (const auto &sampleEntry : trainingSampleRecords)
+        {
+            std::cout << sampleEntry.first << " = ";
+            for (const auto &record : sampleEntry.second)
+            {
+                std::cout << record << ", ";
+            }
+            std::cout << std::endl;
+        }
     }
 }
 
-std::string TrainingDataGeneratorSymbolic::sampleIndex(const std::string &sampleName)
+double TrainingDataGeneratorSymbolic::randomDouble(double lower, double upper)
 {
-    // Extract the integer part after "sample_"
-    return sampleName.substr(sampleName.find('_') + 1);
+    return lower + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX / (upper - lower)));
 }
 
 void TrainingDataGeneratorSymbolic::WriteTrainingDataToFile()
 {
-    std::string outputFile = _outputDatafile;
-    std::map<std::string, std::vector<std::string>> trainingSampleRecords = _trainingSampleRecords;
-    std::ofstream file(outputFile); // Open file for writing
-
-    // Get feature names from featuresAndValuesDict
-    std::map<std::string, std::vector<std::string>> featuresAndValuesDict = _featuresAndValuesDict;
-    std::vector<std::string> features;
-
-    for (const auto &pair : featuresAndValuesDict)
+    if (!_writeToFile)
     {
-        features.push_back(pair.first);
+        std::cout << "Write to file option is disabled. Skipping file writing." << std::endl;
+        return;
     }
 
-    // Sort features alphabetically
-    std::sort(features.begin(), features.end());
-
-    // Prepare title string for the CSV header (features + class column)
-    std::string titleString = ",class";
-    for (const auto &featureName : features)
+    std::ofstream outFile(_outputDatafile);
+    if (!outFile.is_open())
     {
-        titleString += "," + featureName;
+        throw std::runtime_error("Unable to open output file: " + _outputDatafile);
     }
 
-    // Write header to the file
-    file << titleString << "\n";
-
-    // Get sample names and sort them based on the integer part
-    std::vector<std::string> sampleNames;
-    for (const auto &pair : trainingSampleRecords)
+    // Write header
+    outFile << "\"\",class";
+    for (const auto &feature : _featuresAndValuesDict)
     {
-        sampleNames.push_back(pair.first);
+        outFile << ',' << feature.first;
     }
+    outFile << std::endl;
 
-    // Sort sample names based on the integer part of 'sample_'
-    std::sort(sampleNames.begin(), sampleNames.end(), [](const std::string &a, const std::string &b)
-              { return std::stoi(a.substr(a.find('_') + 1)) < std::stoi(b.substr(b.find('_') + 1)); });
-
-    // Prepare and write records to the file
-    for (const auto &sampleName : sampleNames)
+    // print the sample records
+    for (const auto &record : _trainingSampleRecords)
     {
-        std::string recordString = sampleIndex(sampleName) + ",";
-        std::vector<std::string> record = trainingSampleRecords[sampleName];
-        std::map<std::string, std::string> itemPartsDict;
-
-        // Split each record item on '=' and store in itemPartsDict
-        for (const auto &item : record)
+        outFile << record.first;
+        for (const auto &feature : record.second)
         {
-            std::vector<std::string> splits;
-            std::regex re("=");
-            std::copy(std::sregex_token_iterator(item.begin(), item.end(), re, -1),
-                      std::sregex_token_iterator(),
-                      std::back_inserter(splits));
-
-            // Assuming that splits[0] is the key and splits[1] is the value
-            if (splits.size() == 2)
-            {
-                itemPartsDict[splits[0]] = splits[1];
-            }
+            outFile << ',' << feature;
         }
-
-        // Write class to the record string
-        recordString += itemPartsDict["class"];
-        itemPartsDict.erase("class");
-
-        // Sort the remaining keys and write the corresponding values
-        std::vector<std::string> keys;
-        for (const auto &pair : itemPartsDict)
-        {
-            keys.push_back(pair.first);
-        }
-
-        std::sort(keys.begin(), keys.end());
-
-        for (const auto &key : keys)
-        {
-            recordString += "," + itemPartsDict[key];
-        }
-
-        // Write record string to the file
-        file << recordString << "\n";
+        outFile << std::endl;
     }
 
-    // Close the file
-    file.close();
+    outFile.close();
+    std::cout << "Training data written to " << _outputDatafile << std::endl;
 }

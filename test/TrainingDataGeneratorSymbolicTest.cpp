@@ -30,6 +30,13 @@ TEST_F(TrainingDataGeneratorSymbolicTest, ChecktdgsExists)
     ASSERT_NE(&tdgs, nullptr);
 }
 
+TEST_F(TrainingDataGeneratorSymbolicTest, WriteToFileAfterReadAndGenerate)
+{
+    ASSERT_NO_THROW(tdgs.ReadParameterFileSymbolic());
+    ASSERT_NO_THROW(tdgs.GenerateTrainingDataSymbolic());
+    ASSERT_NO_THROW(tdgs.WriteTrainingDataToFile());
+}
+
 TEST_F(TrainingDataGeneratorSymbolicTest, CheckParamsTdgs)
 {
     ASSERT_EQ(tdgs.getOutputDatafile(), "../test/resources/training_symbolic.csv");
@@ -89,9 +96,11 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckBias)
         {{"never=0.8"}, {"heavy=0.8"}, {"heavy=0.8"}, {}}};
 
     int classIndex = 0;
+    int num_seen = 0;
     for (auto const &bias : biasDict)
     {
         ASSERT_EQ(bias.first, expectedClasses[classIndex]);
+        ASSERT_EQ(bias.second.size(), expectedFeatures[classIndex].size());
         int featureIndex = 0;
         for (auto const &feature : bias.second)
         {
@@ -104,5 +113,36 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckBias)
             featureIndex++;
         }
         classIndex++;
+    }
+}
+
+TEST_F(TrainingDataGeneratorSymbolicTest, CheckTrainingSampleRecords)
+{
+    ASSERT_NO_THROW(tdgs.ReadParameterFileSymbolic());
+    ASSERT_NO_THROW(tdgs.GenerateTrainingDataSymbolic());
+    ASSERT_EQ(tdgs.getTrainingSampleRecords().size(), 100);
+    for (auto const &record : tdgs.getTrainingSampleRecords())
+    {
+        ASSERT_EQ(record.second.size(), 5);
+    }
+
+    // ensure first entry is a class (either malignant or benign)
+    std::string firstClass = tdgs.getTrainingSampleRecords()[0][0];
+    ASSERT_TRUE(firstClass == "benign" || firstClass == "malignant");
+    
+    // ensure rest of entries follow this:
+    std::vector<std::string> features = {"exercising", "fatIntake", "smoking", "videoAddiction"};
+    std::vector<std::vector<std::string>> values = {
+        {"never", "occasionally", "regularly"},
+        {"low", "medium", "heavy"},
+        {"heavy", "medium", "light", "never"},
+        {"none", "low", "medium", "heavy"}};
+
+    for (auto const &record : tdgs.getTrainingSampleRecords())
+    {
+        for (int i = 1; i < record.second.size(); i++)
+        {
+            ASSERT_TRUE(std::find(values[i - 1].begin(), values[i - 1].end(), record.second[i]) != values[i - 1].end());
+        }
     }
 }

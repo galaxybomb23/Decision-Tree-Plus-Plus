@@ -21,7 +21,7 @@ private:
     int _writeToFile;
     int _debug1;
     int _debug2;
-    std::map<std::string, std::vector<std::string>> _trainingSampleRecords;
+    std::map<int, std::vector<std::string>> _trainingSampleRecords;
     std::map<std::string, std::vector<std::string>> _featuresAndValuesDict;
     std::map<std::string, std::map<std::string, std::vector<std::string>>> _biasDict;
     std::vector<std::string> _classNames;
@@ -62,10 +62,12 @@ public:
     std::map<std::string, std::map<std::string, std::vector<std::string>>> getBiasDict() { return _biasDict; }
     std::string getOutputDatafile() { return _outputDatafile; }
     std::string getParameterFile() { return _parameterFile; }
+    double randomDouble(double upper, double lower);
     int getNumberOfTrainingSamples() { return _numberOfTrainingSamples; }
     int getWriteToFile() { return _writeToFile; }
     int getDebug1() { return _debug1; }
     int getDebug2() { return _debug2; }
+    std::map<int, std::vector<std::string>> getTrainingSampleRecords() { return _trainingSampleRecords; }
 };
 
 #endif // TRAINING_DATA_GENERATOR_SYMBOLIC_HPP
