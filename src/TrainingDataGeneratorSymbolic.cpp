@@ -487,7 +487,7 @@ void TrainingDataGeneratorSymbolic::WriteTrainingDataToFile()
     }
 
     // Write header
-    outFile << "\"\",class";
+    outFile << ",class";
     for (const auto &feature : _featuresAndValuesDict)
     {
         outFile << ',' << feature.first;
