@@ -15,7 +15,15 @@ int sampleIndex(std::string sample_name)
 double convert(std::string const &str)
 {
     // The purpose of this function is to convert a string to a double.
-    return std::stod(str);
+    try
+    {
+        return std::stod(str);
+    }
+    catch(const std::exception& e)
+    {
+        return std::nan("");
+    }
+    
 }
 
 std::string CleanupCsvString(const std::string &line)

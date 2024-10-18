@@ -15,11 +15,13 @@
 #include "Utility.hpp"
 #include "logger.cpp"
 
+using std::string, std::vector, std::map;
+
 // --------------- Logger --------------- //
 Logger logger("../logs/decisionTree.log");
 
 //--------------- Constructors and Destructors ----------------//
-DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
+DecisionTree::DecisionTree(map<string, string> kwargs)
 {
   if (kwargs.empty())
   {
@@ -27,7 +29,7 @@ DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
   }
 
   // Allowed keys for the kwargs
-  std::vector<std::string> allowedKeys = {
+  vector<string> allowedKeys = {
       "training_datafile",
       "entropy_threshold",
       "max_depth_desired",
@@ -68,8 +70,8 @@ DecisionTree::DecisionTree(std::map<std::string, std::string> kwargs)
   // Check and set keyword arguments
   for (const auto &kv : kwargs)
   {
-    const std::string &key = kv.first;
-    const std::string &value = kv.second;
+    const string &key = kv.first;
+    const string &value = kv.second;
 
     if (key == "training_datafile")
     {
@@ -135,8 +137,8 @@ DecisionTree::~DecisionTree()
 void DecisionTree::getTrainingData()
 {
   // Check if training data file is a CSV file
-  if (_trainingDatafile.find(".csv") == std::string::npos)
-  { // std::string.find() returns std::string::npos if not found
+  if (_trainingDatafile.find(".csv") == string::npos)
+  { // string.find() returns string::npos if not found
     throw std::invalid_argument("Aborted. get_training_data_from_csv() is only for CSV files");
   }
 
@@ -150,11 +152,11 @@ void DecisionTree::getTrainingData()
   }
 
   // Read the header
-  std::string line;
+  string line;
   if (std::getline(file, line))
   {
     std::istringstream ss(line);
-    std::string token;
+    string token;
     while (std::getline(ss, token, ','))
     {
       // strip leading/trailing whitespaces and \" from the token
@@ -168,8 +170,8 @@ void DecisionTree::getTrainingData()
   while (std::getline(file, line))
   {
     std::istringstream ss(line);
-    std::string token;
-    std::vector<std::string> row;
+    string token;
+    vector<string> row;
     while (std::getline(ss, token, ','))
     {
       // strip leading/trailing whitespaces and \" from the token
@@ -202,8 +204,8 @@ void DecisionTree::getTrainingData()
   // Get the features and their values
   for (int i = 1; i < _featureNames.size(); i++)
   {
-    std::vector<std::string> allValues;
-    std::set<std::string> uniqueValues;
+    vector<string> allValues;
+    std::set<string> uniqueValues;
     for (const auto &kv : _trainingDataDict)
     {
       allValues.push_back(kv.second[i]);
@@ -242,7 +244,7 @@ void DecisionTree::calculateFirstOrderProbabilities()
         for (auto it = _probDistributionNumericFeaturesDict[feature].begin();
              it != _probDistributionNumericFeaturesDict[feature].end(); ++it)
         {
-          double samplingPoint = *it;
+          string samplingPoint = std::to_string(*it);
           double prob = probabilityOfFeatureValue(feature, samplingPoint);
           std::cout << feature << "::" << samplingPoint << " = "
                     << std::setprecision(5) << prob << "\n";
@@ -281,9 +283,9 @@ void DecisionTree::showTrainingData() const
 
 //--------------- Classify ----------------//
 
-std::map<std::string, std::string> DecisionTree::classify(
+map<string, string> DecisionTree::classify(
     DecisionTreeNode *rootNode,
-    const std::vector<std::string> &featuresAndValues)
+    const vector<string> &featuresAndValues)
 {
   /*
   Classifies one test sample at a time using the decision tree constructed from
@@ -298,7 +300,7 @@ std::map<std::string, std::string> DecisionTree::classify(
         "Try using the csv_cleanup_needed option in the constructor call.");
   }
 
-  std::vector<std::string> newFeaturesAndValues;
+  vector<string> newFeaturesAndValues;
   std::regex pattern(R"((\S+)\s*=\s*(\S+))");
   std::smatch match;
 
@@ -306,8 +308,8 @@ std::map<std::string, std::string> DecisionTree::classify(
   {
     if (std::regex_match(fv, match, pattern))
     {
-      std::string feature = match[1];
-      std::string value = match[2];
+      string feature = match[1];
+      string value = match[2];
       newFeaturesAndValues.push_back(feature + "=" + value);
     }
     else
@@ -321,8 +323,8 @@ std::map<std::string, std::string> DecisionTree::classify(
   // Update the features and values
   for (const auto &fv : newFeaturesAndValues)
   {
-    std::string feature = fv.substr(0, fv.find("="));
-    std::string value = fv.substr(fv.find("=") + 1);
+    string feature = fv.substr(0, fv.find("="));
+    string value = fv.substr(fv.find("=") + 1);
     _featuresAndValuesDict[feature].push_back(value);
   }
 
@@ -335,14 +337,14 @@ std::map<std::string, std::string> DecisionTree::classify(
     }
   }
 
-  std::map<std::string, std::vector<double>> answer;
+  map<string, vector<double>> answer;
   for (const auto &className : _classNames)
   {
     answer[className] = {};
   }
   answer["solution_path"] = {};
 
-  std::map<std::string, double> classification =
+  map<string, double> classification =
       recursiveDescentForClassification(rootNode, newFeaturesAndValues, answer);
   std::reverse(answer["solution_path"].begin(), answer["solution_path"].end());
 
@@ -356,7 +358,7 @@ std::map<std::string, std::string> DecisionTree::classify(
     }
   }
 
-  std::map<std::string, std::string> classificationForDisplay = {};
+  map<string, string> classificationForDisplay = {};
   for (const auto &kv : classification)
   {
     if (std::isfinite(kv.second))
@@ -367,14 +369,14 @@ std::map<std::string, std::string> DecisionTree::classify(
     }
     else
     {
-      std::vector<std::string> nodes;
+      vector<string> nodes;
       for (const auto &x : kv.first)
       {
         nodes.push_back("NODE" + std::to_string(x));
       }
       std::ostringstream oss;
       std::copy(nodes.begin(), nodes.end(),
-                std::ostream_iterator<std::string>(oss, ", "));
+                std::ostream_iterator<string>(oss, ", "));
       classificationForDisplay[kv.first] = oss.str();
     }
   }
@@ -382,18 +384,18 @@ std::map<std::string, std::string> DecisionTree::classify(
   return classificationForDisplay;
 }
 
-std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
-    DecisionTreeNode *node, const std::vector<std::string> &featureAndValues,
-    std::map<std::string, std::vector<double>> &answer)
+map<string, double> DecisionTree::recursiveDescentForClassification(
+    DecisionTreeNode *node, const vector<string> &featureAndValues,
+    map<string, vector<double>> &answer)
 {
   vector<shared_ptr<DecisionTreeNode>> children = node->GetChildren();
 
   if (children.empty())
   {
     // If leaf node, assign class probabilities
-    std::vector<double> leafNodeClassProbabilities =
+    vector<double> leafNodeClassProbabilities =
         node->GetClassProbabilities();
-    std::map<std::string, double> classProbabilities;
+    map<string, double> classProbabilities;
     for (size_t i = 0; i < _classNames.size(); ++i)
     {
       classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
@@ -402,14 +404,14 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
     return classProbabilities;
   }
 
-  std::string featureTestedAtNode = node->GetFeature();
+  string featureTestedAtNode = node->GetFeature();
   if (_debug3)
   {
     std::cout << "\nCLRD1 Feature tested at node for classifcation: "
               << featureTestedAtNode << std::endl;
   }
 
-  std::string valueForFeature;
+  string valueForFeature;
   bool pathFound = false;
   std::regex pattern(R"((\S+)\s*=\s*(\S+))");
   std::smatch match;
@@ -419,8 +421,8 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
   {
     if (std::regex_search(featureAndValue, match, pattern))
     {
-      std::string feature = match[1].str();
-      std::string value = match[2].str();
+      string feature = match[1].str();
+      string value = match[2].str();
       if (feature == featureTestedAtNode)
       {
         valueForFeature = convert(value);
@@ -431,9 +433,9 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
   // Handle missing feature values
   if (valueForFeature.empty())
   {
-    std::vector<double> leafNodeClassProbabilities =
+    vector<double> leafNodeClassProbabilities =
         node->GetClassProbabilities();
-    std::map<std::string, double> classProbabilities;
+    map<string, double> classProbabilities;
     for (size_t i = 0; i < _classNames.size(); ++i)
     {
       classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
@@ -451,15 +453,15 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
       std::cout << "\nCLRD2 In the numeric section";
     for (const auto &child : children)
     {
-      std::vector<std::string> branchFeaturesAndValues =
+      vector<string> branchFeaturesAndValues =
           child->GetBranchFeaturesAndValuesOrThresholds();
-      std::string lastFeatureAndValueOnBranch = branchFeaturesAndValues.back();
+      string lastFeatureAndValueOnBranch = branchFeaturesAndValues.back();
       std::regex pattern1(R"((.+)<(.+))");
       std::regex pattern2(R"((.+)>(.+))");
 
       if (std::regex_search(lastFeatureAndValueOnBranch, match, pattern1))
       {
-        std::string threshold = match[2].str();
+        string threshold = match[2].str();
         if (std::stod(valueForFeature) <= std::stod(threshold))
         {
           pathFound = true;
@@ -473,7 +475,7 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
       else if (std::regex_search(lastFeatureAndValueOnBranch, match,
                                  pattern2))
       {
-        std::string threshold = match[2].str();
+        string threshold = match[2].str();
         if (std::stod(valueForFeature) > std::stod(threshold))
         {
           pathFound = true;
@@ -488,7 +490,7 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
 
     if (pathFound)
     {
-      std::map<std::string, double> result;
+      map<string, double> result;
       for (const auto &kv : answer)
       {
         if (kv.first != "solution_path")
@@ -502,19 +504,19 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
   }
   else
   { // Symbolic feature case
-    std::string featureValueCombo = featureTestedAtNode + "=" + valueForFeature;
+    string featureValueCombo = featureTestedAtNode + "=" + valueForFeature;
     if (_debug3)
       std::cout << "\nCLRD3 In the symbolic section with feature_value_combo: "
                 << featureValueCombo;
 
     for (const auto &child : children)
     {
-      std::vector<std::string> branch_features_and_values =
+      vector<string> branch_features_and_values =
           child->GetBranchFeaturesAndValuesOrThresholds();
       if (_debug3)
         std::cout << "\nCLRD4 branch features and values: "
                   << branch_features_and_values.back();
-      std::string lastFeatureAndValueOnBranch =
+      string lastFeatureAndValueOnBranch =
           branch_features_and_values.back();
 
       if (lastFeatureAndValueOnBranch == featureValueCombo)
@@ -530,7 +532,7 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
 
     if (pathFound)
     {
-      std::map<std::string, double> result;
+      map<string, double> result;
       for (const auto &kv : answer)
       {
         if (kv.first != "solution_path")
@@ -546,7 +548,7 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
   // If no path found, assign class probabilities from the current node
   if (!pathFound)
   {
-    std::vector<double> leafNodeClassProbabilities =
+    vector<double> leafNodeClassProbabilities =
         node->GetClassProbabilities();
     for (size_t i = 0; i < _classNames.size(); ++i)
     {
@@ -555,7 +557,7 @@ std::map<std::string, double> DecisionTree::recursiveDescentForClassification(
     answer["solution_path"].push_back(node->GetNextSerialNum());
   }
 
-  std::map<std::string, double> result;
+  map<string, double> result;
   for (const auto &kv : answer)
   {
     if (kv.first != "solution_path")
@@ -585,7 +587,7 @@ DecisionTreeNode *DecisionTree::constructDecisionTreeClassifier()
   }
 
   // Calculate prior class probabilities
-  std::vector<double> classProbabilities;
+  vector<double> classProbabilities;
   for (const auto &className : _classNames)
   {
     // TODO //
@@ -629,11 +631,11 @@ void DecisionTree::recursiveDescent(DecisionTreeNode *node) {}
 double DecisionTree::classEntropyOnPriors() { return 0.0; }
 
 //--------------- Probability Calculators ----------------//
-double DecisionTree::priorProbabilityForClass(const std::string &className,
+double DecisionTree::priorProbabilityForClass(const string &className,
                                               bool overloadCache)
 {
   // make a cache key
-  std::string classNameInCache = "prior::" + className;
+  string classNameInCache = "prior::" + className;
   logger.log(LogLevel(0), "priorProbabilityForClass:: classNameInCache: " +
                               classNameInCache);
 
@@ -651,7 +653,7 @@ double DecisionTree::priorProbabilityForClass(const std::string &className,
              "priorProbabilityForClass:: probability not found in cache");
   size_t totalNumSamples = _samplesClassLabelDict.size();
   // get get value from the dictionary
-  std::vector<std::string> allValues = {};
+  vector<string> allValues = {};
   for (const auto &kv : _samplesClassLabelDict)
   {
     allValues.push_back(kv.second);
@@ -668,7 +670,7 @@ double DecisionTree::priorProbabilityForClass(const std::string &className,
                               static_cast<double>(totalNumSamples);
 
     // store the prior probability in the cache
-    std::string thisClassName = "prior::" + className;
+    string thisClassName = "prior::" + className;
     _probabilityCache[thisClassName] = priorProbability;
     logger.log(LogLevel(0),
                "priorProbabilityForClass:: prior probability for " + className +
@@ -702,28 +704,101 @@ void DecisionTree::calculateClassPriors()
   }
 }
 
-double DecisionTree::probabilityOfFeatureValue(const std::string &feature,
-                                               double samplingPoint)
+double DecisionTree::probabilityOfFeatureValue(const string &feature,
+                                               const string &Value)
 {
-  return 1.0;
-}
+	string value = Value;
+	// Convert the value to double, or NAN if it is symbolic
+    double valueAsDouble = convert(value);
+    string featureAndValue;
 
-double DecisionTree::probabilityOfFeatureValue(const std::string &feature,
-                                               const std::string &value)
-{
-  return 1.0;
+    // If the feature is numeric, find the closest sampling point
+    if (!std::isnan(valueAsDouble) && _samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
+		value = std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
+    }
+
+	// Create a combined feature and value string
+    if (!value.empty()) {
+        featureAndValue = feature + "=" + std::to_string(convert(value));
+    }
+
+	// Check if the probability is already cached
+    if (_probabilityCache.find(featureAndValue) != _probabilityCache.end()) {
+        return _probabilityCache[featureAndValue];
+    }
+
+	// Initialize variables for histogram calculations
+    double histogramDelta = 0.0;
+    double diffrange = 0.0;
+    vector<double> valuerange = {};
+    int numOfHistogramBins = 0;
+
+    // Check if the feature is numeric and has a large number of unique values
+    if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
+        if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
+            if (_samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
+                // Calculate the histogram delta and sampling points for the feature
+				valuerange = _numericFeaturesValueRangeDict[feature];
+                diffrange = valuerange[1] - valuerange[0];
+
+                vector<string> values = _featuresAndValuesDict[feature];
+                std::set<string> uniqueValues;
+
+                for (const auto &v : values) {
+                    if (v != "NA") {
+                        uniqueValues.insert(v);
+                    }
+                }
+
+                vector<string> sortedUniqueValues(uniqueValues.begin(), uniqueValues.end());
+                std::sort(sortedUniqueValues.begin(), sortedUniqueValues.end());
+
+                vector<double> diffs;
+                for (size_t i = 1; i < sortedUniqueValues.size(); ++i) {
+                    diffs.push_back(convert(sortedUniqueValues[i]) - convert(sortedUniqueValues[i - 1]));
+                }
+                std::sort(diffs.begin(), diffs.end());
+
+                auto medianDiff = diffs[(diffs.size() / 2) - 1];
+                histogramDelta = medianDiff * 2.0;
+                if (histogramDelta < diffrange / 500.0) {
+                    if (_numberOfHistogramBins > 0) {
+                        histogramDelta = diffrange / static_cast<double>(_numberOfHistogramBins);
+                    } else {
+                        histogramDelta = diffrange / 500.0;
+                    }
+                }
+
+                _histogramDeltaDict[feature] = histogramDelta;
+                numOfHistogramBins = static_cast<int>(diffrange / histogramDelta);
+                _numOfHistogramBinsDict[feature] = numOfHistogramBins;
+                
+                vector<double> sampling_points_for_feature;
+                for (int j = 0; j < numOfHistogramBins; ++j) {
+                    sampling_points_for_feature.push_back(valuerange[0] + histogramDelta * j);
+                }
+
+                _samplingPointsForNumericFeatureDict[feature] = sampling_points_for_feature;
+
+            }
+        }
+    }
+    
+
+    
+    return 1.0;
 }
 
 //--------------- Class Based Utilities ----------------//
 
 bool DecisionTree::checkNamesUsed(
-    const std::vector<std::string> &featuresAndValues)
+    const vector<string> &featuresAndValues)
 {
   return true;
 }
 
 // Getters
-std::string DecisionTree::getTrainingDatafile() const
+string DecisionTree::getTrainingDatafile() const
 {
   return _trainingDatafile;
 }
@@ -737,7 +812,7 @@ int DecisionTree::getCsvClassColumnIndex() const
   return _csvClassColumnIndex;
 }
 
-std::vector<int> DecisionTree::getCsvColumnsForFeatures() const
+vector<int> DecisionTree::getCsvColumnsForFeatures() const
 {
   return _csvColumnsForFeatures;
 }
@@ -765,25 +840,25 @@ int DecisionTree::getHowManyTotalTrainingSamples() const
   return _howManyTotalTrainingSamples;
 }
 
-std::vector<std::string> DecisionTree::getFeatureNames() const
+vector<string> DecisionTree::getFeatureNames() const
 {
   return _featureNames;
 }
 
-std::map<int, std::vector<std::string>>
+map<int, vector<string>>
 DecisionTree::getTrainingDataDict() const
 {
   return _trainingDataDict;
 }
 
-std::map<std::string, std::vector<std::string>>
+map<string, vector<string>>
 DecisionTree::getFeaturesAndValuesDict() const
 {
   return _featuresAndValuesDict;
 }
 
 // Setters
-void DecisionTree::setTrainingDatafile(const std::string &trainingDatafile)
+void DecisionTree::setTrainingDatafile(const string &trainingDatafile)
 {
   _trainingDatafile = trainingDatafile;
 }
@@ -804,7 +879,7 @@ void DecisionTree::setCsvClassColumnIndex(int csvClassColumnIndex)
 }
 
 void DecisionTree::setCsvColumnsForFeatures(
-    const std::vector<int> &csvColumnsForFeatures)
+    const vector<int> &csvColumnsForFeatures)
 {
   _csvColumnsForFeatures = csvColumnsForFeatures;
 }
