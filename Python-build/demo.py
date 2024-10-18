@@ -55,17 +55,17 @@ def CSVParsingDemo():
     return
 
 def donutDemo():
-    fps = 30
-    distance = 20
-    increment = 1
-    refreshRate = 0
-    xpos = 40
-    ypos = 10
-    numupdates = 100
-    dtp.doughnut(fps, distance, increment, refreshRate, xpos, ypos, numupdates)
+    # fps = 120
+    # distance = 2
+    # increment = 0
+    # refreshRate = 0
+    # xpos = 40
+    # ypos = 10
+    # numupdates = 320
+    # dtp.doughnut(fps, distance, increment, refreshRate, xpos, ypos, numupdates)
 
-    #clear terminal
-    os.system("clear")
+    # #clear terminal
+    # os.system("clear")
     return
     
 def dataGenerationDemo():
@@ -187,24 +187,24 @@ def dataGenerationDemo():
     return
 
 def DecisionTreeNodeDemo():
-    kwargs = {
-        "training_datafile": "../test/resources/stage3cancer.csv",
-        "entropy_threshold": "0.1",
-        "max_depth_desired": "20",
-        "csv_class_column_index": "1",
-        "symbolic_to_numeric_cardinality_threshold": "20",
-        "csv_columns_for_features": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        "number_of_histogram_bins": "10",
-        "csv_cleanup_needed": "1",
-        "debug1": "1",
-        "debug2": "2",
-        "debug3": "3"
-    }
-    dtp.display_decision_treeDemo()
+    # kwargs = {
+    #     "training_datafile": "../test/resources/stage3cancer.csv",
+    #     "entropy_threshold": "0.1",
+    #     "max_depth_desired": "20",
+    #     "csv_class_column_index": "1",
+    #     "symbolic_to_numeric_cardinality_threshold": "20",
+    #     "csv_columns_for_features": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    #     "number_of_histogram_bins": "10",
+    #     "csv_cleanup_needed": "1",
+    #     "debug1": "1",
+    #     "debug2": "2",
+    #     "debug3": "3"
+    # }
+    # dtp.display_decision_treeDemo()
 
-    # Prompt user to continue
-    input("Press Enter to continue...")
-    os.system("clear")
+    # # Prompt user to continue
+    # input("Press Enter to continue...")
+    # os.system("clear")
     return
 
 def CSVParsingLargeDemo():
@@ -243,6 +243,7 @@ def CSVParsingLargeDemo():
 
 #interactive demo
 def display_menu():
+    os.system("clear")
     print("Decision Tree Demo Menu")
     print("1. Donut Demo")
     print("2. Decision Tree Node Demo")
@@ -255,6 +256,7 @@ def main():
         choice = input("Enter your choice (1-5): ")
         if choice == '1':
             donutDemo()
+            display_menu()
         elif choice == '2':
             DecisionTreeNodeDemo()
         elif choice == '3':
