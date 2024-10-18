@@ -16,33 +16,27 @@ class DecisionTree
 public:
     //--------------- Constructors and Destructors ----------------//
     DecisionTree(std::map<std::string, std::string> kwargs); // constructor
-    ~DecisionTree(); // destructor
+    ~DecisionTree();                                         // destructor
 
     //--------------- Functions ----------------//
     void getTrainingData();
     void calculateFirstOrderProbabilities();
     void showTrainingData() const;
 
-
     //--------------- Classify ----------------//
-    std::map<std::string, std::string> classify(void* root_node, const std::vector<std::string>& features_and_values);
-
+    std::map<std::string, std::string> classify(void *root_node, const std::vector<std::string> &features_and_values);
 
     //--------------- Construct Tree ----------------//
-    DecisionTreeNode* constructDecisionTreeClassifier();
-
+    DecisionTreeNode *constructDecisionTreeClassifier();
 
     //--------------- Entropy Calculators ----------------//
     double classEntropyOnPriors();
 
-
     //--------------- Probability Calculators ----------------//
-    double probabilityOfFeatureValue(const std::string& feature, const std::string& value);
-    double probabilityOfFeatureValue(const std::string& feature, double sampling_point);
-
+    double probabilityOfFeatureValue(const std::string &feature, const std::string &value);
+    double probabilityOfFeatureValue(const std::string &feature, double sampling_point);
 
     //--------------- Class Based Utilities ----------------//
-
 
     int _nodesCreated;
     std::vector<std::string> _classNames;
@@ -61,15 +55,15 @@ public:
     int getDebug3() const;
     int getHowManyTotalTrainingSamples() const;
     std::vector<std::string> getFeatureNames() const;
-    std::map<std::string, std::vector<std::string>> getTrainingDataDict() const;
+    std::map<int, std::vector<std::string>> getTrainingDataDict() const;
 
     // Setters
-    void setTrainingDatafile(const std::string& trainingDatafile);
+    void setTrainingDatafile(const std::string &trainingDatafile);
     void setEntropyThreshold(double entropyThreshold);
     void setMaxDepthDesired(int maxDepthDesired);
     void setNumberOfHistogramBins(int numberOfHistogramBins);
     void setCsvClassColumnIndex(int csvClassColumnIndex);
-    void setCsvColumnsForFeatures(const std::vector<int>& csvColumnsForFeatures);
+    void setCsvColumnsForFeatures(const std::vector<int> &csvColumnsForFeatures);
     void setSymbolicToNumericCardinalityThreshold(int symbolicToNumericCardinalityThreshold);
     void setCsvCleanupNeeded(int csvCleanupNeeded);
     void setDebug1(int debug1);
@@ -92,10 +86,10 @@ private:
     std::vector<int> _csvColumnsForFeatures;
     std::map<std::string, double> _probabilityCache;
     std::map<std::string, double> _entropyCache;
-    std::map<std::string, std::vector<std::string>> _trainingDataDict;
-    std::map<std::string, std::set<std::string>> _featuresAndValuesDict;
+    std::map<int, std::vector<std::string>> _trainingDataDict;
+    std::map<std::string, std::vector<std::string>> _featuresAndValuesDict;
     std::map<std::string, std::set<std::string>> _featuresAndUniqueValuesDict;
-    std::map<std::string, std::string> _samplesClassLabelDict;
+    std::map<int, std::string> _samplesClassLabelDict;
     std::map<std::string, double> _classPriorsDict;
     std::vector<std::string> _featureNames;
     std::map<std::string, std::vector<double>> _numericFeaturesValueRangeDict;

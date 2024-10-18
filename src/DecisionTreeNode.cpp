@@ -30,6 +30,10 @@ DecisionTreeNode::DecisionTreeNode(const std::string &feature, double entropy,
 DecisionTreeNode::DecisionTreeNode(DecisionTree &dt)
     : _dt(dt)
 {
+    _feature = "";
+    _nodeCreationEntropy = 0;
+    _classProbabilities = {};
+    _branchFeaturesAndValuesOrThresholds = {};
     _serialNumber = GetNextSerialNum();
 }
 
