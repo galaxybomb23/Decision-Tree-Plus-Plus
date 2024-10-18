@@ -10,103 +10,6 @@
 #include "TrainingDataGeneratorSymbolic.hpp"
 #include "Utility.hpp"
 
-// doughnut function for demo purposes
-void doughnut(int fps, int distance, float increment, int refreshRate, int xpos, int ypos, int numupdates)
-{
-    int k;
-    float A = 0, B = 0;
-    float z[1760];
-    char b[1760];
-    float counter = .01;
-
-    std::cout << "\x1b[2J"; // Clear screen
-
-    while (numupdates > 0)
-    {
-
-        // sleep to meet the desired FPS
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
-        memset(b, 32, 1760); // Initialize buffer with spaces
-        memset(z, 0, 7040);  // Initialize z-buffer with zeroes
-
-        for (float j = 0; j < 6.28; j += 0.17)
-        {
-            for (float i = 0; i < 6.28; i += 0.02)
-            {
-                float c = std::sin(i);
-                float d = std::cos(j);
-                float e = std::sin(A);
-                float f = std::sin(j);
-                float g = std::cos(A);
-                float h = d + counter;
-                float D = 1 / (c * h * e + f * g + 5);
-                float l = std::cos(i);
-                float m = std::cos(B);
-                float n = std::sin(B);
-                float t = c * h * g - f * e;
-
-                int x = xpos + 30 * D * (l * h * m - t * n);
-                int y = ypos + 15 * D * (l * h * n + t * m);
-                int o = x + 80 * y;
-                int N = 8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n);
-
-                if (y > 0 && y < 22 && x > 0 && x < 80 && D > z[o])
-                {
-                    z[o] = D;
-                    b[o] = ".,-~:;=!*#$@"[N > 0 ? N : 0];
-                }
-            }
-        }
-
-        std::cout << "\x1b[H"; // Move cursor to top left
-        for (k = 0; k < 1760; k++)
-        {
-            std::this_thread::sleep_for(std::chrono::microseconds(refreshRate));
-            std::cout << (k % 80 ? b[k] : '\n');
-        }
-
-        A += 0.04;
-        B += 0.02;
-
-        // make counter oscillate between 0 and distance
-        if (counter >= distance || counter <= 0)
-        {
-            increment *= -1;
-        }
-        counter += increment;
-        numupdates--;
-    }
-}
-
-void display_decision_treeDemo()
-{
-    // Create a decision tree node
-    // Class members to be used in tests
-    std::map<std::string, std::string> kwargs = {
-        {"training_datafile", "../test/resources/stage3cancer.csv"},
-        {"entropy_threshold", "0.1"},
-        {"max_depth_desired", "20"},
-        {"csv_class_column_index", "1"},
-        {"symbolic_to_numeric_cardinality_threshold", "20"},
-        {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
-        {"number_of_histogram_bins", "10"},
-        {"csv_cleanup_needed", "1"},
-        {"debug1", "1"},
-        {"debug2", "2"},
-        {"debug3", "3"}};
-    DecisionTree dt = DecisionTree(kwargs);
-    DecisionTreeNode node("feature", 0.1, {0.2}, {"branch"}, dt, true);
-
-    // Add child nodes
-    std::shared_ptr<DecisionTreeNode> child1 = std::make_shared<DecisionTreeNode>(dt);
-    std::shared_ptr<DecisionTreeNode> child2 = std::make_shared<DecisionTreeNode>(dt);
-    node.AddChildLink(child1);
-    node.AddChildLink(child2);
-
-    // Display the decision tree
-    node.DisplayDecisionTree("");
-}
-
 #define PYTHON_BUILD
 
 namespace py = pybind11;
@@ -221,10 +124,4 @@ PYBIND11_MODULE(DecisionTreePP, m)
     // Bind ClosestSamplingPoint function
     m.def("ClosestSamplingPoint", [](const std::vector<double> &vec, double val)
           { return ClosestSamplingPoint(vec, val); }, "Find the closest sampling point in a vector to the given value");
-
-    // Bind the doughnut function
-    m.def("doughnut", &doughnut, "Display a doughnut on the screen", py::arg("fps"), py::arg("distance"), py::arg("increment"), py::arg("refreshRate"), py::arg("xpos"), py::arg("ypos"), py::arg("numupdates"));
-
-    // Bind the display_decision_treeDemo function
-    m.def("display_decision_treeDemo", &display_decision_treeDemo, "Display a decision tree for demonstration purposes");
 }
