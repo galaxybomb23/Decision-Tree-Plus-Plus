@@ -116,11 +116,9 @@ class DecisionTree {
   std::map<std::string, double> _classPriorsDict;
   std::vector<std::string> _featureNames;
   std::map<std::string, std::vector<double>> _numericFeaturesValueRangeDict;
-  std::map<std::string, std::vector<double>>
-      _samplingPointsForNumericFeatureDict;
+  std::map<std::string, std::vector<double>> _samplingPointsForNumericFeatureDict;
   std::map<std::string, int> _featureValuesHowManyUniquesDict;
-  std::map<std::string, std::vector<double>>
-      _probDistributionNumericFeaturesDict;
+  std::map<std::string, std::vector<double>> _probDistributionNumericFeaturesDict;
   std::map<std::string, double> _histogramDeltaDict;
   std::map<std::string, int> _numOfHistogramBinsDict;
 };

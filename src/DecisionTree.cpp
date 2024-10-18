@@ -591,7 +591,51 @@ double DecisionTree::classEntropyForGreaterThanThresholdForFeature(
 
 double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
   const std::vector<std::string>& arrayOfFeaturesAndValuesOrThresholds) {
-  return 0.0;
+        // Join the array of features and values or thresholds into a sequence string
+        std::string sequence;
+        for (const auto& featureValue : arrayOfFeaturesAndValuesOrThresholds) {
+            if (!sequence.empty()) {
+                sequence += ":";
+            }
+            sequence += featureValue;
+        }
+
+        // Check if the entropy for the sequence is already cached
+        if (_entropyCache.find(sequence) != _entropyCache.end()) {
+            return _entropyCache[sequence];
+        }
+
+        double entropy = 0.0;
+
+        // Calculate the entropy for each class
+        for (const auto& className : _classNames) {
+            // TODO //
+            // double prob = probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+                // className, arrayOfFeaturesAndValuesOrThresholds);
+            double prob = 0.0;
+
+            double logProb = 0.0;
+            if (prob >= 0.0001 && prob <= 0.999) {
+                logProb = std::log2(prob);
+            }
+
+            // If probability is too small or too large, set logProb to zero
+            if (prob < 0.0001 || prob > 0.999) {
+                logProb = 0.0;
+            }
+
+            // Calculate entropy incrementally
+            entropy += -1.0 * prob * logProb;
+        }
+
+        if (std::abs(entropy) < 0.0000001) {
+            entropy = 0.0;
+        }
+
+        // Cache the result
+        _entropyCache[sequence] = entropy;
+
+        return entropy;
 }
 
 //--------------- Probability Calculators ----------------//
