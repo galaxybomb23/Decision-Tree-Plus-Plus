@@ -633,18 +633,18 @@ double DecisionTree::priorProbabilityForClass(const std::string &className,
                                               bool overloadCache)
 {
   // make a cache key
-  std::string class_name_in_cache = "prior::" + className;
-  logger.log(LogLevel(0), "priorProbabilityForClass:: class_name_in_cache: " +
-                              class_name_in_cache);
+  std::string classNameInCache = "prior::" + className;
+  logger.log(LogLevel(0), "priorProbabilityForClass:: classNameInCache: " +
+                              classNameInCache);
 
   // Check if the probability is already in the cache (memoization)
-  if (_probabilityCache.find(class_name_in_cache) != _probabilityCache.end() &&
+  if (_probabilityCache.find(classNameInCache) != _probabilityCache.end() &&
       !overloadCache)
   {
     logger.log(LogLevel(0),
                "priorProbabilityForClass:: probability found in cache: " +
-                   std::to_string(_probabilityCache[class_name_in_cache]));
-    return _probabilityCache[class_name_in_cache];
+                   std::to_string(_probabilityCache[classNameInCache]));
+    return _probabilityCache[classNameInCache];
   }
 
   logger.log(LogLevel(0),
@@ -674,10 +674,10 @@ double DecisionTree::priorProbabilityForClass(const std::string &className,
                "priorProbabilityForClass:: prior probability for " + className +
                    ": " + std::to_string(priorProbability));
   }
-  return _probabilityCache[class_name_in_cache];
+  return _probabilityCache[classNameInCache];
 }
 
-void DecisionTree::calculate_class_priors()
+void DecisionTree::calculateClassPriors()
 {
   std::cout << "\nCalculating class priors...\n";
   if (_samplesClassLabelDict.size() > 1)
