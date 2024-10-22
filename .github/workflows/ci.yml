@@ -40,6 +40,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install dependencies for CodeQL
+        run: sudo apt-get install -y cmake libgtest-dev libeigen3-dev
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
@@ -53,6 +56,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
+          # Set CMAKE_PREFIX_PATH to the location where Eigen is installed
           cmake -DCMAKE_PREFIX_PATH="/usr/include/eigen3" ..
           make
 
