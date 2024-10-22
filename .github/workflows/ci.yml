@@ -42,7 +42,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: cpp # Explicitly specifying C++ only
+          languages: cpp # Explicitly specifying only C++
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v2
@@ -57,3 +57,5 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+        with:
+          category: "cpp"  # Ensure the category is set to C++ only
