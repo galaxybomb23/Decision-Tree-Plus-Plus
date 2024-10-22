@@ -24,7 +24,8 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake ..
+          # Set CMAKE_PREFIX_PATH to the location where Eigen is installed
+          cmake -DCMAKE_PREFIX_PATH="/usr/include/eigen3" ..
           make
 
       - name: Run tests
@@ -52,7 +53,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake ..
+          cmake -DCMAKE_PREFIX_PATH="/usr/include/eigen3" ..
           make
 
       - name: Perform CodeQL Analysis
