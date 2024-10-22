@@ -14,8 +14,7 @@
 
 #include "Utility.hpp"
 #include "logger.cpp"
-
-using std::string, std::vector, std::map;
+#include <cassert>
 
 // --------------- Logger --------------- //
 Logger logger("../logs/decisionTree.log");
@@ -244,7 +243,8 @@ void DecisionTree::calculateFirstOrderProbabilities()
         for (auto it = _probDistributionNumericFeaturesDict[feature].begin();
              it != _probDistributionNumericFeaturesDict[feature].end(); ++it)
         {
-          string samplingPoint = std::to_string(*it);
+          string samplingPoint = std::to_string(it->first);
+
           double prob = probabilityOfFeatureValue(feature, samplingPoint);
           std::cout << feature << "::" << samplingPoint << " = "
                     << std::setprecision(5) << prob << "\n";
@@ -783,49 +783,218 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
             }
         }
     }
-    
+	if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
+		if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
+			auto samplingPointsForFeature = _samplingPointsForNumericFeatureDict[feature];
+			vector<size_t> countsAtSamplingPoints(samplingPointsForFeature.size(), 0);
+			vector<string> actualValuesForFeature = _featuresAndValuesDict[feature];
+			vector<double> actualValuesForFeatureAsDoubles;
+			
+			for (const auto &v : actualValuesForFeature) {
+				if (v != "NA") {
+					double valueAsDouble = convert(v);
+					if (!std::isnan(valueAsDouble)) {
+						actualValuesForFeatureAsDoubles.push_back(valueAsDouble);
+					}
+                }
+            }
+					
+			for (size_t i = 0; i < samplingPointsForFeature.size(); ++i) {
+				for (size_t j = 0; j < actualValuesForFeatureAsDoubles.size(); ++j) {
+					if (abs(samplingPointsForFeature[i]-actualValuesForFeatureAsDoubles[j]) <= histogramDelta){
+						countsAtSamplingPoints[i] += 1;
+					}
+                }
+            }
+			
+			int totalCounts = 0;
+			// functools.reduce(lambda x,y:x+y, counts_at_sampling_points)
+			for (const auto &c : countsAtSamplingPoints) {
+				totalCounts += c;
+			}
 
+			vector<double> probabilities;
+			for (const auto &c : countsAtSamplingPoints) {
+				probabilities.push_back(static_cast<double>(c) / static_cast<double>(totalCounts));
+			}
+
+			// Check if the probabilities sum to 1
+			double sumProbs = 0.0;
+			for (const auto &p : probabilities) {
+				sumProbs += p;
+			}
+			assert(abs(sumProbs - 1.0) < 0.0001);
+
+			map<double,double> binProbDict;
+			for (size_t i = 0; i < samplingPointsForFeature.size(); ++i) {
+				binProbDict[samplingPointsForFeature[i]] = probabilities[i];
+            }
+			_probDistributionNumericFeaturesDict[feature] = binProbDict;
+
+			//  list(map(lambda x: feature_name + "=" + x, map(str, sampling_points_for_feature)))
+			vector<string> valuesForFeature;
+			valuesForFeature.reserve(samplingPointsForFeature.size());
+			std::transform(samplingPointsForFeature.begin(), samplingPointsForFeature.end(), std::back_inserter(valuesForFeature),
+                   [&feature](int x) { return feature + "=" + std::to_string(x); });
+			// cache rest
+			for (size_t i = 0; i < valuesForFeature.size(); ++i) {
+				_probabilityCache[valuesForFeature[i]] = probabilities[i];
+			}
+			if (!std::isnan(valueAsDouble) && (_probabilityCache.find(featureAndValue) == _probabilityCache.end())) {
+				return _probabilityCache[featureAndValue];
+			}else{
+				return 0.0;
+			}
+            
+		}else{
+            // This section if for those numeric features treated symbolically
+            std::set<string> uniqvaluesForFeature = set(_featuresAndValuesDict[feature].begin(), _featuresAndValuesDict[feature].end());
+            vector<string> valuesForFeature(uniqvaluesForFeature.begin(), uniqvaluesForFeature.end());
+            // Remove NA values
+            valuesForFeature.erase(std::remove(valuesForFeature.begin(), valuesForFeature.end(), "NA"), valuesForFeature.end());
+            // Add "="
+            for (size_t i = 0; i < valuesForFeature.size(); ++i) {
+                valuesForFeature[i] = feature + "=" + valuesForFeature[i];
+            }
+            // Calculate the counts for each value
+            vector<int> valueCounts(valuesForFeature.size(), 0);
+            for (const auto &sample : _trainingDataDict) {
+                vector<string> featuresAndValues = sample.second;
+                for (size_t i = 0; i < valuesForFeature.size(); ++i) {
+                    for (const auto &currentValue : featuresAndValues) {
+                        if (valuesForFeature[i] == currentValue) {
+                            valueCounts[i]++;
+                        }
+                    }
+                
+                }
+            }
+        }
+    } else { // Symbolic feature case
+        vector<string> valuesForFeatures = _featuresAndValuesDict[feature];
+        vector<int> countsForValues(valuesForFeatures.size(), 0);
+        
+        for (const auto& sample : _trainingDataDict) {
+            vector<string> featuresAndValues = sample.second;
+
+            for (int i = 0;  i < valuesForFeatures.size(); i++) {
+                for (size_t i = 0; i < valuesForFeatures.size(); ++i) {
+                    if (std::find(featuresAndValues.begin(), featuresAndValues.end(), valuesForFeatures[i]) != featuresAndValues.end()) {
+                        countsForValues[i]++;
+                    }
+                }
+            }
+        }
+
+        int totalNumSamples = 0;
+        for (int c : countsForValues) {
+            totalNumSamples += c;
+        }
+
+        vector<double> probabilities;
+        for (int c : countsForValues) {
+            probabilities.push_back((double)c / (double)totalNumSamples);
+        }
+
+        for (size_t i = 0; i < valuesForFeatures.size(); ++i) {
+            _probabilityCache[valuesForFeatures[i]] = probabilities[i];
+        }
+
+        if (_probabilityCache.find(featureAndValue) != _probabilityCache.end()) {
+            return _probabilityCache[featureAndValue];
+        } else {
+            return 0.0;
+        }
+    }
     
-    return 1.0;
+    return 0.0;
 }
 
 //--------------- Class Based Utilities ----------------//
 
-bool DecisionTree::checkNamesUsed(
-    const vector<string> &featuresAndValues)
-{
-  return true;
+bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues) {
+  for (const auto &featureAndValue : featuresAndValues) {
+    std::regex pattern(R"(\S+)\s*=\s*(\S+)");
+    std::smatch match;
+    std::regex_search(featureAndValue, match, pattern);
+
+    auto feature = match[1];
+    auto value = match[2];
+
+    if (feature == "" || value == "") {
+      throw std::runtime_error("Your test data has a formatting error");
+    }
+    if (_featuresAndValuesDict.find(feature) == _featuresAndValuesDict.end()) {
+      return false;
+    }
+    return true;
+  }
+  return false;
 }
 
-// Getters
-string DecisionTree::getTrainingDatafile() const
-{
-  return _trainingDatafile;
+DecisionTree& DecisionTree::operator=(const DecisionTree &dt) {
+    return *this;
 }
+
+// print the stree variables
+void DecisionTree::printStats()
+{
+  std::cout << "Training Datafile: " << _trainingDatafile << std::endl;
+  std::cout << "Entropy Threshold: " << _entropyThreshold << std::endl;
+  std::cout << "Max Depth Desired: " << _maxDepthDesired << std::endl;
+  std::cout << "CSV Class Column Index: " << _csvClassColumnIndex << std::endl;
+  std::cout << "Symbolic To Numeric Cardinality Threshold: "
+            << _symbolicToNumericCardinalityThreshold << std::endl;
+  std::cout << "Number Of Histogram Bins: " << _numberOfHistogramBins
+            << std::endl;
+  std::cout << "CSV Cleanup Needed: " << _csvCleanupNeeded << std::endl;
+  std::cout << "Debug1: " << _debug1 << std::endl;
+  std::cout << "Debug2: " << _debug2 << std::endl;
+  std::cout << "Debug3: " << _debug3 << std::endl;
+  std::cout << "How Many Total Training Samples: "
+            << _howManyTotalTrainingSamples << std::endl;
+  std::cout << "Feature Names: ";
+  for (const auto &feature : _featureNames)
+  {
+    std::cout << feature << " ";
+  }
+  std::cout << std::endl;
+  std::cout << "Training Data Dict: ";
+  for (const auto &kv : _trainingDataDict)
+  {
+    std::cout << kv.first << ": ";
+    for (const auto &v : kv.second)
+    {
+      std::cout << v << " ";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << "Features And Values Dict: ";
+  for (const auto &kv : _featuresAndValuesDict)
+  {
+    std::cout << kv.first << ": ";
+    for (const auto &v : kv.second)
+    {
+      std::cout << v << " ";
+    }
+    std::cout << std::endl;
+  }
+}
+
+//--------------- Getters ----------------//
+string DecisionTree::getTrainingDatafile() const { return _trainingDatafile; }
 
 double DecisionTree::getEntropyThreshold() const { return _entropyThreshold; }
 
 int DecisionTree::getMaxDepthDesired() const { return _maxDepthDesired; }
 
-int DecisionTree::getCsvClassColumnIndex() const
-{
-  return _csvClassColumnIndex;
-}
+int DecisionTree::getCsvClassColumnIndex() const { return _csvClassColumnIndex; }
 
-vector<int> DecisionTree::getCsvColumnsForFeatures() const
-{
-  return _csvColumnsForFeatures;
-}
+vector<int> DecisionTree::getCsvColumnsForFeatures() const { return _csvColumnsForFeatures; }
 
-int DecisionTree::getSymbolicToNumericCardinalityThreshold() const
-{
-  return _symbolicToNumericCardinalityThreshold;
-}
+int DecisionTree::getSymbolicToNumericCardinalityThreshold() const { return _symbolicToNumericCardinalityThreshold; }
 
-int DecisionTree::getNumberOfHistogramBins() const
-{
-  return _numberOfHistogramBins;
-}
+int DecisionTree::getNumberOfHistogramBins() const { return _numberOfHistogramBins; }
 
 int DecisionTree::getCsvCleanupNeeded() const { return _csvCleanupNeeded; }
 
@@ -857,7 +1026,7 @@ DecisionTree::getFeaturesAndValuesDict() const
   return _featuresAndValuesDict;
 }
 
-// Setters
+//--------------- Setters ----------------//
 void DecisionTree::setTrainingDatafile(const string &trainingDatafile)
 {
   _trainingDatafile = trainingDatafile;
@@ -910,49 +1079,4 @@ void DecisionTree::setDebug3(int debug3) { _debug3 = debug3; }
 void DecisionTree::setRootNode(std::unique_ptr<DecisionTreeNode> rootNode)
 {
   _rootNode = std::move(rootNode);
-}
-
-// print the stree variables
-void DecisionTree::printStats()
-{
-  std::cout << "Training Datafile: " << _trainingDatafile << std::endl;
-  std::cout << "Entropy Threshold: " << _entropyThreshold << std::endl;
-  std::cout << "Max Depth Desired: " << _maxDepthDesired << std::endl;
-  std::cout << "CSV Class Column Index: " << _csvClassColumnIndex << std::endl;
-  std::cout << "Symbolic To Numeric Cardinality Threshold: "
-            << _symbolicToNumericCardinalityThreshold << std::endl;
-  std::cout << "Number Of Histogram Bins: " << _numberOfHistogramBins
-            << std::endl;
-  std::cout << "CSV Cleanup Needed: " << _csvCleanupNeeded << std::endl;
-  std::cout << "Debug1: " << _debug1 << std::endl;
-  std::cout << "Debug2: " << _debug2 << std::endl;
-  std::cout << "Debug3: " << _debug3 << std::endl;
-  std::cout << "How Many Total Training Samples: "
-            << _howManyTotalTrainingSamples << std::endl;
-  std::cout << "Feature Names: ";
-  for (const auto &feature : _featureNames)
-  {
-    std::cout << feature << " ";
-  }
-  std::cout << std::endl;
-  std::cout << "Training Data Dict: ";
-  for (const auto &kv : _trainingDataDict)
-  {
-    std::cout << kv.first << ": ";
-    for (const auto &v : kv.second)
-    {
-      std::cout << v << " ";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << "Features And Values Dict: ";
-  for (const auto &kv : _featuresAndValuesDict)
-  {
-    std::cout << kv.first << ": ";
-    for (const auto &v : kv.second)
-    {
-      std::cout << v << " ";
-    }
-    std::cout << std::endl;
-  }
 }

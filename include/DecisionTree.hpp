@@ -11,13 +11,16 @@
 
 #include "DecisionTreeNode.hpp"
 
+using std::string, std::vector, std::map;
+
+
 class DecisionTreeNode;
 class DecisionTree
 {
 public:
   //--------------- Constructors and Destructors ----------------//
   DecisionTree(map<string, string> kwargs); // constructor
-  ~DecisionTree();                                         // destructor
+  ~DecisionTree(); // destructor
 
   //--------------- Functions ----------------//
   void getTrainingData();
@@ -49,11 +52,13 @@ public:
 
   //--------------- Class Based Utilities ----------------//
   bool checkNamesUsed(const vector<string> &featuresAndValues);
+  DecisionTree &operator=(const DecisionTree &dt);
+  void printStats();
 
   int _nodesCreated;
   vector<string> _classNames;
 
-  // Getters
+  // --------------- Getters ----------------//
   string getTrainingDatafile() const;
   double getEntropyThreshold() const;
   int getMaxDepthDesired() const;
@@ -70,7 +75,7 @@ public:
   map<string, vector<string>> getFeaturesAndValuesDict() const;
   map<int, vector<string>> getTrainingDataDict() const;
 
-  // Setters
+  //---------------- Setters ----------------//
   void setTrainingDatafile(const string &trainingDatafile);
   void setEntropyThreshold(double entropyThreshold);
   void setMaxDepthDesired(int maxDepthDesired);
@@ -84,9 +89,6 @@ public:
   void setDebug3(int debug3);
   void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
   void setRootNode(std::unique_ptr<DecisionTreeNode> rootNode);
-
-  // Utility Functions
-  void printStats();
 
 private:
   string _trainingDatafile;
@@ -112,7 +114,7 @@ private:
   map<string, vector<double>> _numericFeaturesValueRangeDict;
   map<string, vector<double>> _samplingPointsForNumericFeatureDict;
   map<string, int> _featureValuesHowManyUniquesDict;
-  map<string, vector<double>> _probDistributionNumericFeaturesDict;
+  map<string, map<double, double>> _probDistributionNumericFeaturesDict;
   map<string, double> _histogramDeltaDict;
   map<string, int> _numOfHistogramBinsDict;
 };
