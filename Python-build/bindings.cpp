@@ -10,74 +10,6 @@
 #include "TrainingDataGeneratorSymbolic.hpp"
 #include "Utility.hpp"
 
-// doughnut function for demo purposes
-void doughnut(int fps, int distance, float increment, int refreshRate, int xpos, int ypos, int numupdates)
-{
-    int k;
-    float A = 0, B = 0;
-    float z[1760];
-    char b[1760];
-    float counter = .01;
-
-    std::cout << "\x1b[2J"; // Clear screen
-
-    while (numupdates > 0)
-    {
-
-        // sleep to meet the desired FPS
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
-        memset(b, 32, 1760); // Initialize buffer with spaces
-        memset(z, 0, 7040);  // Initialize z-buffer with zeroes
-
-        for (float j = 0; j < 6.28; j += 0.17)
-        {
-            for (float i = 0; i < 6.28; i += 0.02)
-            {
-                float c = std::sin(i);
-                float d = std::cos(j);
-                float e = std::sin(A);
-                float f = std::sin(j);
-                float g = std::cos(A);
-                float h = d + counter;
-                float D = 1 / (c * h * e + f * g + 5);
-                float l = std::cos(i);
-                float m = std::cos(B);
-                float n = std::sin(B);
-                float t = c * h * g - f * e;
-
-                int x = xpos + 30 * D * (l * h * m - t * n);
-                int y = ypos + 15 * D * (l * h * n + t * m);
-                int o = x + 80 * y;
-                int N = 8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n);
-
-                if (y > 0 && y < 22 && x > 0 && x < 80 && D > z[o])
-                {
-                    z[o] = D;
-                    b[o] = ".,-~:;=!*#$@"[N > 0 ? N : 0];
-                }
-            }
-        }
-
-        std::cout << "\x1b[H"; // Move cursor to top left
-        for (k = 0; k < 1760; k++)
-        {
-            std::this_thread::sleep_for(std::chrono::microseconds(refreshRate));
-            std::cout << (k % 80 ? b[k] : '\n');
-        }
-
-        A += 0.04;
-        B += 0.02;
-
-        // make counter oscillate between 0 and distance
-        if (counter >= distance || counter <= 0)
-        {
-            increment *= -1;
-        }
-        counter += increment;
-        numupdates--;
-    }
-}
-
 #define PYTHON_BUILD
 
 namespace py = pybind11;
@@ -91,8 +23,9 @@ PYBIND11_MODULE(DecisionTreePP, m)
     m.doc() = "Decision Tree Plus Plus Module"; // Optional module documentation
 
     py::class_<DecisionTreeNode>(m, "DecisionTreeNode")
-        .def(py::init<DecisionTree &>(), "Constructor with DecisionTree reference")
+        .def(py::init<DecisionTree &>(), py::arg("dt"), "Constructor with DecisionTree reference")
         .def(py::init<const std::string &, double, const std::vector<double> &, const std::vector<std::string> &, DecisionTree &, bool>(),
+             py::arg("feature"), py::arg("entropy"), py::arg("class_probabilities"), py::arg("branch_features_and_values_or_thresholds"), py::arg("dt"), py::arg("root_or_not"),
              "Constructor with feature, entropy, class probabilities, branch features, DecisionTree reference, and root flag")
         .def("HowManyNodes", &DecisionTreeNode::HowManyNodes, "Get number of nodes")
         .def("GetClassNames", &DecisionTreeNode::GetClassNames, "Get class names")
@@ -103,14 +36,12 @@ PYBIND11_MODULE(DecisionTreePP, m)
         .def("GetBranchFeaturesAndValuesOrThresholds", &DecisionTreeNode::GetBranchFeaturesAndValuesOrThresholds, "Get branch features and values or thresholds")
         .def("GetChildren", &DecisionTreeNode::GetChildren, "Get child nodes")
         .def("GetSerialNum", &DecisionTreeNode::GetSerialNum, "Get serial number")
-        .def("SetClassNames", &DecisionTreeNode::SetClassNames, "Set class names")
-        .def("SetNodeCreationEntropy", &DecisionTreeNode::SetNodeCreationEntropy, "Set node creation entropy")
-        .def("AddChildLink", &DecisionTreeNode::AddChildLink, "Add a child link")
+        .def("SetClassNames", &DecisionTreeNode::SetClassNames, py::arg("class_names_list"), "Set class names")
+        .def("SetNodeCreationEntropy", &DecisionTreeNode::SetNodeCreationEntropy, py::arg("entropy"), "Set node creation entropy")
+        .def("AddChildLink", &DecisionTreeNode::AddChildLink, py::arg("new_node"), "Add a child link")
         .def("DeleteAllLinks", &DecisionTreeNode::DeleteAllLinks, "Delete all child links")
-        .def("DisplayNode", &DecisionTreeNode::DisplayNode, "Display node information", py::arg("offset"))
-        .def("DisplayDecisionTree", &DecisionTreeNode::DisplayDecisionTree, "Display decision tree structure", py::arg("offset"));
-
-    // Define the DecisionTree module
+        .def("DisplayNode", &DecisionTreeNode::DisplayNode, "Display node information")
+        .def("DisplayDecisionTree", &DecisionTreeNode::DisplayDecisionTree, py::arg("offset"), "Display decision tree structure");
 
     // Bind the DecisionTree class
     py::class_<DecisionTree>(m, "DecisionTree")
@@ -193,7 +124,4 @@ PYBIND11_MODULE(DecisionTreePP, m)
     // Bind ClosestSamplingPoint function
     m.def("ClosestSamplingPoint", [](const std::vector<double> &vec, double val)
           { return ClosestSamplingPoint(vec, val); }, "Find the closest sampling point in a vector to the given value");
-
-    // Bind the doughnut function
-    m.def("doughnut", &doughnut, "Display a doughnut on the screen", py::arg("fps"), py::arg("distance"), py::arg("increment"), py::arg("refreshRate"), py::arg("xpos"), py::arg("ypos"), py::arg("numupdates"));
 }
