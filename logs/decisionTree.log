@@ -118,3 +118,15 @@
 [2024-10-28 09:40:18] DEBUG: priorProbabilityForClass:: prior probability for malignant: 0.380000
 [2024-10-28 09:40:18] DEBUG: priorProbabilityForClass:: classNameInCache: prior::malignant
 [2024-10-28 09:40:18] DEBUG: priorProbabilityForClass:: probability found in cache: 0.380000
+[2024-10-28 13:38:25] DEBUG: priorProbabilityForClass:: classNameInCache: prior::benign
+[2024-10-28 13:38:25] DEBUG: priorProbabilityForClass:: probability not found in cache
+[2024-10-28 13:38:25] DEBUG: priorProbabilityForClass:: prior probability for benign: 0.620000
+[2024-10-28 13:38:25] DEBUG: priorProbabilityForClass:: prior probability for malignant: 0.380000
+[2024-10-28 13:38:25] DEBUG: priorProbabilityForClass:: classNameInCache: prior::malignant
+[2024-10-28 13:38:25] DEBUG: priorProbabilityForClass:: probability found in cache: 0.380000
+[2024-10-28 13:43:50] DEBUG: priorProbabilityForClass:: classNameInCache: prior::benign
+[2024-10-28 13:43:50] DEBUG: priorProbabilityForClass:: probability not found in cache
+[2024-10-28 13:43:50] DEBUG: priorProbabilityForClass:: prior probability for benign: 0.620000
+[2024-10-28 13:43:50] DEBUG: priorProbabilityForClass:: prior probability for malignant: 0.380000
+[2024-10-28 13:43:50] DEBUG: priorProbabilityForClass:: classNameInCache: prior::malignant
+[2024-10-28 13:43:50] DEBUG: priorProbabilityForClass:: probability found in cache: 0.380000

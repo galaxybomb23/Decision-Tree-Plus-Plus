@@ -52,6 +52,6 @@ TEST_F(ProbCalcTest, calculateClassPriors) {
 
 TEST_F(ProbCalcTest, probabilityOfFeatureValue) {
     auto prob = dt->probabilityOfFeatureValue("smoking", "heavy");
-    ASSERT_EQ(prob,.44);
+    ASSERT_EQ(prob, 0.44);
     
 }

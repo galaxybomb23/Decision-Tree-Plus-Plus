@@ -33,8 +33,34 @@ test() {
     cd ..
 }
 
+# Function to install the library
+install() {
+    # Cleaning up build directory
+    echo "Installing..."
+    clean
+    echo "Building..."   
+    mkdir -p build 
+    cd build
+
+    # Building the project
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+    cmake --build .
+
+    echo ""
+    echo "The library is installed locally in the build directory"
+    echo "To install it system-wide, run 'sudo cmake --install .' while in the build directory."
+    echo "To validate the install you can run the test suite."
+    echo "  NOTE: The test suite requires the GTest library to be installed."
+    echo ""
+}
+
+# Function to install python code
+install-python() {
+    build_python
+}
+
 # Function to compile python code
-compile_python() {
+build_python() {
     echo "Compiling python code..."
     python3 Python-build/setup.py build_ext --inplace
 }
@@ -45,8 +71,8 @@ case $1 in
     compile_python
     python3 Python-build/demo.py
     ;;
-  python)
-    compile_python
+  build-python)
+    build_python
     ;;
   build)
     build
@@ -57,6 +83,12 @@ case $1 in
   test)
     build
     test
+    ;;
+  install)
+    install
+    ;;
+  install-python)
+    install-python
     ;;
   *)
     asciiquarium
