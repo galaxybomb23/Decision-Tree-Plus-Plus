@@ -3,7 +3,7 @@
 ## Requirements
 
 - **[CMake](https://cmake.org/download/)**: Version 3.10 or higher
-- **[Python](https://www.python.org/downloads/)**: Python 3 with  `setuptools`  for Python code compilation
+- **[Python](https://www.python.org/downloads/)**: Python 3 with  `setuptools` and `pybind11`  for Python code compilation
 - **[GTest](https://github.com/google/googletest)**: For unit testing (optional)
 
 ## Cloning
@@ -40,9 +40,9 @@ Run the script with one of the following options:
 ./run.sh install
 ``` 
 
--   **build-python**: Only builds the Python code using the setup script in  `Python-build/setup.py`.
+-   **build-python**: Only builds the Python code using the setup script in  `Python-build/setup.py` into and shared object file `Python-Build/DecisionTreePP.cpython-310-x86_64-linux-gnu.so`.
 ```bash
-./run.sh python
+./run.sh build-python
 ```
 
 -   **install-python**: Compiles Python code using the setup script found in  `Python-build/setup.py`.
