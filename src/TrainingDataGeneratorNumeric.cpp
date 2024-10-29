@@ -145,7 +145,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
         // Split valueRangeStream by '-' delimiter and add to featuresWithValueRange
         while (std::getline(valueRangeStream, value, '-'))
         {
-            std::cout << value << std::endl;
+            // std::cout << value << std::endl;
             if (!value.empty())
             {
                 valueRange.push_back(std::stod(value));
@@ -167,14 +167,14 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
         std::cout << "Features and their value ranges: " << std::endl;
         for (const auto &kv : featuresWithValueRange)
         {
-            std::cout << kv.first << " : [" << kv.second.first << ", " << kv.second.second << "]" << std::endl;
+            // std::cout << kv.first << " : [" << kv.second.first << ", " << kv.second.second << "]" << std::endl;
         }
     }
 
     // Add class names and their parameter values to classesAndTheirParamValues
     for (int i = 0; i < classNames.size(); i++)
     {
-        std::cout << "Adding [" << classNames[i] << "]" << std::endl;
+        // std::cout << "Adding [" << classNames[i] << "]" << std::endl;
         classesAndTheirParamValues[classNames[i]] = {};
     }
 
