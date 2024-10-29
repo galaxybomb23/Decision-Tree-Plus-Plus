@@ -2,9 +2,9 @@
 
 ## Requirements
 
--   **CMake**: Version 3.10 or higher
--   **Python**: Python 3 with  `setuptools`  for Python code compilation
--   **GTest**: For unit testing (optional)
+- **[CMake](https://cmake.org/download/)**: Version 3.10 or higher
+- **[Python](https://www.python.org/downloads/)**: Python 3 with  `setuptools`  for Python code compilation
+- **[GTest](https://github.com/google/googletest)**: For unit testing (optional)
 
 ## Cloning
 To clone this project run the following command:
