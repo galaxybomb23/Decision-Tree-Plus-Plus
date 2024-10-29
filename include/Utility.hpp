@@ -10,6 +10,7 @@
 #include <iostream>
 #include <tuple>
 #include <numeric>
+#include <cmath>
 
 int sampleIndex(std::string sample_name);
 
@@ -44,8 +45,13 @@ std::pair<T, size_t> minimum(std::vector<T> const &vec)
 double convert(std::string const &str);
 
 template <typename T>
-std::optional<T> ClosestSamplingPoint(std::vector<T> const &vec, T const &val)
+double ClosestSamplingPoint(std::vector<T> const &vec, T const &val)
 {
+    // check if val is NAN
+    if (std::isnan(val))
+    {
+        return val;
+    }
     // try to cast the val to a floating point number
     double value = static_cast<double>(val);
 

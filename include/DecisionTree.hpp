@@ -2,102 +2,121 @@
 #define DECISION_TREE_HPP
 
 // Include
-#include "DecisionTreeNode.hpp"
 #include <iostream>
-#include <vector>
-#include <string>
 #include <map>
-#include <set>
 #include <memory>
+#include <set>
+#include <string>
+#include <vector>
+
+#include "DecisionTreeNode.hpp"
+
+using std::string, std::vector, std::map;
+
 
 class DecisionTreeNode;
 class DecisionTree
 {
 public:
-    //--------------- Constructors and Destructors ----------------//
-    DecisionTree(std::map<std::string, std::string> kwargs); // constructor
-    ~DecisionTree();                                         // destructor
+  //--------------- Constructors and Destructors ----------------//
+  DecisionTree(map<string, string> kwargs); // constructor
+  ~DecisionTree(); // destructor
 
-    //--------------- Functions ----------------//
-    void getTrainingData();
-    void calculateFirstOrderProbabilities();
-    void showTrainingData() const;
+  //--------------- Functions ----------------//
+  void getTrainingData();
+  void calculateFirstOrderProbabilities();
+  void showTrainingData() const;
 
-    //--------------- Classify ----------------//
-    std::map<std::string, std::string> classify(void *root_node, const std::vector<std::string> &features_and_values);
+  //--------------- Classify ----------------//
+  map<string, string> classify(
+      DecisionTreeNode *rootNode,
+      const vector<string> &featuresAndValues);
+  map<string, double> recursiveDescentForClassification(
+      DecisionTreeNode *node,
+      const vector<string> &feature_and_values,
+      map<string, vector<double>> &answer);
 
-    //--------------- Construct Tree ----------------//
-    DecisionTreeNode *constructDecisionTreeClassifier();
+  //--------------- Construct Tree ----------------//
+  DecisionTreeNode *constructDecisionTreeClassifier();
+  void recursiveDescent(DecisionTreeNode *node);
 
-    //--------------- Entropy Calculators ----------------//
-    double classEntropyOnPriors();
+  //--------------- Entropy Calculators ----------------//
+  double classEntropyOnPriors();
 
-    //--------------- Probability Calculators ----------------//
-    double probabilityOfFeatureValue(const std::string &feature, const std::string &value);
-    double probabilityOfFeatureValue(const std::string &feature, double sampling_point);
+  //--------------- Probability Calculators ----------------//
+  double priorProbabilityForClass(const string &className,
+                                  bool overloadCache = false);
+  void calculateClassPriors();
+  double probabilityOfFeatureValue(const string &feature,
+                                   const string &value);
 
-    //--------------- Class Based Utilities ----------------//
+  //--------------- Class Based Utilities ----------------//
+  bool checkNamesUsed(const vector<string> &featuresAndValues);
+  DecisionTree &operator=(const DecisionTree &dt);
+  void printStats();
 
-    int _nodesCreated;
-    std::vector<std::string> _classNames;
+  int _nodesCreated;
+  vector<string> _classNames;
 
-    // Getters
-    std::string getTrainingDatafile() const;
-    double getEntropyThreshold() const;
-    int getMaxDepthDesired() const;
-    int getNumberOfHistogramBins() const;
-    int getCsvClassColumnIndex() const;
-    std::vector<int> getCsvColumnsForFeatures() const;
-    int getSymbolicToNumericCardinalityThreshold() const;
-    int getCsvCleanupNeeded() const;
-    int getDebug1() const;
-    int getDebug2() const;
-    int getDebug3() const;
-    int getHowManyTotalTrainingSamples() const;
-    std::vector<std::string> getFeatureNames() const;
-    std::map<int, std::vector<std::string>> getTrainingDataDict() const;
+  // --------------- Getters ----------------//
+  string getTrainingDatafile() const;
+  double getEntropyThreshold() const;
+  int getMaxDepthDesired() const;
+  int getNumberOfHistogramBins() const;
+  int getCsvClassColumnIndex() const;
+  vector<int> getCsvColumnsForFeatures() const;
+  int getSymbolicToNumericCardinalityThreshold() const;
+  int getCsvCleanupNeeded() const;
+  int getDebug1() const;
+  int getDebug2() const;
+  int getDebug3() const;
+  int getHowManyTotalTrainingSamples() const;
+  vector<string> getFeatureNames() const;
+  map<string, vector<string>> getFeaturesAndValuesDict() const;
+  map<int, vector<string>> getTrainingDataDict() const;
 
-    // Setters
-    void setTrainingDatafile(const std::string &trainingDatafile);
-    void setEntropyThreshold(double entropyThreshold);
-    void setMaxDepthDesired(int maxDepthDesired);
-    void setNumberOfHistogramBins(int numberOfHistogramBins);
-    void setCsvClassColumnIndex(int csvClassColumnIndex);
-    void setCsvColumnsForFeatures(const std::vector<int> &csvColumnsForFeatures);
-    void setSymbolicToNumericCardinalityThreshold(int symbolicToNumericCardinalityThreshold);
-    void setCsvCleanupNeeded(int csvCleanupNeeded);
-    void setDebug1(int debug1);
-    void setDebug2(int debug2);
-    void setDebug3(int debug3);
-    void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
+  //---------------- Setters ----------------//
+  void setTrainingDatafile(const string &trainingDatafile);
+  void setEntropyThreshold(double entropyThreshold);
+  void setMaxDepthDesired(int maxDepthDesired);
+  void setNumberOfHistogramBins(int numberOfHistogramBins);
+  void setCsvClassColumnIndex(int csvClassColumnIndex);
+  void setCsvColumnsForFeatures(const vector<int> &csvColumnsForFeatures);
+  void setSymbolicToNumericCardinalityThreshold(int symbolicToNumericCardinalityThreshold);
+  void setCsvCleanupNeeded(int csvCleanupNeeded);
+  void setDebug1(int debug1);
+  void setDebug2(int debug2);
+  void setDebug3(int debug3);
+  void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
+  void setRootNode(std::unique_ptr<DecisionTreeNode> rootNode);
 
 private:
-    std::string _trainingDatafile;
-    double _entropyThreshold;
-    int _maxDepthDesired;
-    int _numberOfHistogramBins;
-    int _csvClassColumnIndex;
-    int _symbolicToNumericCardinalityThreshold;
-    int _csvCleanupNeeded;
-    int _debug1, _debug2, _debug3;
-    int _howManyTotalTrainingSamples;
+  string _trainingDatafile;
+  double _entropyThreshold;
+  int _maxDepthDesired;
+  int _numberOfHistogramBins;
+  int _csvClassColumnIndex;
+  int _symbolicToNumericCardinalityThreshold;
+  int _csvCleanupNeeded;
+  int _debug1, _debug2, _debug3;
+  int _howManyTotalTrainingSamples;
 
-    std::unique_ptr<DecisionTreeNode> _rootNode;
-    std::vector<int> _csvColumnsForFeatures;
-    std::map<std::string, double> _probabilityCache;
-    std::map<std::string, double> _entropyCache;
-    std::map<int, std::vector<std::string>> _trainingDataDict;
-    std::map<std::string, std::vector<std::string>> _featuresAndValuesDict;
-    std::map<std::string, std::set<std::string>> _featuresAndUniqueValuesDict;
-    std::map<int, std::string> _samplesClassLabelDict;
-    std::map<std::string, double> _classPriorsDict;
-    std::vector<std::string> _featureNames;
-    std::map<std::string, std::vector<double>> _numericFeaturesValueRangeDict;
-    std::map<std::string, std::vector<double>> _samplingPointsForNumericFeatureDict;
-    std::map<std::string, int> _featureValuesHowManyUniquesDict;
-    std::map<std::string, std::vector<double>> _probDistributionNumericFeaturesDict;
-    std::map<std::string, double> _histogramDeltaDict;
-    std::map<std::string, int> _numOfHistogramBinsDict;
+  std::unique_ptr<DecisionTreeNode> _rootNode;
+  vector<int> _csvColumnsForFeatures;
+  map<string, double> _probabilityCache;
+  map<string, double> _entropyCache;
+  map<int, vector<string>> _trainingDataDict;
+  map<string, vector<string>> _featuresAndValuesDict;
+  map<string, std::set<string>> _featuresAndUniqueValuesDict;
+  map<int, string> _samplesClassLabelDict;
+  map<string, double> _classPriorsDict;
+  vector<string> _featureNames;
+  map<string, vector<double>> _numericFeaturesValueRangeDict;
+  map<string, vector<double>> _samplingPointsForNumericFeatureDict;
+  map<string, int> _featureValuesHowManyUniquesDict;
+  map<string, map<double, double>> _probDistributionNumericFeaturesDict;
+  map<string, double> _histogramDeltaDict;
+  map<string, int> _numOfHistogramBinsDict;
 };
 
 #endif // DECISION_TREE_HPP
