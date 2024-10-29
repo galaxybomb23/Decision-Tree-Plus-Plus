@@ -1,6 +1,7 @@
 #include "Utility.hpp"
 #include <regex>
 #include <iostream>
+#include <cmath>
 #include <sstream>
 
 int sampleIndex(std::string sample_name)
@@ -19,11 +20,10 @@ double convert(std::string const &str)
     {
         return std::stod(str);
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         return std::nan("");
     }
-    
 }
 
 std::string CleanupCsvString(const std::string &line)

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <tuple>
 #include <numeric>
+#include <cmath>
 
 int sampleIndex(std::string sample_name);
 
