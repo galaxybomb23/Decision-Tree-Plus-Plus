@@ -722,7 +722,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
     {
         featureAndValue = feature + "=" + value;
     }
-    
+
     // Check if the probability is already cached
     if (_probabilityCache.find(featureAndValue) != _probabilityCache.end())
     {
@@ -1000,44 +1000,61 @@ double DecisionTree::probabilityOfFeatureValueGivenClass(const string &featureNa
 
 double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className)
 {
-	double thresholdAsDouble = convert(threshold);
-	string featureThresholdCombo = featureName + "<" + std::to_string(thresholdAsDouble) + "::" + className;
-	
-	// Check if the probability is already cached
-	if (_probabilityCache.find(featureThresholdCombo) != _probabilityCache.end())
-	{
-		return _probabilityCache[featureThresholdCombo];
-	}
-	
-	//accumulate all smaples for given class
-	vector<int> dataSamplesForClass;
-	for (const auto &kv : _samplesClassLabelDict) {
-		if (kv.second == className){
-			dataSamplesForClass.push_back(kv.first);
-		}}
+    double thresholdAsDouble = convert(threshold);
+    string featureThresholdCombo = featureName + "<" + std::to_string(thresholdAsDouble) + "::" + className;
 
-	vector<string> actualFeatureValuesForSamplesInClass;
-	for(const auto sampleIdx : dataSamplesForClass){
-		for(const auto FeatureAndValue : _trainingDataDict[sampleIdx]){
-			//add
-			// pattern = r'(.+)=(.+)'
-            //     m = re.search(pattern, feature_and_value)
-            //     feature,value = m.group(1),m.group(2)
-            //     if feature == feature_name and value != 'NA':
-            //         actual_feature_values_for_samples_in_class.append(convert(value))
-		}
-	}
+    // Check if the probability is already cached
+    if (_probabilityCache.find(featureThresholdCombo) != _probabilityCache.end())
+    {
+        return _probabilityCache[featureThresholdCombo];
+    }
 
-	// actual_points_for_feature_less_than_threshold = list(filter(lambda x: x <= threshold, 
-    //                                       actual_feature_values_for_samples_in_class))
-    //     # The conditional in the assignment shown below introduced in Version 3.2.1:
-    //     probability = ((1.0 * len(actual_points_for_feature_less_than_threshold)) / len(actual_feature_values_for_samples_in_class)) if len(actual_feature_values_for_samples_in_class) > 0 else 0.0
-    //     self._probability_cache[feature_threshold_class_combo] = probability
-    //     return probability
+    // accumulate all smaples for given class
+    vector<int> dataSamplesForClass;
+    for (const auto &kv : _samplesClassLabelDict)
+    {
+        if (kv.second == className)
+        {
+            dataSamplesForClass.push_back(kv.first);
+        }
+    }
+
+    vector<string> actualFeatureValuesForSamplesInClass;
+    for (const auto sampleIdx : dataSamplesForClass)
+    {
+        for (const auto FeatureAndValue : _trainingDataDict[sampleIdx])
+        {
+            regex pattern(R"((.+)=(.+))");
+            smatch match;
+            if (regex_search(FeatureAndValue, match, pattern))
+            {
+                string feature = match[1];
+                string value = match[2];
+                if (feature == featureName && value != "NA")
+                {
+                    actualFeatureValuesForSamplesInClass.push_back(value);
+                }
+            }
+        }
+    }
+
+    vector<double> actualPointsForFeatureLessThanThreshold;
+    for (const auto &v : actualFeatureValuesForSamplesInClass)
+    {
+        double valueAsDouble = convert(v);
+        if (!std::isnan(valueAsDouble) && valueAsDouble < thresholdAsDouble)
+        {
+            actualPointsForFeatureLessThanThreshold.push_back(valueAsDouble);
+        }
+    }
+
+    double probability = static_cast<double>(actualPointsForFeatureLessThanThreshold.size()) / static_cast<double>(actualFeatureValuesForSamplesInClass.size());
+    _probabilityCache[featureThresholdCombo] = probability;
+    return probability;
 }
-    //--------------- Class Based Utilities ----------------//
+//--------------- Class Based Utilities ----------------//
 
-    bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)
+bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)
 {
     for (const auto &featureAndValue : featuresAndValues)
     {
