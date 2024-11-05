@@ -48,12 +48,16 @@ public:
     void calculateClassPriors();
     double probabilityOfFeatureValue(const string &feature,
                                      const string &value);
+    double probabilityOfFeatureLessThanThreshold(const string &feature,
+                                                 const string &threshold);
     double probabilityOfFeatureValueGivenClass(const string &featureName, const string &threshold);
     double probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className);
+    double probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 
     //--------------- Class Based Utilities ----------------//
     bool checkNamesUsed(const vector<string> &featuresAndValues);
     DecisionTree &operator=(const DecisionTree &dt);
+    vector<string> findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes);
     void printStats();
 
     int _nodesCreated;
