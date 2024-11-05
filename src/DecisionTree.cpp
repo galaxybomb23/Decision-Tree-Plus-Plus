@@ -90,9 +90,9 @@ DecisionTree::DecisionTree(map<string, string> kwargs)
         }
         else if (key == "csv_columns_for_features")
         {
-            for (const auto &c : value)
+            for (const auto &count : value)
             {
-                _csvColumnsForFeatures.push_back(c);
+                _csvColumnsForFeatures.push_back(count);
             }
         }
         else if (key == "symbolic_to_numeric_cardinality_threshold")
@@ -706,7 +706,7 @@ void DecisionTree::calculateClassPriors()
 double DecisionTree::probabilityOfFeatureValue(const string &feature,
                                                const string &Value)
 {
-    string value = Value;
+    string value = Value; // create a copy of the value
     // Convert the value to double, or NAN if it is symbolic
     double valueAsDouble = convert(value);
     string featureAndValue;
@@ -829,15 +829,15 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
 
             int totalCounts = 0;
             // functools.reduce(lambda x,y:x+y, counts_at_sampling_points)
-            for (const auto &c : countsAtSamplingPoints)
+            for (const auto &count : countsAtSamplingPoints)
             {
-                totalCounts += c;
+                totalCounts += count;
             }
 
             vector<double> probabilities;
-            for (const auto &c : countsAtSamplingPoints)
+            for (const auto &count : countsAtSamplingPoints)
             {
-                probabilities.push_back(static_cast<double>(c) / static_cast<double>(totalCounts));
+                probabilities.push_back(static_cast<double>(count) / static_cast<double>(totalCounts));
             }
 
             // Check if the probabilities sum to 1
@@ -910,51 +910,50 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
         vector<string> valuesForFeatures = _featuresAndValuesDict[feature];
         vector<int> countsForValues(valuesForFeatures.size(), 0);
 
-        for (const auto &sample : _trainingDataDict)
-        {
+        for (const auto &sample : _trainingDataDict) {
             vector<string> featuresAndValues = sample.second;
 
-            for (int i = 0; i < valuesForFeatures.size(); i++)
-            {
-                for (size_t i = 0; i < valuesForFeatures.size(); ++i)
-                {
-                    if (std::find(featuresAndValues.begin(), featuresAndValues.end(), valuesForFeatures[i]) != featuresAndValues.end())
-                    {
-                        countsForValues[i]++;
-                    }
+            for (size_t i = 0; i < valuesForFeatures.size(); i++) {
+                if (std::find(featuresAndValues.begin(), featuresAndValues.end(), valuesForFeatures[i]) != featuresAndValues.end()) {
+                    countsForValues[i]++;
                 }
             }
         }
 
-        int totalNumSamples = 0;
-        for (int c : countsForValues)
-        {
-            totalNumSamples += c;
-        }
+        int totalNumSamples = _trainingDataDict.size();
+        // for (int count : countsForValues)
+        // {
+        //     totalNumSamples += count;
+        // }
 
         vector<double> probabilities;
-        for (int c : countsForValues)
+        for (int count : countsForValues)
         {
-            probabilities.push_back((double)c / (double)totalNumSamples);
+            probabilities.push_back((double)count / (double)totalNumSamples);
+            cout << "count and totalNumSamples: " << count << " " << totalNumSamples << endl;
         }
 
         for (size_t i = 0; i < valuesForFeatures.size(); ++i)
         {
-            _probabilityCache[valuesForFeatures[i]] = probabilities[i];
-            cout << valuesForFeatures[i] << " = " << probabilities[i] << " compared to " << featureAndValue << endl;
+            string name = feature + "=" + valuesForFeatures[i];
+            _probabilityCache[name] = probabilities[i];
         }
 
+        // print the prob cache
+        for (const auto &kv : _probabilityCache)
+        {
+            cout << kv.first << " : " << kv.second << endl;
+        }
+    
         if (_probabilityCache.find(featureAndValue) != _probabilityCache.end())
         {
             return _probabilityCache[featureAndValue];
         }
         else
         {
-            cout << "We are hitting first zero" << endl;
             return 0.0;
         }
     }
-    cout << "We are hitting second zero" << endl;
     return 0.0;
 }
 
@@ -969,6 +968,7 @@ double DecisionTree::probabilityOfFeatureValueGivenClass(const string &featureNa
         return _probabilityCache[featureThresholdCombo];
     }
 
+    // Get all values for the feature
     vector<string> valuesForFeature = _featuresAndValuesDict[featureName];
     vector<double> valuesForFeatureAsDoubles;
     for (const auto &v : valuesForFeature)
@@ -983,6 +983,7 @@ double DecisionTree::probabilityOfFeatureValueGivenClass(const string &featureNa
         }
     }
 
+    // Get all values less than the threshold
     vector<double> allValuesLessThanThreshold;
     for (const auto &v : valuesForFeatureAsDoubles)
     {
@@ -992,8 +993,10 @@ double DecisionTree::probabilityOfFeatureValueGivenClass(const string &featureNa
         }
     }
 
+    // Calculate the probability
     double probability = static_cast<double>(allValuesLessThanThreshold.size()) / static_cast<double>(valuesForFeatureAsDoubles.size());
-
+    
+    // Cache the probability
     _probabilityCache[featureThresholdCombo] = probability;
     return probability;
 }
@@ -1019,6 +1022,7 @@ double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const strin
         }
     }
 
+    // Get all values for the feature
     vector<string> actualFeatureValuesForSamplesInClass;
     for (const auto sampleIdx : dataSamplesForClass)
     {
@@ -1038,6 +1042,7 @@ double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const strin
         }
     }
 
+    // Get all values less than the threshold
     vector<double> actualPointsForFeatureLessThanThreshold;
     for (const auto &v : actualFeatureValuesForSamplesInClass)
     {
@@ -1048,10 +1053,21 @@ double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const strin
         }
     }
 
+    // Calculate and cache the probability
     double probability = static_cast<double>(actualPointsForFeatureLessThanThreshold.size()) / static_cast<double>(actualFeatureValuesForSamplesInClass.size());
     _probabilityCache[featureThresholdCombo] = probability;
     return probability;
 }
+
+
+double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds) {
+// This method requires that all truly numeric types only be expressed as '<' or '>'
+// constructs in the array of branch features and thresholds
+    //check len of array to be grea
+    if (arrayOfFeaturesAndValuesOrThresholds.size() == 0) { return 0.0; }
+    return 0.0;
+}
+
 //--------------- Class Based Utilities ----------------//
 
 bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)

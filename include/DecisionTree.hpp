@@ -50,6 +50,7 @@ public:
                                      const string &value);
     double probabilityOfFeatureValueGivenClass(const string &featureName, const string &threshold);
     double probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className);
+    double probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 
     //--------------- Class Based Utilities ----------------//
     bool checkNamesUsed(const vector<string> &featuresAndValues);
