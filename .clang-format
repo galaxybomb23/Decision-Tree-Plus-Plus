@@ -1,0 +1,57 @@
+# 
+
+---
+Language: Cpp
+# Set the base style; modify any of the below options as needed
+BasedOnStyle: LLVM
+
+# General formatting
+IndentWidth: 4                  # Use 4 spaces for indentation
+TabWidth: 4                      # Number of spaces per tab
+UseTab: Never                    # Use spaces instead of tabs
+
+# Column width and line breaking
+ColumnLimit: 120                  # Maximum width for lines
+BreakBeforeBraces: Stroustrup     # Braces on new line for functions and control blocks
+
+# Spacing settings
+SpacesInParentheses: false       # No spaces inside parentheses
+SpacesInAngles: false            # No spaces inside angle brackets
+SpaceAfterCStyleCast: true       # Space after C-style casts
+
+# Pointer and reference alignment
+PointerAlignment: Left           # Align pointers and references to the left (e.g., int* ptr)
+
+# Control statement formatting
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: true
+
+# Function formatting
+AllowShortFunctionsOnASingleLine: Inline  # Keep short functions inline on a single line
+AlignAfterOpenBracket: Align  # Align parameters on new lines if needed
+BinPackArguments: false             # No packing of arguments on a single line
+BinPackParameters: false            # Break parameters to individual lines if needed
+BreakConstructorInitializers : BeforeColon
+PackConstructorInitializers : CurrentLine
+
+# Namespace formatting
+NamespaceIndentation: None       # Don't indent inside namespaces
+
+# Miscellaneous
+Cpp11BracedListStyle: true       # Format braced lists per C++11 style
+DerivePointerAlignment: false    # Always use the specified PointerAlignment
+SortIncludes: true               # Sort #include statements
+AlignArrayOfStructures: Right    # Align array of structures to the right
+
+AlignConsecutiveAssignments: true # Align consecutive assignments
+AlignOperands: true              # Align operands like << for streams
+
+BitFieldColonSpacing: Both       # Spacing for bit fields
+
+IncludeBlocks: Regroup           # Group includes based on type
+
+# End of file settings
+MaxEmptyLinesToKeep: 2           # Keep up to 2 empty lines
+QualifierAlignment: Left         # Left-align qualifiers
+ReferenceAlignment: Right     # Align references similarly to pointers

@@ -1,45 +1,45 @@
 #include "DecisionTreeNode.hpp"
+
 #include "DecisionTree.hpp"
 
 // for vector output
 std::ostream &operator<<(std::ostream &os, const std::vector<std::string> &vec)
 {
-    for (const auto &str : vec)
-    {
+    for (const auto &str : vec) {
         os << str << " ";
     }
     return os;
 }
 
-DecisionTreeNode::DecisionTreeNode(const std::string &feature, double entropy,
+DecisionTreeNode::DecisionTreeNode(const std::string &feature,
+                                   double entropy,
                                    const std::vector<double> &class_probabilities,
                                    const std::vector<string> &branch_features_and_values_or_thresholds,
-                                   DecisionTree &dt, const bool isRoot)
-    : _dt(dt), _feature(feature), _nodeCreationEntropy(entropy),
+                                   DecisionTree &dt,
+                                   const bool isRoot)
+    : _dt(dt),
+      _feature(feature),
+      _nodeCreationEntropy(entropy),
       _classProbabilities(class_probabilities),
       _branchFeaturesAndValuesOrThresholds(branch_features_and_values_or_thresholds)
 {
-    if (isRoot)
-    {
+    if (isRoot) {
         _dt._nodesCreated = -1;
         _dt._classNames.clear();
     }
     _serialNumber = GetNextSerialNum();
 }
 
-DecisionTreeNode::DecisionTreeNode(DecisionTree &dt)
-    : _dt(dt)
+DecisionTreeNode::DecisionTreeNode(DecisionTree &dt) : _dt(dt)
 {
-    _feature = "";
-    _nodeCreationEntropy = 0;
-    _classProbabilities = {};
+    _feature                             = "";
+    _nodeCreationEntropy                 = 0;
+    _classProbabilities                  = {};
     _branchFeaturesAndValuesOrThresholds = {};
-    _serialNumber = GetNextSerialNum();
+    _serialNumber                        = GetNextSerialNum();
 }
 
-DecisionTreeNode::~DecisionTreeNode()
-{
-}
+DecisionTreeNode::~DecisionTreeNode() {}
 
 // Other functions below
 int DecisionTreeNode::HowManyNodes()
@@ -120,8 +120,7 @@ void DecisionTreeNode::DisplayNode(const std::string &offset) const
 
     // Format class probabilities
     std::vector<std::string> classProbsForDisplay;
-    for (double prob : _classProbabilities)
-    {
+    for (double prob : _classProbabilities) {
         std::ostringstream probStream;
         probStream << std::fixed << std::setprecision(3) << prob;
         classProbsForDisplay.push_back(probStream.str());
@@ -129,11 +128,9 @@ void DecisionTreeNode::DisplayNode(const std::string &offset) const
 
     // Format branch features and values
     std::ostringstream branch_features_stream;
-    for (size_t i = 0; i < _branchFeaturesAndValuesOrThresholds.size(); ++i)
-    {
+    for (size_t i = 0; i < _branchFeaturesAndValuesOrThresholds.size(); ++i) {
         branch_features_stream << _branchFeaturesAndValuesOrThresholds[i];
-        if (i < _branchFeaturesAndValuesOrThresholds.size() - 1)
-        {
+        if (i < _branchFeaturesAndValuesOrThresholds.size() - 1) {
             branch_features_stream << ", ";
         }
     }
@@ -145,11 +142,9 @@ void DecisionTreeNode::DisplayNode(const std::string &offset) const
                 << offset << "  Branch features and values to this node: " << branchFeaturesAndValuesStr << endl
                 << offset << "  Class probabilities at current node: [";
 
-    for (size_t i = 0; i < classProbsForDisplay.size(); ++i)
-    {
+    for (size_t i = 0; i < classProbsForDisplay.size(); ++i) {
         nodeDisplay << classProbsForDisplay[i];
-        if (i < classProbsForDisplay.size() - 1)
-        {
+        if (i < classProbsForDisplay.size() - 1) {
             nodeDisplay << ", ";
         }
     }
@@ -169,8 +164,7 @@ void DecisionTreeNode::DisplayDecisionTree(const std::string &offset) const
 
     // Recursively display child nodes with an increased offset
     std::string newOffset = offset + "    ";
-    for (const auto &child : this->GetChildren())
-    {
+    for (const auto &child : this->GetChildren()) {
         child->DisplayDecisionTree(newOffset);
     }
 }
