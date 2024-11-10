@@ -908,17 +908,21 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
     else
     { // Symbolic feature case
         vector<string> valuesForFeatures = _featuresAndValuesDict[feature];
+        for (size_t i = 0; i < valuesForFeatures.size(); ++i)
+        {
+            valuesForFeatures[i] = feature + "=" + valuesForFeatures[i];
+        }
         vector<int> countsForValues(valuesForFeatures.size(), 0);
 
         for (const auto &sample : _trainingDataDict)
         {
             vector<string> featuresAndValues = sample.second;
-
             for (int i = 0; i < valuesForFeatures.size(); i++)
             {
-                for (size_t i = 0; i < valuesForFeatures.size(); ++i)
+                for (int j = 0 ; j < featuresAndValues.size(); j++)
                 {
-                    if (std::find(featuresAndValues.begin(), featuresAndValues.end(), valuesForFeatures[i]) != featuresAndValues.end())
+                    string name = _featureNames[j + 1] + "=" + featuresAndValues[j];
+                    if (valuesForFeatures[i] == name)
                     {
                         countsForValues[i]++;
                     }
@@ -927,21 +931,16 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
         }
 
         int totalNumSamples = _trainingDataDict.size();
-        // for (int count : countsForValues)
-        // {
-        //     totalNumSamples += count;
-        // }
 
         vector<double> probabilities;
         for (int count : countsForValues)
         {
             probabilities.push_back((double)count / (double)totalNumSamples);
-            cout << "count and totalNumSamples: " << count << " " << totalNumSamples << endl;
         }
 
         for (size_t i = 0; i < valuesForFeatures.size(); ++i)
         {
-            string name = feature + "=" + valuesForFeatures[i];
+            string name = valuesForFeatures[i];
             _probabilityCache[name] = probabilities[i];
         }
 
@@ -963,268 +962,268 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
     return 0.0;
 }
 
-double DecisionTree::probabilityOfFeatureValueGivenClass(const string &featureName, const string &threshold)
-{
-    double thresholdAsDouble = convert(threshold);
-    string featureThresholdCombo = featureName + "<" + std::to_string(thresholdAsDouble);
+// double DecisionTree::probabilityOfFeatureValueGivenClass(const string &featureName, const string &threshold)
+// {
+//     double thresholdAsDouble = convert(threshold);
+//     string featureThresholdCombo = featureName + "<" + std::to_string(thresholdAsDouble);
 
-    // Check if the probability is already cached
-    if (_probabilityCache.find(featureThresholdCombo) != _probabilityCache.end())
-    {
-        return _probabilityCache[featureThresholdCombo];
-    }
+//     // Check if the probability is already cached
+//     if (_probabilityCache.find(featureThresholdCombo) != _probabilityCache.end())
+//     {
+//         return _probabilityCache[featureThresholdCombo];
+//     }
 
-    // Get all values for the feature
-    vector<string> valuesForFeature = _featuresAndValuesDict[featureName];
-    vector<double> valuesForFeatureAsDoubles;
-    for (const auto &v : valuesForFeature)
-    {
-        if (v != "NA")
-        {
-            double valueAsDouble = convert(v);
-            if (!std::isnan(valueAsDouble))
-            {
-                valuesForFeatureAsDoubles.push_back(valueAsDouble);
-            }
-        }
-    }
+//     // Get all values for the feature
+//     vector<string> valuesForFeature = _featuresAndValuesDict[featureName];
+//     vector<double> valuesForFeatureAsDoubles;
+//     for (const auto &v : valuesForFeature)
+//     {
+//         if (v != "NA")
+//         {
+//             double valueAsDouble = convert(v);
+//             if (!std::isnan(valueAsDouble))
+//             {
+//                 valuesForFeatureAsDoubles.push_back(valueAsDouble);
+//             }
+//         }
+//     }
 
-    // Get all values less than the threshold
-    vector<double> allValuesLessThanThreshold;
-    for (const auto &v : valuesForFeatureAsDoubles)
-    {
-        if (v < thresholdAsDouble)
-        {
-            allValuesLessThanThreshold.push_back(v);
-        }
-    }
+//     // Get all values less than the threshold
+//     vector<double> allValuesLessThanThreshold;
+//     for (const auto &v : valuesForFeatureAsDoubles)
+//     {
+//         if (v < thresholdAsDouble)
+//         {
+//             allValuesLessThanThreshold.push_back(v);
+//         }
+//     }
 
-    // Calculate the probability
-    double probability = static_cast<double>(allValuesLessThanThreshold.size()) / static_cast<double>(valuesForFeatureAsDoubles.size());
-    _probabilityCache[featureThresholdCombo] = probability;
-    return probability;
-}
+//     // Calculate the probability
+//     double probability = static_cast<double>(allValuesLessThanThreshold.size()) / static_cast<double>(valuesForFeatureAsDoubles.size());
+//     _probabilityCache[featureThresholdCombo] = probability;
+//     return probability;
+// }
 
-double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className)
-{
-    double thresholdAsDouble = convert(threshold);
-    string featureThresholdCombo = featureName + "<" + std::to_string(thresholdAsDouble) + "::" + className;
+// double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className)
+// {
+//     double thresholdAsDouble = convert(threshold);
+//     string featureThresholdCombo = featureName + "<" + std::to_string(thresholdAsDouble) + "::" + className;
 
-    // Check if the probability is already cached
-    if (_probabilityCache.find(featureThresholdCombo) != _probabilityCache.end())
-    {
-        return _probabilityCache[featureThresholdCombo];
-    }
+//     // Check if the probability is already cached
+//     if (_probabilityCache.find(featureThresholdCombo) != _probabilityCache.end())
+//     {
+//         return _probabilityCache[featureThresholdCombo];
+//     }
 
-    // accumulate all smaples for given class
-    vector<int> dataSamplesForClass;
-    for (const auto &kv : _samplesClassLabelDict)
-    {
-        if (kv.second == className)
-        {
-            dataSamplesForClass.push_back(kv.first);
-        }
-    }
+//     // accumulate all smaples for given class
+//     vector<int> dataSamplesForClass;
+//     for (const auto &kv : _samplesClassLabelDict)
+//     {
+//         if (kv.second == className)
+//         {
+//             dataSamplesForClass.push_back(kv.first);
+//         }
+//     }
 
-    // Get all values for the feature
-    vector<string> actualFeatureValuesForSamplesInClass;
-    for (const auto sampleIdx : dataSamplesForClass)
-    {
-        for (const auto FeatureAndValue : _trainingDataDict[sampleIdx])
-        {
-            regex pattern(R"((.+)=(.+))");
-            smatch match;
-            if (regex_search(FeatureAndValue, match, pattern))
-            {
-                string feature = match[1];
-                string value = match[2];
-                if (feature == featureName && value != "NA")
-                {
-                    actualFeatureValuesForSamplesInClass.push_back(value);
-                }
-            }
-        }
-    }
+//     // Get all values for the feature
+//     vector<string> actualFeatureValuesForSamplesInClass;
+//     for (const auto sampleIdx : dataSamplesForClass)
+//     {
+//         for (const auto FeatureAndValue : _trainingDataDict[sampleIdx])
+//         {
+//             regex pattern(R"((.+)=(.+))");
+//             smatch match;
+//             if (regex_search(FeatureAndValue, match, pattern))
+//             {
+//                 string feature = match[1];
+//                 string value = match[2];
+//                 if (feature == featureName && value != "NA")
+//                 {
+//                     actualFeatureValuesForSamplesInClass.push_back(value);
+//                 }
+//             }
+//         }
+//     }
 
-    // Get all values less than the threshold
-    vector<double> actualPointsForFeatureLessThanThreshold;
-    for (const auto &v : actualFeatureValuesForSamplesInClass)
-    {
-        double valueAsDouble = convert(v);
-        if (!std::isnan(valueAsDouble) && valueAsDouble < thresholdAsDouble)
-        {
-            actualPointsForFeatureLessThanThreshold.push_back(valueAsDouble);
-        }
-    }
+//     // Get all values less than the threshold
+//     vector<double> actualPointsForFeatureLessThanThreshold;
+//     for (const auto &v : actualFeatureValuesForSamplesInClass)
+//     {
+//         double valueAsDouble = convert(v);
+//         if (!std::isnan(valueAsDouble) && valueAsDouble < thresholdAsDouble)
+//         {
+//             actualPointsForFeatureLessThanThreshold.push_back(valueAsDouble);
+//         }
+//     }
 
-    // Calculate and cache the probability
-    double probability = static_cast<double>(actualPointsForFeatureLessThanThreshold.size()) / static_cast<double>(actualFeatureValuesForSamplesInClass.size());
-    _probabilityCache[featureThresholdCombo] = probability;
-    return probability;
-}
+//     // Calculate and cache the probability
+//     double probability = static_cast<double>(actualPointsForFeatureLessThanThreshold.size()) / static_cast<double>(actualFeatureValuesForSamplesInClass.size());
+//     _probabilityCache[featureThresholdCombo] = probability;
+//     return probability;
+// }
 
-double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
-{
-    // This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array of branch features and thresholds
-    // check len of array to not be zero
-    if (arrayOfFeaturesAndValuesOrThresholds.size() == 0)
-    {
-        return std::nan("");
-    }
-    // generate sequence string
-    string sequence = "";
-    for (const auto &item : arrayOfFeaturesAndValuesOrThresholds)
-    {
-        sequence += item + ":";
-    }
-    // check if the sequence is in the cache
-    if (_probabilityCache.find(sequence) != _probabilityCache.end())
-    {
-        return _probabilityCache[sequence];
-    }
+// double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
+// {
+//     // This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array of branch features and thresholds
+//     // check len of array to not be zero
+//     if (arrayOfFeaturesAndValuesOrThresholds.size() == 0)
+//     {
+//         return std::nan("");
+//     }
+//     // generate sequence string
+//     string sequence = "";
+//     for (const auto &item : arrayOfFeaturesAndValuesOrThresholds)
+//     {
+//         sequence += item + ":";
+//     }
+//     // check if the sequence is in the cache
+//     if (_probabilityCache.find(sequence) != _probabilityCache.end())
+//     {
+//         return _probabilityCache[sequence];
+//     }
 
-    // setup the ritual table
-    double probability = std::nan("");
-    regex pattern1(R"((.+)=(.+))");
-    regex pattern2(R"((.+)<(.+))");
-    regex pattern3(R"((.+)>(.+))");
-    vector<string> trueNumericTypes;
-    vector<string> trueNumericTypesFeatureNames;
-    vector<string> symbolicTypes;
-    vector<string> symbolicTypesFeatureNames;
+//     // setup the ritual table
+//     double probability = std::nan("");
+//     regex pattern1(R"((.+)=(.+))");
+//     regex pattern2(R"((.+)<(.+))");
+//     regex pattern3(R"((.+)>(.+))");
+//     vector<string> trueNumericTypes;
+//     vector<string> trueNumericTypesFeatureNames;
+//     vector<string> symbolicTypes;
+//     vector<string> symbolicTypesFeatureNames;
 
-    // cast draw the incantation
-    for (const auto &item : arrayOfFeaturesAndValuesOrThresholds)
-    {
-        smatch match;
-        string feature;
-        string value;
-        if (regex_search(item, match, pattern2))
-        {
-            feature = match[1];
-            value = match[2];
-            trueNumericTypes.push_back(item);
-            trueNumericTypesFeatureNames.push_back(feature);
-        }
-        else if (regex_search(item, match, pattern3))
-        {
-            feature = match[1];
-            value = match[2];
-            trueNumericTypes.push_back(item);
-            trueNumericTypesFeatureNames.push_back(feature);
-        }
-        else
-        {
-            feature = match[1]; // group 1
-            value = match[2];   // group 2
-            symbolicTypes.push_back(item);
-            symbolicTypesFeatureNames.push_back(feature);
-        }
-    }
+//     // cast draw the incantation
+//     for (const auto &item : arrayOfFeaturesAndValuesOrThresholds)
+//     {
+//         smatch match;
+//         string feature;
+//         string value;
+//         if (regex_search(item, match, pattern2))
+//         {
+//             feature = match[1];
+//             value = match[2];
+//             trueNumericTypes.push_back(item);
+//             trueNumericTypesFeatureNames.push_back(feature);
+//         }
+//         else if (regex_search(item, match, pattern3))
+//         {
+//             feature = match[1];
+//             value = match[2];
+//             trueNumericTypes.push_back(item);
+//             trueNumericTypesFeatureNames.push_back(feature);
+//         }
+//         else
+//         {
+//             feature = match[1]; // group 1
+//             value = match[2];   // group 2
+//             symbolicTypes.push_back(item);
+//             symbolicTypesFeatureNames.push_back(feature);
+//         }
+//     }
 
-    // remove duplicates from feature names in-place
-    trueNumericTypesFeatureNames.erase(unique(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end()), trueNumericTypesFeatureNames.end());
-    symbolicTypesFeatureNames.erase(unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()), symbolicTypesFeatureNames.end());
-    vector<string> boundedIntervalsNumericTypes = this->findBoundedIntervalsForNumericFeatures(trueNumericTypes);
+//     // remove duplicates from feature names in-place
+//     trueNumericTypesFeatureNames.erase(unique(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end()), trueNumericTypesFeatureNames.end());
+//     symbolicTypesFeatureNames.erase(unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()), symbolicTypesFeatureNames.end());
+//     vector<string> boundedIntervalsNumericTypes = this->findBoundedIntervalsForNumericFeatures(trueNumericTypes);
 
-    // Calculate the upper and the lower bounds to be used when searching for the best
-    // threshold for each of the numeric features that are in play at the current node:
+//     // Calculate the upper and the lower bounds to be used when searching for the best
+//     // threshold for each of the numeric features that are in play at the current node:
 
-    // populate bounds with feature names
-    std::map<string, double> lowerBound;
-    std::map<string, double> upperBound;
-    for (const auto &feature : trueNumericTypesFeatureNames)
-    {
-        lowerBound[feature] = std::numeric_limits<double>::max();
-        upperBound[feature] = std::numeric_limits<double>::min();
-    }
+//     // populate bounds with feature names
+//     std::map<string, double> lowerBound;
+//     std::map<string, double> upperBound;
+//     for (const auto &feature : trueNumericTypesFeatureNames)
+//     {
+//         lowerBound[feature] = std::numeric_limits<double>::max();
+//         upperBound[feature] = std::numeric_limits<double>::min();
+//     }
 
-    // populate with values from the bounded intervals
-    for (const auto &item : boundedIntervalsNumericTypes)
-    {
-        if (item[1] == ">")
-        {
-            lowerBound[item[0]] = convert(item[2]);
-        }
-        else
-        {
-            upperBound[item[0]] = convert(item[2]);
-        }
-    }
+//     // populate with values from the bounded intervals
+//     for (const auto &item : boundedIntervalsNumericTypes)
+//     {
+//         if (item[1] == ">")
+//         {
+//             lowerBound[item[0]] = convert(item[2]);
+//         }
+//         else
+//         {
+//             upperBound[item[0]] = convert(item[2]);
+//         }
+//     }
 
-    // Cast the black magic
-    for (const auto &featureName : trueNumericTypesFeatureNames)
-    {
-        if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] != std::numeric_limits<double>::min())
-        {
-            if (upperBound[featureName] <= lowerBound[featureName])
-            {
-                return 0; // Return 0 if upper bound is less than or equal to lower bound
-            }
-            else
-            {
-                if (!probability)
-                {
-                    probability = this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName])) -
-                                  this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName]));
-                }
-                else
-                {
-                    probability *= (this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName])) -
-                                    this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName])));
-                }
-            }
-        }
-        else if (upperBound[featureName] != std::numeric_limits<double>::min() && lowerBound[featureName] == std::numeric_limits<double>::max())
-        {
-            if (!probability)
-            {
-                probability = this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName]));
-            }
-            else
-            {
-                probability *= this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName]));
-            }
-        }
-        else if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] == std::numeric_limits<double>::min())
-        {
-            if (!probability)
-            {
-                probability = 1.0 - this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName]));
-            }
-            else
-            {
-                probability *= (1.0 - this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName])));
-            }
-        }
-        else
-        {
-            // throw an error
-            throw std::runtime_error("Ill formatted call to 'probability_of_sequence' method");
-        }
-    }
+//     // Cast the black magic
+//     for (const auto &featureName : trueNumericTypesFeatureNames)
+//     {
+//         if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] != std::numeric_limits<double>::min())
+//         {
+//             if (upperBound[featureName] <= lowerBound[featureName])
+//             {
+//                 return 0; // Return 0 if upper bound is less than or equal to lower bound
+//             }
+//             else
+//             {
+//                 if (!probability)
+//                 {
+//                     probability = this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName])) -
+//                                   this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName]));
+//                 }
+//                 else
+//                 {
+//                     probability *= (this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName])) -
+//                                     this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName])));
+//                 }
+//             }
+//         }
+//         else if (upperBound[featureName] != std::numeric_limits<double>::min() && lowerBound[featureName] == std::numeric_limits<double>::max())
+//         {
+//             if (!probability)
+//             {
+//                 probability = this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName]));
+//             }
+//             else
+//             {
+//                 probability *= this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName]));
+//             }
+//         }
+//         else if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] == std::numeric_limits<double>::min())
+//         {
+//             if (!probability)
+//             {
+//                 probability = 1.0 - this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName]));
+//             }
+//             else
+//             {
+//                 probability *= (1.0 - this->probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName])));
+//             }
+//         }
+//         else
+//         {
+//             // throw an error
+//             throw std::runtime_error("Ill formatted call to 'probability_of_sequence' method");
+//         }
+//     }
 
-    // Cast the white magic
-    for (const auto &featureAndValue : symbolicTypes)
-    {
-        smatch match;
-        if (regex_search(featureAndValue, match, pattern1))
-        {
-            string feature = match[1];
-            string value = match[2];
-            if (!probability)
-            {
-                probability = this->probabilityOfFeatureValue(feature, value);
-            }
-            else
-            {
-                probability *= this->probabilityOfFeatureValue(feature, value);
-            }
-        }
-    }
-    _probabilityCache[sequence] = probability;
-    return probability;
-}
+//     // Cast the white magic
+//     for (const auto &featureAndValue : symbolicTypes)
+//     {
+//         smatch match;
+//         if (regex_search(featureAndValue, match, pattern1))
+//         {
+//             string feature = match[1];
+//             string value = match[2];
+//             if (!probability)
+//             {
+//                 probability = this->probabilityOfFeatureValue(feature, value);
+//             }
+//             else
+//             {
+//                 probability *= this->probabilityOfFeatureValue(feature, value);
+//             }
+//         }
+//     }
+//     _probabilityCache[sequence] = probability;
+//     return probability;
+// }
 //--------------- Class Based Utilities ----------------//
 
 bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)
@@ -1256,120 +1255,120 @@ DecisionTree &DecisionTree::operator=(const DecisionTree &dt)
     return *this;
 }
 
-vector<string> DecisionTree::findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes)
-{
-    // Step 1: Split each item in `trueNumericTypes` by '>' or '<'
-    vector<vector<string>> splitArr;
-    regex re("(>|<)"); // Regular expression to match '>' or '<'
+// vector<string> DecisionTree::findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes)
+// {
+//     // Step 1: Split each item in `trueNumericTypes` by '>' or '<'
+//     vector<vector<string>> splitArr;
+//     regex re("(>|<)"); // Regular expression to match '>' or '<'
 
-    for (const auto &s : trueNumericTypes)
-    {
-        vector<string> parts{s}; // Initialize with the feature name
-        // Use regex iterator to split each string at '>' or '<' symbols
-        sregex_token_iterator iter(s.begin(), s.end(), re, {-1, 0});
-        sregex_token_iterator end;
+//     for (const auto &s : trueNumericTypes)
+//     {
+//         vector<string> parts{s}; // Initialize with the feature name
+//         // Use regex iterator to split each string at '>' or '<' symbols
+//         sregex_token_iterator iter(s.begin(), s.end(), re, {-1, 0});
+//         sregex_token_iterator end;
 
-        // Add each part from the split that is non-empty to `parts`
-        for (; iter != end; ++iter)
-        {
-            if (!iter->str().empty())
-                parts.push_back(*iter);
-        }
-        splitArr.push_back(parts); // Append the processed parts to `splitArr`
-    }
+//         // Add each part from the split that is non-empty to `parts`
+//         for (; iter != end; ++iter)
+//         {
+//             if (!iter->str().empty())
+//                 parts.push_back(*iter);
+//         }
+//         splitArr.push_back(parts); // Append the processed parts to `splitArr`
+//     }
 
-    // Step 2: Group items by feature names in `_featureNames`
-    vector<vector<vector<string>>> groupedByFeature;
-    for (const auto &feature : _featureNames)
-    {
-        vector<vector<string>> featureGroup;
-        // Filter `splitArr` for entries that match the current feature name
-        copy_if(splitArr.begin(), splitArr.end(), back_inserter(featureGroup),
-                [&feature](const vector<string> &item)
-                { return item[0] == feature; });
-        groupedByFeature.push_back(featureGroup); // Store the grouped results
-    }
+//     // Step 2: Group items by feature names in `_featureNames`
+//     vector<vector<vector<string>>> groupedByFeature;
+//     for (const auto &feature : _featureNames)
+//     {
+//         vector<vector<string>> featureGroup;
+//         // Filter `splitArr` for entries that match the current feature name
+//         copy_if(splitArr.begin(), splitArr.end(), back_inserter(featureGroup),
+//                 [&feature](const vector<string> &item)
+//                 { return item[0] == feature; });
+//         groupedByFeature.push_back(featureGroup); // Store the grouped results
+//     }
 
-    // Step 3: Sort each feature group so '<' entries come before '>' entries
-    vector<vector<vector<string>>> sortedBySymbol;
-    for (auto &featureGroup : groupedByFeature)
-    {
-        // Sort based on comparison symbol (position 1), so '<' comes before '>'
-        sort(featureGroup.begin(), featureGroup.end(),
-             [](const vector<string> &a, const vector<string> &b)
-             { return a[1] < b[1]; });
-        sortedBySymbol.push_back(featureGroup);
-    }
+//     // Step 3: Sort each feature group so '<' entries come before '>' entries
+//     vector<vector<vector<string>>> sortedBySymbol;
+//     for (auto &featureGroup : groupedByFeature)
+//     {
+//         // Sort based on comparison symbol (position 1), so '<' comes before '>'
+//         sort(featureGroup.begin(), featureGroup.end(),
+//              [](const vector<string> &a, const vector<string> &b)
+//              { return a[1] < b[1]; });
+//         sortedBySymbol.push_back(featureGroup);
+//     }
 
-    // Step 4: Separate items within each sorted list by comparison symbol and sort by numeric value
-    vector<vector<vector<string>>> sortedNumeric;
-    for (const auto &sortedGroup : sortedBySymbol)
-    {
-        vector<vector<string>> tempGroup;
+//     // Step 4: Separate items within each sorted list by comparison symbol and sort by numeric value
+//     vector<vector<vector<string>>> sortedNumeric;
+//     for (const auto &sortedGroup : sortedBySymbol)
+//     {
+//         vector<vector<string>> tempGroup;
 
-        // Separate items based on the comparison symbol ('<' or '>')
-        for (const auto &symbol : {"<", ">"})
-        {
-            vector<vector<string>> comparisonGroup;
-            copy_if(sortedGroup.begin(), sortedGroup.end(), back_inserter(comparisonGroup),
-                    [&symbol](const vector<string> &item)
-                    { return item[1] == symbol; });
+//         // Separate items based on the comparison symbol ('<' or '>')
+//         for (const auto &symbol : {"<", ">"})
+//         {
+//             vector<vector<string>> comparisonGroup;
+//             copy_if(sortedGroup.begin(), sortedGroup.end(), back_inserter(comparisonGroup),
+//                     [&symbol](const vector<string> &item)
+//                     { return item[1] == symbol; });
 
-            // Sort each group by the numeric value (position 2)
-            sort(comparisonGroup.begin(), comparisonGroup.end(),
-                 [](const vector<string> &a, const vector<string> &b)
-                 { return stof(a[2]) < stof(b[2]); });
+//             // Sort each group by the numeric value (position 2)
+//             sort(comparisonGroup.begin(), comparisonGroup.end(),
+//                  [](const vector<string> &a, const vector<string> &b)
+//                  { return stof(a[2]) < stof(b[2]); });
 
-            // Add sorted comparison groups to `tempGroup`
-            tempGroup.insert(tempGroup.end(), comparisonGroup.begin(), comparisonGroup.end());
-        }
-        sortedNumeric.push_back(tempGroup); // Store the fully sorted groups
-    }
+//             // Add sorted comparison groups to `tempGroup`
+//             tempGroup.insert(tempGroup.end(), comparisonGroup.begin(), comparisonGroup.end());
+//         }
+//         sortedNumeric.push_back(tempGroup); // Store the fully sorted groups
+//     }
 
-    // Step 5: Flatten and filter items again by `_featureNames`
-    vector<vector<string>> finalFiltered;
-    for (const auto &feature : _featureNames)
-    {
-        vector<vector<string>> featureFiltered;
+//     // Step 5: Flatten and filter items again by `_featureNames`
+//     vector<vector<string>> finalFiltered;
+//     for (const auto &feature : _featureNames)
+//     {
+//         vector<vector<string>> featureFiltered;
 
-        // Filter `sortedNumeric` to retain only entries for the current feature
-        copy_if(sortedNumeric.begin(), sortedNumeric.end(), back_inserter(featureFiltered),
-                [&feature](const vector<string> &item)
-                { return item[0] == feature; });
+//         // Filter `sortedNumeric` to retain only entries for the current feature
+//         copy_if(sortedNumeric.begin(), sortedNumeric.end(), back_inserter(featureFiltered),
+//                 [&feature](const vector<string> &item)
+//                 { return item[0] == feature; });
 
-        // Collect filtered entries in `finalFiltered`
-        finalFiltered.insert(finalFiltered.end(), featureFiltered.begin(), featureFiltered.end());
-    }
+//         // Collect filtered entries in `finalFiltered`
+//         finalFiltered.insert(finalFiltered.end(), featureFiltered.begin(), featureFiltered.end());
+//     }
 
-    // Step 6: Determine intervals: keep the first item if it's '<', the last if it's '>',
-    // and both if they differ in comparison type
-    vector<vector<string>> finalSelection;
-    for (auto &featureList : finalFiltered)
-    {
-        vector<string> selected;
+//     // Step 6: Determine intervals: keep the first item if it's '<', the last if it's '>',
+//     // and both if they differ in comparison type
+//     vector<vector<string>> finalSelection;
+//     for (auto &featureList : finalFiltered)
+//     {
+//         vector<string> selected;
 
-        // Select the lowest bound if '<' or highest if '>', or both if necessary
-        if (featureList.front()[1] == "<")
-            selected.push_back(featureList.front()[2]);
-        else
-            selected.push_back(featureList.back()[2]);
+//         // Select the lowest bound if '<' or highest if '>', or both if necessary
+//         if (featureList.front()[1] == "<")
+//             selected.push_back(featureList.front()[2]);
+//         else
+//             selected.push_back(featureList.back()[2]);
 
-        // If bounds differ ('<' and '>'), add both the lowest and highest
-        if (featureList.front()[1] != featureList.back()[1])
-            selected.push_back(featureList.back()[2]);
+//         // If bounds differ ('<' and '>'), add both the lowest and highest
+//         if (featureList.front()[1] != featureList.back()[1])
+//             selected.push_back(featureList.back()[2]);
 
-        finalSelection.push_back(selected); // Append the bounded intervals
-    }
+//         finalSelection.push_back(selected); // Append the bounded intervals
+//     }
 
-    // Step 7: Flatten the final selection into a single vector for the result
-    vector<string> result;
-    for (const auto &interval : finalSelection)
-    {
-        copy(interval.begin(), interval.end(), back_inserter(result));
-    }
+//     // Step 7: Flatten the final selection into a single vector for the result
+//     vector<string> result;
+//     for (const auto &interval : finalSelection)
+//     {
+//         copy(interval.begin(), interval.end(), back_inserter(result));
+//     }
 
-    return result; // Return the flattened list of selected intervals
-}
+//     return result; // Return the flattened list of selected intervals
+// }
 
 // print the stree variables
 void DecisionTree::printStats()
