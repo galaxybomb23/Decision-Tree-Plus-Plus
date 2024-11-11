@@ -47,7 +47,13 @@ TEST_F(ProbCalcTest, priorProbabilityForClass) {
 }
 
 TEST_F(ProbCalcTest, calculateClassPriors) {
-    ASSERT_EQ(1, 1);
+    dt->calculateClassPriors();
+    vector<float> expected = {0.62, 0.38};
+    vector<float> priors;
+    for (int i = 0; i < dt->_classNames.size(); i++) {
+        priors.push_back(dt->priorProbabilityForClass(dt->_classNames[i]));
+        ASSERT_EQ(expected[i], priors[i]);
+    }
 }
 
 TEST_F(ProbCalcTest, probabilityOfFeatureValue) {

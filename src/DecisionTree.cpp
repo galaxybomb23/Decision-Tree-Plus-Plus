@@ -945,10 +945,10 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
         }
 
         // print the prob cache
-        for (const auto &kv : _probabilityCache)
-        {
-            cout << kv.first << " : " << kv.second << endl;
-        }
+        // for (const auto &kv : _probabilityCache)
+        // {
+        //     cout << kv.first << " : " << kv.second << endl;
+        // }
 
         if (_probabilityCache.find(featureAndValue) != _probabilityCache.end())
         {
