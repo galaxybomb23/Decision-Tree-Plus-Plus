@@ -43,14 +43,11 @@ public:
     double classEntropyOnPriors();
 
     //--------------- Probability Calculators ----------------//
-    double priorProbabilityForClass(const string &className,
-                                    bool overloadCache = false);
+    double priorProbabilityForClass(const string &className, bool overloadCache = false);
     void calculateClassPriors();
-    double probabilityOfFeatureValue(const string &feature,
-                                     const string &value);
-    double probabilityOfFeatureLessThanThreshold(const string &feature,
-                                                 const string &threshold);
-    double probabilityOfFeatureValueGivenClass(const string &featureName, const string &threshold);
+    double probabilityOfFeatureValue(const string &feature, const string &value);
+    double probabilityOfFeatureValueGivenClass(const string &feature, const string &value, const string &className);
+    double probabilityOfFeatureLessThanThreshold(const string &featureName, const string &threshold);
     double probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className);
     double probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 

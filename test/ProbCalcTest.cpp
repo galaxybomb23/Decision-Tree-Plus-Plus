@@ -66,3 +66,23 @@ TEST_F(ProbCalcTest, probabilityOfFeatureValue) {
     auto prob3 = dt->probabilityOfFeatureValue("smoking", "heavy");
     ASSERT_EQ(prob3, 0.44);
 }
+
+TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClass) {
+    auto prob0 = dt->probabilityOfFeatureValueGivenClass("smoking", "never", "benign");
+    ASSERT_NEAR(prob0, 0.242, 0.001);
+    auto prob1 = dt->probabilityOfFeatureValueGivenClass("smoking", "light", "benign");
+    ASSERT_NEAR(prob1, 0.339, 0.001);
+    auto prob2 = dt->probabilityOfFeatureValueGivenClass("smoking", "medium", "benign");
+    ASSERT_NEAR(prob2, 0.258, 0.001);
+    auto prob3 = dt->probabilityOfFeatureValueGivenClass("smoking", "heavy", "benign");
+    ASSERT_NEAR(prob3, 0.161, 0.001);
+
+    auto prob4 = dt->probabilityOfFeatureValueGivenClass("smoking", "never", "malignant");
+    ASSERT_NEAR(prob4, 0.026, 0.001);
+    auto prob5 = dt->probabilityOfFeatureValueGivenClass("smoking", "light", "malignant");
+    ASSERT_NEAR(prob5, 0.053, 0.001);
+    auto prob6 = dt->probabilityOfFeatureValueGivenClass("smoking", "medium", "malignant");
+    ASSERT_NEAR(prob6, 0.026, 0.001);
+    auto prob7 = dt->probabilityOfFeatureValueGivenClass("smoking", "heavy", "malignant");
+    ASSERT_NEAR(prob7, 0.895, 0.001);
+}
