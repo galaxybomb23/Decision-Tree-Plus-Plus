@@ -1062,6 +1062,7 @@ double DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature,
     return 0.0;
 }
 
+// This is used for NUMERIC features only, threshold is a string, but should be a double
 double DecisionTree::probabilityOfFeatureLessThanThreshold(const string &featureName, const string &threshold)
 {
     double thresholdAsDouble = convert(threshold);
@@ -1092,7 +1093,7 @@ double DecisionTree::probabilityOfFeatureLessThanThreshold(const string &feature
     vector<double> allValuesLessThanThreshold;
     for (const auto &v : valuesForFeatureAsDoubles)
     {
-        if (v < thresholdAsDouble)
+        if (v <= thresholdAsDouble)
         {
             allValuesLessThanThreshold.push_back(v);
         }
@@ -1104,63 +1105,65 @@ double DecisionTree::probabilityOfFeatureLessThanThreshold(const string &feature
     return probability;
 }
 
-// double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className)
-// {
-//     double thresholdAsDouble = convert(threshold);
-//     string featureThresholdCombo = featureName + "<" + std::to_string(thresholdAsDouble) + "::" + className;
+double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className)
+{
+    double thresholdAsDouble = convert(threshold);
+    string featureThresholdCombo = featureName + "<" + std::to_string(thresholdAsDouble) + "::" + className;
 
-//     // Check if the probability is already cached
-//     if (_probabilityCache.find(featureThresholdCombo) != _probabilityCache.end())
-//     {
-//         return _probabilityCache[featureThresholdCombo];
-//     }
+    // Check if the probability is already cached
+    if (_probabilityCache.find(featureThresholdCombo) != _probabilityCache.end())
+    {
+        return _probabilityCache[featureThresholdCombo];
+    }
 
-//     // accumulate all smaples for given class
-//     vector<int> dataSamplesForClass;
-//     for (const auto &kv : _samplesClassLabelDict)
-//     {
-//         if (kv.second == className)
-//         {
-//             dataSamplesForClass.push_back(kv.first);
-//         }
-//     }
+    // accumulate all smaples for given class
+    vector<int> dataSamplesForClass;
+    for (const auto &kv : _samplesClassLabelDict)
+    {
+        if (kv.second == className)
+        {
+            dataSamplesForClass.push_back(kv.first);
+        }
+    }
 
-//     // Get all values for the feature
-//     vector<string> actualFeatureValuesForSamplesInClass;
-//     for (const auto sampleIdx : dataSamplesForClass)
-//     {
-//         for (const auto FeatureAndValue : _trainingDataDict[sampleIdx])
-//         {
-//             regex pattern(R"((.+)=(.+))");
-//             smatch match;
-//             if (regex_search(FeatureAndValue, match, pattern))
-//             {
-//                 string feature = match[1];
-//                 string value = match[2];
-//                 if (feature == featureName && value != "NA")
-//                 {
-//                     actualFeatureValuesForSamplesInClass.push_back(value);
-//                 }
-//             }
-//         }
-//     }
+    // MARK: Correct up to here
 
-//     // Get all values less than the threshold
-//     vector<double> actualPointsForFeatureLessThanThreshold;
-//     for (const auto &v : actualFeatureValuesForSamplesInClass)
-//     {
-//         double valueAsDouble = convert(v);
-//         if (!std::isnan(valueAsDouble) && valueAsDouble < thresholdAsDouble)
-//         {
-//             actualPointsForFeatureLessThanThreshold.push_back(valueAsDouble);
-//         }
-//     }
+    // Get all values for the feature
+    vector<string> actualFeatureValuesForSamplesInClass;
+    for (const auto sampleIdx : dataSamplesForClass)
+    {
+        for (const auto FeatureAndValue : _trainingDataDict[sampleIdx])
+        {
+            regex pattern(R"((.+)=(.+))");
+            smatch match;
+            if (regex_search(FeatureAndValue, match, pattern))
+            {
+                string feature = match[1];
+                string value = match[2];
+                if (feature == featureName && value != "NA")
+                {
+                    actualFeatureValuesForSamplesInClass.push_back(value);
+                }
+            }
+        }
+    }
 
-//     // Calculate and cache the probability
-//     double probability = static_cast<double>(actualPointsForFeatureLessThanThreshold.size()) / static_cast<double>(actualFeatureValuesForSamplesInClass.size());
-//     _probabilityCache[featureThresholdCombo] = probability;
-//     return probability;
-// }
+    // Get all values less than the threshold
+    vector<double> actualPointsForFeatureLessThanThreshold;
+    for (const auto &v : actualFeatureValuesForSamplesInClass)
+    {
+        double valueAsDouble = convert(v);
+        if (!std::isnan(valueAsDouble) && valueAsDouble < thresholdAsDouble)
+        {
+            actualPointsForFeatureLessThanThreshold.push_back(valueAsDouble);
+        }
+    }
+
+    // Calculate and cache the probability
+    double probability = static_cast<double>(actualPointsForFeatureLessThanThreshold.size()) / static_cast<double>(actualFeatureValuesForSamplesInClass.size());
+    _probabilityCache[featureThresholdCombo] = probability;
+    return probability;
+}
 
 // double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 // {
