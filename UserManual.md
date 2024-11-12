@@ -95,4 +95,47 @@ import DecisionTreePP
 ```
 
 ## Examples
+Training data is supplied via text files, which are read into the `DecisionTree` constructur:
+
+```cpp
+std::map<std::string, std::string> kwargs = {
+      {"training_datafile", "../test/resources/training_symbolic.csv"},
+      {"csv_class_column_index", "1"},
+      {"csv_columns_for_features", {2, 3, 4, 5}},
+      {"max_depth_desired", "5"},
+      {"entropy_threshold", "0.1"}
+      // further arguments
+  };
+DecisionTree dt = DecisionTree(kwargs);
+DecisionTreeNode node =
+      DecisionTreeNode("feature", 0.0, {0.0}, {"branch"}, dt, true);
+}; // creating a node
+```
+
+A user may then read the training data and set up the tree for classification:
+
+```cpp
+dt.getTrainingData()
+dt.calculateFirstOrderProbabilities()
+dt.calculateClassPriors()
+
+// create a root node
+auto root = dt.constructDecisionTreeClassifier()
+
+// define sample
+const std::vector<std::string> featuresAndValues = {
+        "g2 = 4.2",
+        "grade = 2.3",
+        "gleason = 4",
+        "eet = 1.7",
+        "age = 55.0",
+        "ploidy = diploid"
+    };
+
+// classify
+auto classification = dt.classify(root_node, test_sample)
+```
+
+This will return reference to a hash map where the keys represent the class names and the values indicate the corresponding classification probabilities. Additionally, this hash map contains an extra key-value pair detailing the solution path from the root node to the leaf node where the final classification was determined.
+
 For more examples on usage and details on library functionality, check the  `demo.py`  script in the  `Python-build`  directory. You can also check the test cases located in the `test` directory for more examples on how to use the code.
