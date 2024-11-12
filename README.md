@@ -4,6 +4,12 @@
 
 This module allows users to construct a Decision Tree from training data containing either symbolic or numeric features, and peform classification tasks. A decision tree is a flowchart-like model utilizing nodes, where each internal node represents a "test" on an attribute designing to maximally-reduce entropy in a decision or classification task.​
 
+## Practical Usage
+
+Imagine you run a small investment company where traders make buy/sell decisions based on five specific criteria. One day, all your traders quit, however you have a record of all your traders' past decisions based on these criteria. Thankfully, our decision tree module can save your business!
+
+By pooling past buy/sell data in a training file, you may build a decision tree to classify any future investment decisions. According to Avinash Kak, this approach would outperform any of your former individual traders, as the computer's buy/sell decisions would leverage the collective knowledge of all past traders.
+
 ![image](https://github.com/user-attachments/assets/59ce82b5-9c86-4422-ad6e-32a96f239036)
 
 ## Features
