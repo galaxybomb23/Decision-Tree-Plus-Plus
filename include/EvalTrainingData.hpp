@@ -3,13 +3,13 @@
 
 class EvalTrainingData {
   public:
-    EvalTrainingData();  // Constructor
-    ~EvalTrainingData(); // Destructor
+	EvalTrainingData();	 // Constructor
+	~EvalTrainingData(); // Destructor
 
-    void evaluateTrainingData(); // Evaluate the training data
+	void evaluateTrainingData(); // Evaluate the training data
 
   private:
-    // Private members
+	// Private members
 };
 
 #endif // EVAL_TRAINING_DATA_HPP

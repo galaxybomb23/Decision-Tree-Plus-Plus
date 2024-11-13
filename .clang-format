@@ -8,7 +8,7 @@ BasedOnStyle: LLVM
 # General formatting
 IndentWidth: 4                  # Use 4 spaces for indentation
 TabWidth: 4                      # Number of spaces per tab
-UseTab: Never                    # Use spaces instead of tabs
+UseTab: Always                    # Use spaces instead of tabs
 
 # Column width and line breaking
 ColumnLimit: 120                  # Maximum width for lines
