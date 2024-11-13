@@ -1335,6 +1335,7 @@ double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const strin
 //     _probabilityCache[sequence] = probability;
 //     return probability;
 // }
+
 //--------------- Class Based Utilities ----------------//
 
 bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)
