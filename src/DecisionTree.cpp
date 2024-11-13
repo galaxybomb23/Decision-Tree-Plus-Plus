@@ -132,7 +132,7 @@ DecisionTree::~DecisionTree()
 
 //--------------- Functions ----------------//
 
-// Get training data
+// Get the training data from the CSV file
 void DecisionTree::getTrainingData()
 {
     // Check if training data file is a CSV file
@@ -156,16 +156,18 @@ void DecisionTree::getTrainingData()
     {
         std::istringstream ss(line);
         string token;
+        int columnIdx = 0; // Index of the column
         while (std::getline(ss, token, ','))
         {
             // strip leading/trailing whitespaces and \" from the token
             token.erase(0, token.find_first_not_of(" \""));
             token.erase(token.find_last_not_of(" \"") + 1);
-            _featureNames.push_back(token); // Get the feature names
+            // Check if the column is a class column, if not, add it to the feature columns
+            if (std::find(_csvColumnsForFeatures.begin(), _csvColumnsForFeatures.end(), columnIdx) != _csvColumnsForFeatures.end()) {
+                _featureNames.push_back(token); // Get the feature names
+            }
+            columnIdx++;
         }
-        // remove the first element to remove the unique id
-        // TODO: Implement the below
-        // _featureNames.erase(_featureNames.begin());
     }
 
     // Read the data
@@ -174,20 +176,37 @@ void DecisionTree::getTrainingData()
         std::istringstream ss(line);
         string token;
         vector<string> row;
+        int columnIdx = 0;
+        int uniqueId;
+        string className;
+
         while (std::getline(ss, token, ','))
         {
             // strip leading/trailing whitespaces and \" from the token
             token.erase(0, token.find_first_not_of(" \""));
             token.erase(token.find_last_not_of(" \"") + 1);
-            row.push_back(token);
+            
+            // If the column is the idx column, set the uniqueId
+            if (columnIdx == 0)
+            {
+                uniqueId = std::stoi(token);
+            }
+            // If the column is the class column, set the className
+            else if (columnIdx == _csvClassColumnIndex)
+            {
+                className = token;
+            } 
+            // If the column is a feature column, add the token to the row
+            else if (std::find(_csvColumnsForFeatures.begin(), _csvColumnsForFeatures.end(), columnIdx) != _csvColumnsForFeatures.end())
+            {
+                row.push_back(token);
+            }
+            columnIdx++;
         }
 
-        // remove the first element from the row
-        int uniqueId = std::stoi(row.front());
-        // row.erase(row.begin());
         _trainingDataDict[uniqueId] = row;
-        _samplesClassLabelDict[uniqueId] = row[_csvClassColumnIndex];
-        _classNames.push_back(row[_csvClassColumnIndex]);
+        _samplesClassLabelDict[uniqueId] = className;
+        _classNames.push_back(className);
     }
 
     // Close the file
@@ -204,23 +223,17 @@ void DecisionTree::getTrainingData()
     _howManyTotalTrainingSamples = _trainingDataDict.size();
 
     // Get the features and their values
-    for (int i = 1; i < _featureNames.size(); i++)
+    for (int i = 0; i < _featureNames.size(); i++)
     {
-        vector<string> allValues;
-        std::set<string> uniqueValues;
+        vector<string> allValues; // All values for the feature
+        std::set<string> uniqueValues; // Unique values for the feature
         for (const auto &kv : _trainingDataDict)
         {
-            allValues.push_back(kv.second[i]);
-            uniqueValues.insert(kv.second[i]);
+            allValues.push_back(kv.second[i]); // Insert the value into the vector
+            uniqueValues.insert(kv.second[i]); // Insert the value into the set
         }
         _featuresAndValuesDict[_featureNames[i]] = allValues;
         _featuresAndUniqueValuesDict[_featureNames[i]] = uniqueValues;
-    }
-
-    // itterate the _trainingDataDict remove the first element from the row
-    for (auto &kv : _trainingDataDict)
-    {
-        kv.second.erase(kv.second.begin());
     }
 }
 
@@ -752,6 +765,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
                 vector<string> values = _featuresAndValuesDict[feature];
                 std::set<string> uniqueValues;
 
+                // remove NA values
                 for (const auto &v : values)
                 {
                     if (v != "NA")
@@ -760,9 +774,11 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
                     }
                 }
 
+                // Get unique Values
                 vector<string> sortedUniqueValues(uniqueValues.begin(), uniqueValues.end());
                 std::sort(sortedUniqueValues.begin(), sortedUniqueValues.end());
 
+                // calc diffs
                 vector<double> diffs;
                 for (size_t i = 1; i < sortedUniqueValues.size(); ++i)
                 {
@@ -924,8 +940,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature,
             {
                 for (int j = 0; j < featuresAndValues.size(); j++)
                 {
-                    // TODO: Double check if this might go out of bounds
-                    string name = _featureNames[j + 1] + "=" + featuresAndValues[j];
+                    string name = _featureNames[j] + "=" + featuresAndValues[j];
                     if (valuesForFeatures[i] == name)
                     {
                         countsForValues[i]++;
@@ -1032,7 +1047,7 @@ double DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature,
             vector<string> featuresAndValues = _trainingDataDict[sample];
             for (int i = 0; i < valuesForFeature.size(); i++) {
                 for (int j = 0; j < featuresAndValues.size(); j++) {
-                    string name = _featureNames[j + 1] + "=" + featuresAndValues[j];
+                    string name = _featureNames[j] + "=" + featuresAndValues[j];
                     if (valuesForFeature[i] == name) {
                         countsForValues[i]++;
                     }
@@ -1079,7 +1094,7 @@ double DecisionTree::probabilityOfFeatureLessThanThreshold(const string &feature
     vector<double> valuesForFeatureAsDoubles;
     for (const auto &v : valuesForFeature)
     {
-        if (v != "NA")
+        if (v != "NA") // Remove NA
         {
             double valueAsDouble = convert(v);
             if (!std::isnan(valueAsDouble))
@@ -1126,34 +1141,27 @@ double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const strin
         }
     }
 
-    // MARK: Correct up to here
-
     // Get all values for the feature
     vector<string> actualFeatureValuesForSamplesInClass;
-    for (const auto sampleIdx : dataSamplesForClass)
+    for (const auto& sampleIdx : dataSamplesForClass)
     {
-        for (const auto FeatureAndValue : _trainingDataDict[sampleIdx])
+        int featureIdx = 0;
+        for (const auto& value : _trainingDataDict[sampleIdx])
         {
-            regex pattern(R"((.+)=(.+))");
-            smatch match;
-            if (regex_search(FeatureAndValue, match, pattern))
-            {
-                string feature = match[1];
-                string value = match[2];
-                if (feature == featureName && value != "NA")
+            // if feature matches, add it to the samples list
+                if (_featureNames[featureIdx++] == featureName && value != "NA")
                 {
-                    actualFeatureValuesForSamplesInClass.push_back(value);
-                }
-            }
+                    actualFeatureValuesForSamplesInClass.push_back(value);}
+
         }
     }
 
-    // Get all values less than the threshold
+    // Get all values less than or Equal to the threshold
     vector<double> actualPointsForFeatureLessThanThreshold;
     for (const auto &v : actualFeatureValuesForSamplesInClass)
     {
         double valueAsDouble = convert(v);
-        if (!std::isnan(valueAsDouble) && valueAsDouble < thresholdAsDouble)
+        if (!std::isnan(valueAsDouble) && valueAsDouble <= thresholdAsDouble)
         {
             actualPointsForFeatureLessThanThreshold.push_back(valueAsDouble);
         }

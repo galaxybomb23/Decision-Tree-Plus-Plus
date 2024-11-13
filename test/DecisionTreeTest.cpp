@@ -45,10 +45,10 @@ TEST_F(DecisionTreeTest, CheckParamsDt)
 {
   std::map<std::string, std::string> kargs = {
       {"training_datafile", "../test/resources/stage3cancer.csv"},
-      {"csv_class_column_index", "1"},
-      {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
-      {"max_depth_desired", "20"},
-      {"entropy_threshold", "0.1"},
+      {"csv_class_column_index", "2"},
+      {"csv_columns_for_features", {3,4,5,6,7,8}},
+      {"max_depth_desired", "8"},
+      {"entropy_threshold", "0.01"},
       {"symbolic_to_numeric_cardinality_threshold", "20"},
       {"number_of_histogram_bins", "10"},
       {"csv_cleanup_needed", "1"},
@@ -59,11 +59,11 @@ TEST_F(DecisionTreeTest, CheckParamsDt)
   DecisionTree dt = DecisionTree(kargs);
 
   ASSERT_EQ(dt.getTrainingDatafile(), "../test/resources/stage3cancer.csv");
-  ASSERT_EQ(dt.getEntropyThreshold(), 0.1);
-  ASSERT_EQ(dt.getMaxDepthDesired(), 20);
-  ASSERT_EQ(dt.getCsvClassColumnIndex(), 1);
+  ASSERT_EQ(dt.getEntropyThreshold(), 0.01);
+  ASSERT_EQ(dt.getMaxDepthDesired(), 8);
+  ASSERT_EQ(dt.getCsvClassColumnIndex(), 2);
   ASSERT_EQ(dt.getSymbolicToNumericCardinalityThreshold(), 20);
-  ASSERT_EQ(dt.getCsvColumnsForFeatures().size(), 10);
+  ASSERT_EQ(dt.getCsvColumnsForFeatures().size(), 6);
   ASSERT_EQ(dt.getNumberOfHistogramBins(), 10);
   ASSERT_EQ(dt.getCsvCleanupNeeded(), 1);
   ASSERT_EQ(dt.getDebug1(), 1);
@@ -77,10 +77,10 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
 {
   std::map<std::string, std::string> kargs = {
       {"training_datafile", "../test/resources/stage3cancer.csv"},
-      {"csv_class_column_index", "8"},
-      {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
-      {"max_depth_desired", "5"},
-      {"entropy_threshold", "0.1"},
+      {"csv_class_column_index", "2"},
+      {"csv_columns_for_features", {3,4,5,6,7,8}},
+      {"max_depth_desired", "8"},
+      {"entropy_threshold", "0.01"},
       {"symbolic_to_numeric_cardinality_threshold", "20"},
       {"number_of_histogram_bins", "10"},
       {"csv_cleanup_needed", "1"},
@@ -94,16 +94,16 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
   ASSERT_EQ(dt.getHowManyTotalTrainingSamples(), 146);
 
   std::vector<std::string> expectedFeatureNames = {
-      "", "pgtime", "pgstat", "age", "eet", "g2", "grade", "gleason", "ploidy"};
+	"age", "eet", "g2", "grade", "gleason", "ploidy"};
   ASSERT_EQ(dt.getFeatureNames(), expectedFeatureNames);
 
   // check if getTrainingDataDict() contains the following randomly selected
   // data
   std::map<int, std::vector<std::string>> expectedTrainingDataDict = {
-      {1, {"6.1", "0", "64", "2", "10.26", "2", "4", "diploid"}},
-      {146, {"2.1", "1", "56", "2", "9.01", "3", "7", "diploid"}},
-      {28, {"13.9", "0", "57", "2", "12.13", "3", "6", "diploid"}},
-      {55, {"1", "1", "61", "1", "2.4", "4", "10", "diploid"}}};
+      {1, {"64", "2", "10.26", "2", "4", "diploid"}},
+      {146, {"56", "2", "9.01", "3", "7", "diploid"}},
+      {28, {"57", "2", "12.13", "3", "6", "diploid"}},
+      {55, {"61", "1", "2.4", "4", "10", "diploid"}}};
   std::map<int, std::vector<std::string>> trainingDataDict =
       dt.getTrainingDataDict();
   for (auto data : expectedTrainingDataDict)
@@ -114,8 +114,6 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
   // check if getFeaturesAndValuesDict() contains the following randomly
   // selected data
   std::map<std::string, std::vector<std::string>> expectedFeaturesAndValuesDict = {
-      {"pgtime", {"15.9", "6.1", "4.8", "5.2"}},
-      {"pgstat", {"0", "1"}},
       {"age", {"64", "57", "61"}},
       {"eet", {"2", "1", "NA"}},
       {"g2", {"10.26", "9.01", "12.13", "2.4"}},
@@ -124,6 +122,7 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
       {"ploidy", {"aneuploid", "diploid", "tetraploid"}}};
   std::map<std::string, std::vector<std::string>> featuresAndValuesDict =
       dt.getFeaturesAndValuesDict();
+	
   for (const auto &data : expectedFeaturesAndValuesDict)
   {
     for (const auto &value : data.second)
@@ -135,6 +134,6 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
   }
 
   // check if _classNames is set correctly
-  std::vector<std::string> expectedClassNames = {"aneuploid", "diploid", "tetraploid"};
+  std::vector<std::string> expectedClassNames = {"0", "1"};
   ASSERT_EQ(dt._classNames, expectedClassNames);
 }

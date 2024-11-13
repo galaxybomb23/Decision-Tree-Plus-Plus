@@ -9,6 +9,9 @@ dtree = dt.DecisionTree( training_datafile = "test/resources/training_symbolic.c
 
 dtree.get_training_data()
 
+# ----- ProbOfFeatureValue -----
+# print(dtree.probability_of_feature_value( 'smoking', 'never' ))
+
 # ----- ProbOfFeatureValueGivenClass -----
 # print(dtree.probability_of_feature_value_given_class( 'smoking', 'never', 'class=benign' ))
 # print(dtree.probability_of_feature_value_given_class( 'smoking', 'never', 'class=malignant' ))
@@ -37,6 +40,7 @@ dtreeN = dt.DecisionTree( training_datafile = "test/resources/stage3cancer.csv",
                      )
 
 dtreeN.get_training_data()
+# print(dtreeN._training_data_dict)
 
 # ----- ProbOfFeatureValueLessThanThreshold -----
 # print(dtreeN.probability_of_feature_less_than_threshold( '"age"', '47' ))

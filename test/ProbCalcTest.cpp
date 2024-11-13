@@ -12,7 +12,7 @@ class ProbCalcTest : public ::testing::Test
         map<string,string> kwargsS = { // Symbolic kwargs
             {"training_datafile", "../test/resources/training_symbolic.csv"},
             {"csv_class_column_index", "1"},
-            {"csv_columns_for_features", "{2,3,4,5}"},
+            {"csv_columns_for_features", {2,3,4,5}},
             {"max_depth_desired", "5"},
             {"entropy_threshold", "0.1"}
         };
@@ -20,7 +20,7 @@ class ProbCalcTest : public ::testing::Test
         map<string,string> kwargsN = { // Numeric kwargs
             {"training_datafile", "../test/resources/stage3cancer.csv"},
             {"csv_class_column_index", "2"},
-            {"csv_columns_for_features", "{3,4,5,6,7,8}"},
+            {"csv_columns_for_features", {3,4,5,6,7,8}},
             {"max_depth_desired", "8"},
             {"entropy_threshold", "0.01"}
         };
@@ -39,17 +39,10 @@ class ProbCalcTest : public ::testing::Test
     }
 
 };
-// Pyhton setup:
-// dt = DecisionTree( training_datafile = r"penis",  
-//                         csv_class_column_index = 1,
-//                         csv_columns_for_features = [2,3,4,5],
-//                         max_depth_desired = 5,
-//                         entropy_threshold = 0.1,
-//                      )
 
 TEST_F(ProbCalcTest, CheckdtExists) { ASSERT_NE(&dtS, nullptr); }
 
-TEST_F(ProbCalcTest, priorProbabilityForClass) {
+TEST_F(ProbCalcTest, priorProbabilityForClassSymbolic) {
     double prob = dtS->priorProbabilityForClass("benign");
     ASSERT_EQ(prob, 0.62);
 
@@ -57,7 +50,7 @@ TEST_F(ProbCalcTest, priorProbabilityForClass) {
     ASSERT_EQ(prob, 0.38);
 }
 
-TEST_F(ProbCalcTest, calculateClassPriors) {
+TEST_F(ProbCalcTest, calculateClassPriorsSymbolic) {
     dtS->calculateClassPriors();
     vector<float> expected = {0.62, 0.38};
     vector<float> priors;
@@ -67,7 +60,7 @@ TEST_F(ProbCalcTest, calculateClassPriors) {
     }
 }
 
-TEST_F(ProbCalcTest, probabilityOfFeatureValue) {
+TEST_F(ProbCalcTest, probabilityOfFeatureValueSymbolic) {
     auto prob0 = dtS->probabilityOfFeatureValue("smoking", "never");
     ASSERT_EQ(prob0, 0.16);
     auto prob1 = dtS->probabilityOfFeatureValue("smoking", "light");
@@ -78,7 +71,7 @@ TEST_F(ProbCalcTest, probabilityOfFeatureValue) {
     ASSERT_EQ(prob3, 0.44);
 }
 
-TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClass) {
+TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClassSymbolic) {
     auto prob0 = dtS->probabilityOfFeatureValueGivenClass("smoking", "never", "benign");
     ASSERT_NEAR(prob0, 0.242, 0.001);
     auto prob1 = dtS->probabilityOfFeatureValueGivenClass("smoking", "light", "benign");
@@ -98,6 +91,12 @@ TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClass) {
     ASSERT_NEAR(prob7, 0.895, 0.001);
 }
 
+// TODO: Add tests for numeric data
+// priorProbabilityForClass
+// calculateClassPriors
+// probabilityOfFeatureValue
+// probabilityOfFeatureValueGivenClass
+
 TEST_F(ProbCalcTest, probabilityOfFeatureLessThanThreshold) {
     auto prob0 = dtN->probabilityOfFeatureLessThanThreshold("age", "47");
     ASSERT_NEAR(prob0, 0.007, 0.001);
@@ -109,5 +108,5 @@ TEST_F(ProbCalcTest, probabilityOfFeatureLessThanThreshold) {
 
 TEST_F(ProbCalcTest, probabilityOfFeatureLessThanThresholdGivenClass) {
     auto prob0 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("age", "47", "1");
-    ASSERT_NEAR(prob0, 0.007, 0.001);
+    ASSERT_NEAR(prob0, 0.019, 0.001);
 }
