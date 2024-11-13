@@ -1,11 +1,10 @@
 #ifndef TRAINING_DATA_GENERATOR_SYMBOLIC_HPP
 #define TRAINING_DATA_GENERATOR_SYMBOLIC_HPP
 
-class TrainingDataGeneratorSymbolic
-{
-private:
+class TrainingDataGeneratorSymbolic {
+  private:
     /* data */
-public:
+  public:
     TrainingDataGeneratorSymbolic(/* args */);
     ~TrainingDataGeneratorSymbolic();
 

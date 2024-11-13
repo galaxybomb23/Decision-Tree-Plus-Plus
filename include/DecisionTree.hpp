@@ -2,6 +2,8 @@
 #define DECISION_TREE_HPP
 
 // Include
+#include "DecisionTreeNode.hpp"
+
 #include <iostream>
 #include <map>
 #include <memory>
@@ -9,14 +11,11 @@
 #include <string>
 #include <vector>
 
-#include "DecisionTreeNode.hpp"
-
 using std::string, std::vector, std::map;
 
 class DecisionTreeNode;
-class DecisionTree
-{
-public:
+class DecisionTree {
+  public:
     //--------------- Constructors and Destructors ----------------//
     DecisionTree(map<string, string> kwargs); // constructor
     ~DecisionTree();                          // destructor
@@ -27,17 +26,14 @@ public:
     void showTrainingData() const;
 
     //--------------- Classify ----------------//
-    map<string, string> classify(
-        DecisionTreeNode *rootNode,
-        const vector<string> &featuresAndValues);
-    map<string, double> recursiveDescentForClassification(
-        DecisionTreeNode *node,
-        const vector<string> &feature_and_values,
-        map<string, vector<double>> &answer);
+    map<string, string> classify(DecisionTreeNode* rootNode, const vector<string> &featuresAndValues);
+    map<string, double> recursiveDescentForClassification(DecisionTreeNode* node,
+                                                          const vector<string> &feature_and_values,
+                                                          map<string, vector<double>> &answer);
 
     //--------------- Construct Tree ----------------//
-    DecisionTreeNode *constructDecisionTreeClassifier();
-    void recursiveDescent(DecisionTreeNode *node);
+    DecisionTreeNode* constructDecisionTreeClassifier();
+    void recursiveDescent(DecisionTreeNode* node);
 
     //--------------- Entropy Calculators ----------------//
     double classEntropyOnPriors();
@@ -48,8 +44,11 @@ public:
     double probabilityOfFeatureValue(const string &feature, const string &value);
     double probabilityOfFeatureValueGivenClass(const string &feature, const string &value, const string &className);
     double probabilityOfFeatureLessThanThreshold(const string &featureName, const string &threshold);
-    double probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className);
-    double probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
+    double probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName,
+                                                           const string &threshold,
+                                                           const string &className);
+    double
+    probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 
     //--------------- Class Based Utilities ----------------//
     bool checkNamesUsed(const vector<string> &featuresAndValues);
@@ -92,7 +91,7 @@ public:
     void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
     void setRootNode(std::unique_ptr<DecisionTreeNode> rootNode);
 
-private:
+  private:
     string _trainingDatafile;
     double _entropyThreshold;
     int _maxDepthDesired;

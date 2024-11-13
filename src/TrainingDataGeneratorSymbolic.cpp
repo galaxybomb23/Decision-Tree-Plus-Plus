@@ -1,12 +1,8 @@
 #include "TrainingDataGeneratorSymbolic.hpp"
 
-TrainingDataGeneratorSymbolic::TrainingDataGeneratorSymbolic(/* args */)
-{
-}
+TrainingDataGeneratorSymbolic::TrainingDataGeneratorSymbolic(/* args */) {}
 
-TrainingDataGeneratorSymbolic::~TrainingDataGeneratorSymbolic()
-{
-}
+TrainingDataGeneratorSymbolic::~TrainingDataGeneratorSymbolic() {}
 
 void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
 {
