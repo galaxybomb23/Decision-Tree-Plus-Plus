@@ -32,7 +32,8 @@ dtree.get_training_data()
 
 
 # NUMERIC
-dtreeN = dt.DecisionTree( training_datafile = "test/resources/stage3cancer.csv",
+dtreeN = dt.DecisionTree( 
+                        training_datafile = "test/resources/stage3cancer.csv",
                         csv_class_column_index = 2,
                         csv_columns_for_features = [3,4,5,6,7,8],
                         max_depth_desired = 8,
@@ -48,7 +49,7 @@ dtreeN.get_training_data()
 # print(dtreeN.probability_of_feature_less_than_threshold( '"age"', '100' ))
 
 # ----- ProbOfFeatureValueLessThanThresholdGivenClass -----
-print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"age"', '47', '"pgstat"=1' ))
+# print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"age"', '47', '"pgstat"=1' ))
 
 # dtreeN.calculate_first_order_probabilities()
 # dtreeN.calculate_class_priors()
@@ -58,3 +59,14 @@ print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"age"', '4
 # test_sampleN = ["pgtime=6.1","pgstat=1","age=70","eet=1","g2=11.7","grade=3","gleason=8","ploidy=diplooid"]
 # classificationN = dtreeN.classify(root_nodeN, test_sampleN)
 # print("Classification: " + str(classificationN))
+
+# ----- ProbOfASequenceOfFeaturesAndValuesOrThresholds -----
+
+
+# ----- FindBoundedIntervalsForNumericFeatures -----
+# test with one feature
+print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2">51.360000000000404'] ))
+# test with overlapping feature bounds
+print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2"<3.840000000000012', '"g2"<2.4'] ))
+# test with multiple features
+print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2"<3.840000000000012', '"age"<63.0'] ))

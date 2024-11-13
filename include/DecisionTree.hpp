@@ -53,7 +53,7 @@ class DecisionTree {
     //--------------- Class Based Utilities ----------------//
     bool checkNamesUsed(const vector<string> &featuresAndValues);
     DecisionTree &operator=(const DecisionTree &dt);
-    vector<string> findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes);
+    vector<vector<string>> findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes);
     void printStats();
 
     int _nodesCreated;

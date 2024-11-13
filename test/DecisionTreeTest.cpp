@@ -16,7 +16,7 @@ protected:
   }
 
   // Class members to be used in tests
-  std::map<std::string, std::string> kwargs = {
+  map<string, string> kwargs = {
       {"training_datafile", "../test/resources/training_symbolic.csv"},
       {"csv_class_column_index", "1"},
       {"csv_columns_for_features", {2, 3, 4, 5}},
@@ -43,7 +43,7 @@ TEST_F(DecisionTreeTest, ConstructorInitializesNode)
 
 TEST_F(DecisionTreeTest, CheckParamsDt)
 {
-  std::map<std::string, std::string> kargs = {
+  map<string, string> kargs = {
       {"training_datafile", "../test/resources/stage3cancer.csv"},
       {"csv_class_column_index", "2"},
       {"csv_columns_for_features", {3,4,5,6,7,8}},
@@ -75,7 +75,7 @@ TEST_F(DecisionTreeTest, CheckParamsDt)
 
 TEST_F(DecisionTreeTest, CheckGetTrainingData)
 {
-  std::map<std::string, std::string> kargs = {
+  map<string, string> kargs = {
       {"training_datafile", "../test/resources/stage3cancer.csv"},
       {"csv_class_column_index", "2"},
       {"csv_columns_for_features", {3,4,5,6,7,8}},
@@ -93,18 +93,18 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
   ASSERT_NO_THROW(dt.getTrainingData());
   ASSERT_EQ(dt.getHowManyTotalTrainingSamples(), 146);
 
-  std::vector<std::string> expectedFeatureNames = {
+  vector<string> expectedFeatureNames = {
 	"age", "eet", "g2", "grade", "gleason", "ploidy"};
   ASSERT_EQ(dt.getFeatureNames(), expectedFeatureNames);
 
   // check if getTrainingDataDict() contains the following randomly selected
   // data
-  std::map<int, std::vector<std::string>> expectedTrainingDataDict = {
+  map<int, vector<string>> expectedTrainingDataDict = {
       {1, {"64", "2", "10.26", "2", "4", "diploid"}},
       {146, {"56", "2", "9.01", "3", "7", "diploid"}},
       {28, {"57", "2", "12.13", "3", "6", "diploid"}},
       {55, {"61", "1", "2.4", "4", "10", "diploid"}}};
-  std::map<int, std::vector<std::string>> trainingDataDict =
+  map<int, vector<string>> trainingDataDict =
       dt.getTrainingDataDict();
   for (auto data : expectedTrainingDataDict)
   {
@@ -113,14 +113,14 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
 
   // check if getFeaturesAndValuesDict() contains the following randomly
   // selected data
-  std::map<std::string, std::vector<std::string>> expectedFeaturesAndValuesDict = {
+  map<string, vector<string>> expectedFeaturesAndValuesDict = {
       {"age", {"64", "57", "61"}},
       {"eet", {"2", "1", "NA"}},
       {"g2", {"10.26", "9.01", "12.13", "2.4"}},
       {"grade", {"2", "3", "4"}},
       {"gleason", {"4", "7", "6", "8", "10"}},
       {"ploidy", {"aneuploid", "diploid", "tetraploid"}}};
-  std::map<std::string, std::vector<std::string>> featuresAndValuesDict =
+  map<string, vector<string>> featuresAndValuesDict =
       dt.getFeaturesAndValuesDict();
 	
   for (const auto &data : expectedFeaturesAndValuesDict)
@@ -134,6 +134,26 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
   }
 
   // check if _classNames is set correctly
-  std::vector<std::string> expectedClassNames = {"0", "1"};
+  vector<string> expectedClassNames = {"0", "1"};
   ASSERT_EQ(dt._classNames, expectedClassNames);
+}
+
+TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures) {
+    // # test with one feature
+    // print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2">51.360000000000404'] ))
+    // [['"g2"', '>', '51.360000000000404']]
+    // vector<string> trueNumericTypes = {"g2>51.360000000000404"};
+    // vector<vector<string>> boundedIntervals = dt.findBoundedIntervalsForNumericFeatures(trueNumericTypes);
+    // vector<vector<string>> expectedBoundedIntervals = {{"g2", ">", "51.360000000000404"}};
+    // ASSERT_EQ(boundedIntervals, expectedBoundedIntervals);
+
+
+    // # test with overlapping feature bounds
+    // print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2"<3.840000000000012', '"g2"<2.4'] ))
+    // [['"g2"', '<', '2.4']]
+
+
+    // # test with multiple features
+    // print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2"<3.840000000000012', '"age"<63.0'] ))
+    // [['"age"', '<', '63.0'], ['"g2"', '<', '3.840000000000012']]
 }

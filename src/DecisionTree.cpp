@@ -1003,7 +1003,7 @@ double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const strin
 // &arrayOfFeaturesAndValuesOrThresholds)
 // {
 //     // This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array of
-//     branch features and thresholds
+//     // branch features and thresholds
 //     // check len of array to not be zero
 //     if (arrayOfFeaturesAndValuesOrThresholds.size() == 0)
 //     {
@@ -1205,7 +1205,7 @@ DecisionTree &DecisionTree::operator=(const DecisionTree &dt)
     return *this;
 }
 
-// vector<string> DecisionTree::findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes)
+// vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes)
 // {
 //     // Step 1: Split each item in `trueNumericTypes` by '>' or '<'
 //     vector<vector<string>> splitArr;
@@ -1323,23 +1323,23 @@ DecisionTree &DecisionTree::operator=(const DecisionTree &dt)
 // print the stree variables
 void DecisionTree::printStats()
 {
-    std::cout << "Training Datafile: " << _trainingDatafile << std::endl;
-    std::cout << "Entropy Threshold: " << _entropyThreshold << std::endl;
-    std::cout << "Max Depth Desired: " << _maxDepthDesired << std::endl;
-    std::cout << "CSV Class Column Index: " << _csvClassColumnIndex << std::endl;
-    std::cout << "Symbolic To Numeric Cardinality Threshold: " << _symbolicToNumericCardinalityThreshold << std::endl;
-    std::cout << "Number Of Histogram Bins: " << _numberOfHistogramBins << std::endl;
-    std::cout << "CSV Cleanup Needed: " << _csvCleanupNeeded << std::endl;
-    std::cout << "Debug1: " << _debug1 << std::endl;
-    std::cout << "Debug2: " << _debug2 << std::endl;
-    std::cout << "Debug3: " << _debug3 << std::endl;
-    std::cout << "How Many Total Training Samples: " << _howManyTotalTrainingSamples << std::endl;
-    std::cout << "Feature Names: ";
+    std::cout << "Training Datafile:                            " << _trainingDatafile << std::endl;
+    std::cout << "Entropy Threshold:                            " << _entropyThreshold << std::endl;
+    std::cout << "Max Depth Desired:                            " << _maxDepthDesired << std::endl;
+    std::cout << "CSV Class Column Index:                       " << _csvClassColumnIndex << std::endl;
+    std::cout << "Symbolic To Numeric Cardinality Threshold:    " << _symbolicToNumericCardinalityThreshold << std::endl;
+    std::cout << "Number Of Histogram Bins:                     " << _numberOfHistogramBins << std::endl;
+    std::cout << "CSV Cleanup Needed:                           " << _csvCleanupNeeded << std::endl;
+    std::cout << "Debug1:                                       " << _debug1 << std::endl;
+    std::cout << "Debug2:                                       " << _debug2 << std::endl;
+    std::cout << "Debug3:                                       " << _debug3 << std::endl;
+    std::cout << "How Many Total Training Samples:              " << _howManyTotalTrainingSamples << std::endl;
+    std::cout << "Feature Names: \n";
     for (const auto &feature : _featureNames) {
         std::cout << feature << " ";
     }
     std::cout << std::endl;
-    std::cout << "Training Data Dict: ";
+    std::cout << "Training Data Dict: \n";
     for (const auto &kv : _trainingDataDict) {
         std::cout << kv.first << ": ";
         for (const auto &v : kv.second) {
@@ -1347,7 +1347,7 @@ void DecisionTree::printStats()
         }
         std::cout << std::endl;
     }
-    std::cout << "Features And Values Dict: ";
+    std::cout << "Features And Values Dict: \n";
     for (const auto &kv : _featuresAndValuesDict) {
         std::cout << kv.first << ": ";
         for (const auto &v : kv.second) {
