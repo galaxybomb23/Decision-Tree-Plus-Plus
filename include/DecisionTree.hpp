@@ -47,8 +47,12 @@ class DecisionTree {
 	double probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName,
 														   const string &threshold,
 														   const string &className);
-	double
-	probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
+														   
+	double probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
+	double probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
+		const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &className);
+	double probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+		const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 
 	//--------------- Class Based Utilities ----------------//
 	bool checkNamesUsed(const vector<string> &featuresAndValues);

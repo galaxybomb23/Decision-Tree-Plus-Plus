@@ -1250,8 +1250,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
             }
             else
             {
-                // MARK: This is where the problem is, probabilityOfFeatureValue("grade", "2.0") is returning 0.0
-                // cout << "probabilityOfFeatureValue(feature, value): " << probabilityOfFeatureValue(feature, value) << endl;
                 probability *= probabilityOfFeatureValue(feature, value);
             }
         }
@@ -1260,6 +1258,18 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
     _probabilityCache[sequence] = probability;
     return probability;
 }
+
+// TODO: Implement this function
+double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
+		const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &className) {
+			return 0.0;
+		}
+
+// TODO: Implement this function
+double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+		const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds) {
+			return 0.0;
+		}
 
 //--------------- Class Based Utilities ----------------//
 
