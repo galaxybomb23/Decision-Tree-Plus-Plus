@@ -574,53 +574,56 @@ double DecisionTree::classEntropyOnPriors()
 //--------------- Probability Calculators ----------------//
 double DecisionTree::priorProbabilityForClass(const string &className, bool overloadCache)
 {
-	// make a cache key
-	string classNameInCache = "prior::" + className;
-	logger.log(LogLevel(0), "priorProbabilityForClass:: classNameInCache: " + classNameInCache);
+	// Generate a cache key for prior probability of a specific class
+	string classNameCacheKey = "prior::" + className;
+	logger.log(LogLevel(0), "priorProbabilityForClass:: classNameInCache: " + classNameCacheKey);
 
 	// Check if the probability is already in the cache (memoization)
-	if (_probabilityCache.find(classNameInCache) != _probabilityCache.end() && !overloadCache) {
+	if (_probabilityCache.find(classNameCacheKey) != _probabilityCache.end() && !overloadCache) {
 		logger.log(LogLevel(0),
 				   "priorProbabilityForClass:: probability found in cache: " +
-					   std::to_string(_probabilityCache[classNameInCache]));
-		return _probabilityCache[classNameInCache];
+					   std::to_string(_probabilityCache[classNameCacheKey]));
+		return _probabilityCache[classNameCacheKey];
 	}
 
 	logger.log(LogLevel(0), "priorProbabilityForClass:: probability not found in cache");
+
+	// Calculate prior probability for all classes and store in cache
 	size_t totalNumSamples = _samplesClassLabelDict.size();
-	// get get value from the dictionary
 	vector<string> allValues = {};
 	for (const auto &kv : _samplesClassLabelDict) {
 		allValues.push_back(kv.second);
 	}
 
-	// itterate over all class names to calculate their prior probabilities
+	// Iterate over all class names to calculate their prior probabilities
 	for (const auto &className : _classNames) {
-		// get the number of samples for the class
+		// Get the number of samples for the class
 		size_t numSamplesForClass = std::count(allValues.begin(), allValues.end(), className);
-		// calculate the prior probability for the class
+		// Calculate the prior probability for the class
 		double priorProbability = static_cast<double>(numSamplesForClass) / static_cast<double>(totalNumSamples);
 
-		// store the prior probability in the cache
-		string thisClassName			 = "prior::" + className;
-		_probabilityCache[thisClassName] = priorProbability;
-		logger.log(LogLevel(0),
-				   "priorProbabilityForClass:: prior probability for " + className + ": " +
-					   std::to_string(priorProbability));
+		// Store the prior probability in the cache
+		string classNamePrior = "prior::" + className;
+		_probabilityCache[classNamePrior] = priorProbability;
+		logger.log(LogLevel(0), "priorProbabilityForClass:: prior probability for " + className + ": " + std::to_string(priorProbability));
 	}
-	return _probabilityCache[classNameInCache];
+	return _probabilityCache[classNameCacheKey];
 }
 
 void DecisionTree::calculateClassPriors()
 {
 	cout << "\nCalculating class priors...\n";
+
+	// Return if the class priors have already been calculated
 	if (_samplesClassLabelDict.size() > 1) {
 		return;
 	}
 
+	// Calculate and cache the priors for each class
 	for (const auto &className : _classNames) {
 		priorProbabilityForClass(className, true);
 	}
+
 	if (_debug2) {
 		cout << "\nClass priors calculated:\n" << endl;
 		for (const auto &className : _classNames) {
@@ -629,103 +632,100 @@ void DecisionTree::calculateClassPriors()
 	}
 }
 
-double DecisionTree::probabilityOfFeatureValue(const string &feature, const string &Value)
+double DecisionTree::probabilityOfFeatureValue(const string &feature, const string &value)
 {
-	string value = Value; // create a copy of the value
-	// Convert the value to double, or NAN if it is symbolic
-	double valueAsDouble = convert(value);
+	// Prepare feature value and initialize variables
+	string adjustedValue = value; // Create a copy of the value
+	double valueAsDouble = convert(adjustedValue);
 	string featureAndValue;
 
 	// If the feature is numeric, find the closest sampling point
 	if (!std::isnan(valueAsDouble) &&
 		_samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
-		value = std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
+		adjustedValue = std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
 	}
 
-    // If the feature is numeric, assign is back to value
+    // If the feature is numeric, format the double for storing it into the cache
+	// This will remove trailing zeroes from the double as a string
     if (!std::isnan(valueAsDouble)) {
-        value = formatDouble(valueAsDouble);
+        adjustedValue = formatDouble(valueAsDouble);
     }
 
 	// Create a combined feature and value string
-	if (!value.empty()) {
-		featureAndValue = feature + "=" + value;
+	if (!adjustedValue.empty()) {
+		featureAndValue = feature + "=" + adjustedValue;
 	}
 
-    cout << value << featureAndValue << endl;
-
-
-	// Check if the probability is already cached
+	// Check if the probability is already cached, if so, return it
 	if (_probabilityCache.find(featureAndValue) != _probabilityCache.end()) {
 		return _probabilityCache[featureAndValue];
 	}
 
 	// Initialize variables for histogram calculations
 	double histogramDelta	  = 0.0;
-	double diffrange		  = 0.0;
-	vector<double> valuerange = {};
+	double diffRange		  = 0.0;
+	vector<double> valueRange = {};
 	int numOfHistogramBins	  = 0;
 
-	// Check if the feature is numeric and has a large number of unique values
+	// Check if feature is numeric with sufficient unique values for histogram calculations
 	if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
 		if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
+			// Calculate histogram delta based on median difference between unique sorted values
 			if (_samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
-				// Calculate the histogram delta and sampling points for the feature
-				valuerange = _numericFeaturesValueRangeDict[feature];
-				diffrange  = valuerange[1] - valuerange[0];
+				valueRange = _numericFeaturesValueRangeDict[feature];
+				diffRange  = valueRange[1] - valueRange[0];
 
 				vector<string> values = _featuresAndValuesDict[feature];
 				std::set<string> uniqueValues;
-
-				// remove NA values
-				for (const auto &v : values) {
+				for (const auto &v : values) { // Remove NA values
 					if (v != "NA") {
 						uniqueValues.insert(v);
 					}
 				}
 
-				// Get unique Values
+				// Get unique values
 				vector<string> sortedUniqueValues(uniqueValues.begin(), uniqueValues.end());
 				std::sort(sortedUniqueValues.begin(), sortedUniqueValues.end());
 
-				// calc diffs
+				// Calc diffs
 				vector<double> diffs;
-				for (size_t i = 1; i < sortedUniqueValues.size(); ++i) {
-					diffs.push_back(convert(sortedUniqueValues[i]) - convert(sortedUniqueValues[i - 1]));
+				for (size_t diffIdx = 1; diffIdx < sortedUniqueValues.size(); ++diffIdx) {
+					diffs.push_back(convert(sortedUniqueValues[diffIdx]) - convert(sortedUniqueValues[diffIdx - 1]));
 				}
 				std::sort(diffs.begin(), diffs.end());
 
 				auto medianDiff = diffs[(diffs.size() / 2) - 1];
 				histogramDelta	= medianDiff * 2.0;
-				if (histogramDelta < diffrange / 500.0) {
+				if (histogramDelta < diffRange / 500.0) {
 					if (_numberOfHistogramBins > 0) {
-						histogramDelta = diffrange / static_cast<double>(_numberOfHistogramBins);
+						histogramDelta = diffRange / static_cast<double>(_numberOfHistogramBins);
 					}
 					else {
-						histogramDelta = diffrange / 500.0;
+						histogramDelta = diffRange / 500.0;
 					}
 				}
 
 				_histogramDeltaDict[feature]	 = histogramDelta;
-				numOfHistogramBins				 = static_cast<int>(diffrange / histogramDelta);
+				numOfHistogramBins				 = static_cast<int>(diffRange / histogramDelta);
 				_numOfHistogramBinsDict[feature] = numOfHistogramBins;
 
-				vector<double> sampling_points_for_feature;
-				for (int j = 0; j < numOfHistogramBins; ++j) {
-					sampling_points_for_feature.push_back(valuerange[0] + histogramDelta * j);
+				vector<double> samplingPointsForFeature;
+				for (size_t histIdx = 0; histIdx < numOfHistogramBins; ++histIdx) {
+					samplingPointsForFeature.push_back(valueRange[0] + histogramDelta * histIdx);
 				}
 
-				_samplingPointsForNumericFeatureDict[feature] = sampling_points_for_feature;
+				_samplingPointsForNumericFeatureDict[feature] = samplingPointsForFeature;
 			}
 		}
 	}
+
 	if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
 		if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
 			auto samplingPointsForFeature = _samplingPointsForNumericFeatureDict[feature];
 			vector<size_t> countsAtSamplingPoints(samplingPointsForFeature.size(), 0);
 			vector<string> actualValuesForFeature = _featuresAndValuesDict[feature];
 			vector<double> actualValuesForFeatureAsDoubles;
-
+			 
 			for (const auto &v : actualValuesForFeature) {
 				if (v != "NA") {
 					double valueAsDouble = convert(v);
@@ -735,6 +735,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 				}
 			}
 
+			// Count the number of values at each sampling point
 			for (size_t i = 0; i < samplingPointsForFeature.size(); ++i) {
 				for (size_t j = 0; j < actualValuesForFeatureAsDoubles.size(); ++j) {
 					if (abs(samplingPointsForFeature[i] - actualValuesForFeatureAsDoubles[j]) <= histogramDelta) {
@@ -742,13 +743,14 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 					}
 				}
 			}
-
+			
+			// Calculate the total counts
 			int totalCounts = 0;
-			// functools.reduce(lambda x,y:x+y, counts_at_sampling_points)
 			for (const auto &count : countsAtSamplingPoints) {
 				totalCounts += count;
 			}
 
+			// Calculate the probabilities
 			vector<double> probabilities;
 			for (const auto &count : countsAtSamplingPoints) {
 				probabilities.push_back(static_cast<double>(count) / static_cast<double>(totalCounts));
@@ -761,20 +763,20 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 			}
 			assert(abs(sumProbs - 1.0) < 0.0001);
 
+			// Cache the probabilities
 			map<double, double> binProbDict;
 			for (size_t i = 0; i < samplingPointsForFeature.size(); ++i) {
 				binProbDict[samplingPointsForFeature[i]] = probabilities[i];
 			}
 			_probDistributionNumericFeaturesDict[feature] = binProbDict;
 
-			//  list(map(lambda x: feature_name + "=" + x, map(str, sampling_points_for_feature)))
 			vector<string> valuesForFeature;
 			valuesForFeature.reserve(samplingPointsForFeature.size());
 			std::transform(samplingPointsForFeature.begin(),
 						   samplingPointsForFeature.end(),
 						   std::back_inserter(valuesForFeature),
 						   [&feature](int x) { return feature + "=" + std::to_string(x); });
-			// cache rest
+			// Cache rest
 			for (size_t i = 0; i < valuesForFeature.size(); ++i) {
 				_probabilityCache[valuesForFeature[i]] = probabilities[i];
 			}
@@ -790,10 +792,9 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 			std::set<string> uniqueValuesForFeature =
 				set(_featuresAndValuesDict[feature].begin(), _featuresAndValuesDict[feature].end());
 			vector<string> valuesForFeature(uniqueValuesForFeature.begin(), uniqueValuesForFeature.end());
-			// Remove NA values
-			valuesForFeature.erase(std::remove(valuesForFeature.begin(), valuesForFeature.end(), "NA"),
-								   valuesForFeature.end());
-			// Add "="
+			valuesForFeature.erase(std::remove(valuesForFeature.begin(), valuesForFeature.end(), "NA"), valuesForFeature.end());
+
+			// Create a feature and value string
 			for (size_t i = 0; i < valuesForFeature.size(); ++i) {
 				valuesForFeature[i] = feature + "=" + valuesForFeature[i];
 			}
@@ -826,7 +827,6 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 
             // Assigning probability cache
             for (size_t i = 0; i < valuesForFeature.size(); ++i) {
-                cout << valuesForFeature[i] << endl;
                 _probabilityCache[valuesForFeature[i]] = probabilities[i];
             }
 
@@ -839,7 +839,8 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
             }
 		}
 	}
-	else { // Symbolic feature case
+	// Symbolic feature case
+	else {
 		vector<string> valuesForFeatures = _featuresAndValuesDict[feature];
 		for (size_t i = 0; i < valuesForFeatures.size(); ++i) {
 			valuesForFeatures[i] = feature + "=" + valuesForFeatures[i];
@@ -880,28 +881,27 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 	return 0.0;
 }
 
-double
-DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const string &value, const string &className)
+double DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const string &value, const string &className)
 {
-	string Value = value;
-	// Convert the value to double, or NAN if it is symbolic
-	double valueAsDouble = convert(Value);
+	// Prepare feature value class and initialize variables
+	string adjustedValue = value;
+	double valueAsDouble = convert(adjustedValue);
 	string featureAndValueClass;
 
 	// If the feature is numeric, find the closest sampling point
 	if (!std::isnan(valueAsDouble) &&
 		_samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
-		Value = std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
+		adjustedValue = std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
 	}
 
-	// If the feature is numeric, assign is back to value
+	// If the feature is numeric, format the double for storing it into the cache
 	if (!std::isnan(valueAsDouble)) {
-		Value = formatDouble(valueAsDouble);
+		adjustedValue = formatDouble(valueAsDouble);
 	}
 
 	// Create a combined feature and value string
-	if (!Value.empty()) {
-		featureAndValueClass = feature + "=" + Value;
+	if (!adjustedValue.empty()) {
+		featureAndValueClass = feature + "=" + adjustedValue + "::" + className;
 	}
 
 	// Check if the probability is already cached
@@ -926,6 +926,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 	}
 
 	vector<int> samplesForClass = {}; // Vector to store all sample indices for the given class
+
 	// Accumulate all samples names for the given class
 	for (const auto &sampleName : _samplesClassLabelDict) {
 		if (_samplesClassLabelDict[sampleName.first] == className) {
@@ -935,13 +936,15 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 
 	// Numeric feature case
 	if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
-		// TODO: Numeric feature case
+		// TODO: Implement this
 	}
-	else { // Purely symbolic case
+	// Purely symbolic case	
+	else {
 		vector<string> valuesForFeature = _featuresAndValuesDict[feature];
 		for (size_t i = 0; i < valuesForFeature.size(); ++i) {
 			valuesForFeature[i] = feature + "=" + valuesForFeature[i];
 		}
+
 		// Removing the duplicate values
 		std::sort(valuesForFeature.begin(), valuesForFeature.end());
 		auto it = std::unique(valuesForFeature.begin(), valuesForFeature.end());
@@ -972,7 +975,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 				static_cast<double>(countsForValues[i]) / static_cast<double>(totalNumSamples);
 		}
 
-		string featureAndValueAndClass = feature + "=" + Value + "::" + className;
+		string featureAndValueAndClass = feature + "=" + adjustedValue + "::" + className;
 		if (_probabilityCache.find(featureAndValueAndClass) != _probabilityCache.end()) {
 			return _probabilityCache[featureAndValueAndClass];
 		}
@@ -1035,7 +1038,7 @@ double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const strin
 		return _probabilityCache[featureThresholdCombo];
 	}
 
-	// accumulate all smaples for given class
+	// Accumulate all smaples for given class
 	vector<int> dataSamplesForClass;
 	for (const auto &kv : _samplesClassLabelDict) {
 		if (kv.second == className) {
@@ -1077,16 +1080,15 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
     // This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array
     // of branch features and thresholds. The symbolic types should be expressed as 'feature=value' constructs.
 
-    // Check len of array to not be zero
     if (arrayOfFeaturesAndValuesOrThresholds.size() == 0)
     {
         return std::nan("");
     }
+
     // Generate sequence string
     string sequence = "";
     for (const auto &item : arrayOfFeaturesAndValuesOrThresholds)
     {
-        // Append a colon to the sequence if it is not the last item
         if (item != arrayOfFeaturesAndValuesOrThresholds.back())
         {
             sequence += item + ":";
@@ -1135,8 +1137,8 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
         else
         {
             regex_search(item, match, pattern1);
-            feature = match[1]; // group 1
-            value = match[2];   // group 2
+            feature = match[1];
+            value = match[2];
             symbolicTypes.push_back(item);
             symbolicTypesFeatureNames.push_back(feature);
         }
@@ -1259,11 +1261,180 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
     return probability;
 }
 
-// TODO: Implement this function
 double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
 		const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &className) {
-			return 0.0;
+	// This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array of branch features and thresholds. 
+	// The symbolic types should be expressed as 'feature=value' constructs.
+	
+	if (arrayOfFeaturesAndValuesOrThresholds.size() == 0) {
+		return std::nan("");
+	}
+
+	// Generate sequence string
+	string sequence = "";
+	for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
+		// Append a colon to the sequence if it is not the last item
+		if (item != arrayOfFeaturesAndValuesOrThresholds.back()) {
+			sequence += item + ":";
 		}
+		else {
+			sequence += item;
+		}
+	}
+	string sequenceWithClass = sequence + "::" + className;
+
+	// Setup the ritual table
+	double probability = 0.0;
+	regex pattern1(R"((.+)=(.+))"); // Symbolic feature pattern
+	regex pattern2(R"((.+)<(.+))"); // Numeric feature pattern
+	regex pattern3(R"((.+)>(.+))"); // Numeric feature pattern
+	vector<string> trueNumericTypes;
+	vector<string> trueNumericTypesFeatureNames;
+	vector<string> symbolicTypes;
+	vector<string> symbolicTypesFeatureNames;
+
+	// Cast draw the incantation
+	for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
+		smatch match;
+		string feature;
+		string value;
+		if (regex_search(item, match, pattern2)) {
+			feature = match[1];
+			value = match[2];
+			trueNumericTypes.push_back(item);
+			trueNumericTypesFeatureNames.push_back(feature);
+		}
+		else if (regex_search(item, match, pattern3)) {
+			feature = match[1];
+			value = match[2];
+			trueNumericTypes.push_back(item);
+			trueNumericTypesFeatureNames.push_back(feature);
+		}
+		else {
+			regex_search(item, match, pattern1);
+			feature = match[1]; // group 1
+			value = match[2];   // group 2
+			symbolicTypes.push_back(item);
+			symbolicTypesFeatureNames.push_back(feature);
+		}
+	}
+
+	// Remove duplicates from feature names in-place
+	trueNumericTypesFeatureNames.erase(unique(trueNumericTypesFeatureNames.begin(),
+											trueNumericTypesFeatureNames.end()), trueNumericTypesFeatureNames.end());
+	symbolicTypesFeatureNames.erase(unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()),
+									symbolicTypesFeatureNames.end());
+	vector<vector<string>> boundedIntervalsNumericTypes = findBoundedIntervalsForNumericFeatures(trueNumericTypes);
+
+	// Calculate the upper and the lower bounds to be used when searching for the best
+	// threshold for each of the numeric features that are in play at the current node:
+	std::map<string, double> lowerBound;
+    std::map<string, double> upperBound;
+    for (const auto &feature : trueNumericTypesFeatureNames)
+    {
+        lowerBound[feature] = std::numeric_limits<double>::max();
+        upperBound[feature] = std::numeric_limits<double>::min();
+    }
+
+	// Populate with values from the bounded intervals
+    for (const auto &item : boundedIntervalsNumericTypes)
+    {
+        if (item[1] == ">")
+        {
+            lowerBound[item[0]] = convert(item[2]);
+        }
+        else
+        {
+            upperBound[item[0]] = convert(item[2]);
+        }
+    }
+
+	// Numeric feature case
+	for (const auto &featureName : trueNumericTypesFeatureNames) {
+		// If the feature has both a lower and upper bound
+		if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] !=
+            std::numeric_limits<double>::min())
+        {
+			// If the upper bound is less than or equal to the lower bound, return 0
+            if (upperBound[featureName] <= lowerBound[featureName])
+            {
+                return 0;
+            }
+            else
+            {
+                if (!probability)
+                {
+                    probability = probabilityOfFeatureLessThanThreshold(featureName,
+                        std::to_string(upperBound[featureName])) -
+                                  probabilityOfFeatureLessThanThreshold(featureName,
+                                    std::to_string(lowerBound[featureName]));
+                }
+                else
+                {
+                    probability *= (probabilityOfFeatureLessThanThreshold(featureName,
+                        std::to_string(upperBound[featureName])) -
+                                    probabilityOfFeatureLessThanThreshold(featureName,
+                                        std::to_string(lowerBound[featureName])));
+                }
+            }
+        }
+		// If the feature has only an upper bound
+        else if (upperBound[featureName] != std::numeric_limits<double>::min() && lowerBound[featureName] ==
+            std::numeric_limits<double>::max())
+        {
+            if (!probability)
+            {
+                probability = probabilityOfFeatureLessThanThreshold(featureName,
+                    std::to_string(upperBound[featureName]));
+            }
+            else
+            {
+                probability *= probabilityOfFeatureLessThanThreshold(featureName,
+                    std::to_string(upperBound[featureName]));
+            }
+        }
+		// If the feature has only a lower bound
+        else if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] ==
+            std::numeric_limits<double>::min())
+        {
+            if (!probability)
+            {
+                probability = 1.0 - probabilityOfFeatureLessThanThreshold(featureName,
+                    std::to_string(lowerBound[featureName]));
+            }
+            else
+            {
+                probability *= (1.0 - probabilityOfFeatureLessThanThreshold(featureName,
+                    std::to_string(lowerBound[featureName])));
+            }
+        }
+        else
+        {
+            throw std::runtime_error("Ill formatted call to 'probability_of_sequence' method");
+        }
+	}
+
+	// Symbolic feature case
+	for (const auto &featureAndValue : symbolicTypes) {
+		smatch match;
+		if (regex_search(featureAndValue, match, pattern1)) {
+			string feature = match[1];
+			string value = match[2];
+			if (!probability) {
+				probability = probabilityOfFeatureValueGivenClass(feature, value, className);
+			}
+			else {
+				probability *= probabilityOfFeatureValueGivenClass(feature, value, className);
+				if (probability == 0) {
+					cout << "probabilityOfFeatureValueGivenClass(" << feature << ", " << value << ", " << className << "): " << probabilityOfFeatureValueGivenClass(feature, value, className) << endl;
+				}
+			}
+		}
+	}
+
+	_probabilityCache[sequenceWithClass] = probability;
+	return probability;
+}
 
 // TODO: Implement this function
 double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
@@ -1366,117 +1537,6 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
 	}
 
 	return result;
-	//     // Step 1: Split each item in `trueNumericTypes` by '>' or '<'
-	//     vector<vector<string>> splitArr;
-	//     regex re("(>|<)"); // Regular expression to match '>' or '<'
-
-	//     for (const auto &s : trueNumericTypes)
-	//     {
-	//         vector<string> parts{s}; // Initialize with the feature name
-	//         // Use regex iterator to split each string at '>' or '<' symbols
-	//         sregex_token_iterator iter(s.begin(), s.end(), re, {-1, 0});
-	//         sregex_token_iterator end;
-
-	//         // Add each part from the split that is non-empty to `parts`
-	//         for (; iter != end; ++iter)
-	//         {
-	//             if (!iter->str().empty())
-	//                 parts.push_back(*iter);
-	//         }
-	//         splitArr.push_back(parts); // Append the processed parts to `splitArr`
-	//     }
-
-	//     // Step 2: Group items by feature names in `_featureNames`
-	//     vector<vector<vector<string>>> groupedByFeature;
-	//     for (const auto &feature : _featureNames)
-	//     {
-	//         vector<vector<string>> featureGroup;
-	//         // Filter `splitArr` for entries that match the current feature name
-	//         copy_if(splitArr.begin(), splitArr.end(), back_inserter(featureGroup),
-	//                 [&feature](const vector<string> &item)
-	//                 { return item[0] == feature; });
-	//         groupedByFeature.push_back(featureGroup); // Store the grouped results
-	//     }
-
-	//     // Step 3: Sort each feature group so '<' entries come before '>' entries
-	//     vector<vector<vector<string>>> sortedBySymbol;
-	//     for (auto &featureGroup : groupedByFeature)
-	//     {
-	//         // Sort based on comparison symbol (position 1), so '<' comes before '>'
-	//         sort(featureGroup.begin(), featureGroup.end(),
-	//              [](const vector<string> &a, const vector<string> &b)
-	//              { return a[1] < b[1]; });
-	//         sortedBySymbol.push_back(featureGroup);
-	//     }
-
-	//     // Step 4: Separate items within each sorted list by comparison symbol and sort by numeric value
-	//     vector<vector<vector<string>>> sortedNumeric;
-	//     for (const auto &sortedGroup : sortedBySymbol)
-	//     {
-	//         vector<vector<string>> tempGroup;
-
-	//         // Separate items based on the comparison symbol ('<' or '>')
-	//         for (const auto &symbol : {"<", ">"})
-	//         {
-	//             vector<vector<string>> comparisonGroup;
-	//             copy_if(sortedGroup.begin(), sortedGroup.end(), back_inserter(comparisonGroup),
-	//                     [&symbol](const vector<string> &item)
-	//                     { return item[1] == symbol; });
-
-	//             // Sort each group by the numeric value (position 2)
-	//             sort(comparisonGroup.begin(), comparisonGroup.end(),
-	//                  [](const vector<string> &a, const vector<string> &b)
-	//                  { return stof(a[2]) < stof(b[2]); });
-
-	//             // Add sorted comparison groups to `tempGroup`
-	//             tempGroup.insert(tempGroup.end(), comparisonGroup.begin(), comparisonGroup.end());
-	//         }
-	//         sortedNumeric.push_back(tempGroup); // Store the fully sorted groups
-	//     }
-
-	//     // Step 5: Flatten and filter items again by `_featureNames`
-	//     vector<vector<string>> finalFiltered;
-	//     for (const auto &feature : _featureNames)
-	//     {
-	//         vector<vector<string>> featureFiltered;
-
-	//         // Filter `sortedNumeric` to retain only entries for the current feature
-	//         copy_if(sortedNumeric.begin(), sortedNumeric.end(), back_inserter(featureFiltered),
-	//                 [&feature](const vector<string> &item)
-	//                 { return item[0] == feature; });
-
-	//         // Collect filtered entries in `finalFiltered`
-	//         finalFiltered.insert(finalFiltered.end(), featureFiltered.begin(), featureFiltered.end());
-	//     }
-
-	//     // Step 6: Determine intervals: keep the first item if it's '<', the last if it's '>',
-	//     // and both if they differ in comparison type
-	//     vector<vector<string>> finalSelection;
-	//     for (auto &featureList : finalFiltered)
-	//     {
-	//         vector<string> selected;
-
-	//         // Select the lowest bound if '<' or highest if '>', or both if necessary
-	//         if (featureList.front()[1] == "<")
-	//             selected.push_back(featureList.front()[2]);
-	//         else
-	//             selected.push_back(featureList.back()[2]);
-
-	//         // If bounds differ ('<' and '>'), add both the lowest and highest
-	//         if (featureList.front()[1] != featureList.back()[1])
-	//             selected.push_back(featureList.back()[2]);
-
-	//         finalSelection.push_back(selected); // Append the bounded intervals
-	//     }
-
-	//     // Step 7: Flatten the final selection into a single vector for the result
-	//     vector<string> result;
-	//     for (const auto &interval : finalSelection)
-	//     {
-	//         copy(interval.begin(), interval.end(), back_inserter(result));
-	//     }
-
-	//     return result; // Return the flattened list of selected intervals
 }
 
 // print the stree variables

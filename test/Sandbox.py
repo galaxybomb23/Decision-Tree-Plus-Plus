@@ -36,6 +36,15 @@ dtree.get_training_data()
 # print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds( ['fatIntake=low', 'smoking=never', 'exercising=regularly'] ))
 # print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds( ['fatIntake=medium', 'exercising=occasionally'] ))
 
+# ----- ProbOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass -----
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['exercising=never'], 'class=benign' ))
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['smoking=heavy'], 'class=malignant' ))
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['fatIntake=heavy', 'exercising=never'], 'class=benign' ))
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['fatIntake=heavy', 'videoAddiction=medium'], 'class=malignant' ))
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['fatIntake=heavy', 'smoking=heavy', 'videoAddiction=none'], 'class=benign' ))
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['fatIntake=heavy', 'smoking=heavy', 'videoAddiction=heavy', 'exercising=regularly'], 'class=benign' ))
+
+
 
 # NUMERIC
 dtreeN = dt.DecisionTree( 
@@ -91,3 +100,9 @@ dtreeN.get_training_data()
 # print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2"<3.840000000000012', '"g2"<2.4'] ))
 # test with multiple features
 # print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2"<3.840000000000012', '"age"<63.0'] ))
+
+# ----- ProbOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass -----
+# print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"age"<47.0'], '"pgstat"=1' ))
+print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"age">51.0'], '"pgstat"=0' ))
+# print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"ploidy"="aneuploid"'], '"pgstat"=0' ))
+# print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"grade"=2.0', '"g2">42.00000000000033'], '"pgstat"=0' ))

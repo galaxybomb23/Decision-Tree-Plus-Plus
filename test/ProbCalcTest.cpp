@@ -106,19 +106,30 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsSymbol
     ASSERT_NEAR(prob4, 0.089, 0.001);
 }
 
+TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClassSymbolic) {
+    double prob0 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "exercising=never" }, "benign");
+    ASSERT_NEAR(prob0, 0.161, 0.001);
+    double prob1 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "smoking=heavy" }, "malignant");
+    ASSERT_NEAR(prob1, 0.895, 0.001);
+    double prob2 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "fatIntake=heavy", "exercising=never" }, "benign");
+    ASSERT_NEAR(prob2, 0.026, 0.001);
+    double prob3 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "fatIntake=heavy", "videoAddiction=medium" }, "malignant");
+    ASSERT_NEAR(prob3, 0.235, 0.001);
+    double prob4 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "fatIntake=heavy", "smoking=heavy", "videoAddiction=none" }, "benign");
+    ASSERT_NEAR(prob4, 0.007, 0.001);
+    double prob5 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "fatIntake=heavy", "smoking=heavy", "videoAddiction=heavy", "exercising=regularly" }, "benign");
+    ASSERT_NEAR(prob5, 0.001, 0.001);
+}
+
+
 // ------ Numeric Data Tests ------
 
-// TODO: Add tests for numeric data for the following functions:
-// priorProbabilityForClass
-// calculateClassPriors
-// probabilityOfFeatureValue
-// probabilityOfFeatureValueGivenClass
-// probabilityOfASequenceOfFeaturesAndValuesOrThresholds
-
+// TODO: Write more asserts
 TEST_F(ProbCalcTest, priorProbabilityForClassNumeric) {
     
 }
 
+// TODO: Write more asserts
 TEST_F(ProbCalcTest, calculateClassPriorsNumeric) {
     
 }
@@ -129,6 +140,7 @@ TEST_F(ProbCalcTest, probabilityOfFeatureValueNumeric) {
     ASSERT_NEAR(prob0, 0.404, 0.001);
 }
 
+// TODO: Write more asserts
 TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClassNumeric) {
     
 }
@@ -174,4 +186,16 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsNumeri
     ASSERT_NEAR(prob4, 0.000161, 0.000001);
     double prob5 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({ "grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=tetraploid" });
     ASSERT_NEAR(prob5, 0.000994, 0.000001);
+}
+
+// TODO: Once numeric case for probabilityOfFeatureValueGivenClassNumeric is working, check these
+TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClassNumeric) {
+    // double prob0 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "age<47.0" }, "1");
+    // ASSERT_NEAR(prob0, 0.019, 0.001);
+    // double prob1 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "grade=2.0", "gleason=5.0", "g2<3.840000000000012", "age>51.0" }, "0");
+    // ASSERT_NEAR(prob1, 0.193, 0.001);
+    // double prob2 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=aneuploid" }, "0");
+    // ASSERT_NEAR(prob2, 0.008, 0.001);
+    // double prob3 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "grade=2.0", "g2>42.00000000000033" }, "0");
+    // ASSERT_NEAR(prob3, 0.006, 0.001);
 }

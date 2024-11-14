@@ -10,15 +10,15 @@ void assertVectorsAlmostEqual(const vector<vector<string>> &actual,
                               const string &message = "")
 {
     // Print both actual and expected vectors before performing any comparisons
-    std::cout << message << "Actual vector: \n";
-    for (const auto &cond : actual) {
-        std::cout << "{" << cond[0] << ", " << cond[1] << ", " << cond[2] << "}\n";
-    }
+    // std::cout << message << "Actual vector: \n";
+    // for (const auto &cond : actual) {
+        // std::cout << "{" << cond[0] << ", " << cond[1] << ", " << cond[2] << "}\n";
+    // }
 
-    std::cout << message << "Expected vector: \n";
-    for (const auto &row : expected) {
-        std::cout << "{" << row[0] << ", " << row[1] << ", " << row[2] << "}\n";
-    }
+    // std::cout << message << "Expected vector: \n";
+    // for (const auto &row : expected) {
+    //     std::cout << "{" << row[0] << ", " << row[1] << ", " << row[2] << "}\n";
+    // }
 
     double tolerance = TOLERANCE;
     ASSERT_EQ(actual.size(), expected.size()) << message << " Sizes of actual and expected vectors are different.";
