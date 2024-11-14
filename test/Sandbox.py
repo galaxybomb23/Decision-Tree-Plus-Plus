@@ -8,6 +8,13 @@ dtree = dt.DecisionTree( training_datafile = "test/resources/training_symbolic.c
                      )
 
 dtree.get_training_data()
+# dtree.determine_data_condition()
+
+# root_node = dtree.construct_decision_tree_classifier()
+
+# test_sample = ['exercising=never', 'smoking=heavy', 'fatIntake=heavy', 'videoAddiction=heavy']
+# classification = dtree.classify(root_node, test_sample)
+# print("Classification: " + str(classification))
 
 # ----- ProbOfFeatureValue -----
 # print(dtree.probability_of_feature_value( 'smoking', 'never' ))
@@ -22,13 +29,12 @@ dtree.get_training_data()
 # print(dtree.probability_of_feature_value_given_class( 'smoking', 'heavy', 'class=benign' ))
 # print(dtree.probability_of_feature_value_given_class( 'smoking', 'heavy', 'class=malignant' ))
 
-# dtree.determine_data_condition()
-
-# root_node = dtree.construct_decision_tree_classifier()
-
-# test_sample = ['exercising=never', 'smoking=heavy', 'fatIntake=heavy', 'videoAddiction=heavy']
-# classification = dtree.classify(root_node, test_sample)
-# print("Classification: " + str(classification))
+# ----- ProbOfASequenceOfFeaturesAndValuesOrThresholds -----
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds( ['exercising=never'] ))
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds( ['fatIntake=heavy'] ))
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds( ['fatIntake=low', 'smoking=heavy'] ))
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds( ['fatIntake=low', 'smoking=never', 'exercising=regularly'] ))
+# print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds( ['fatIntake=medium', 'exercising=occasionally'] ))
 
 
 # NUMERIC
@@ -42,15 +48,6 @@ dtreeN = dt.DecisionTree(
 
 dtreeN.get_training_data()
 # print(dtreeN._training_data_dict)
-
-# ----- ProbOfFeatureValueLessThanThreshold -----
-# print(dtreeN.probability_of_feature_less_than_threshold( '"age"', '47' ))
-# print(dtreeN.probability_of_feature_less_than_threshold( '"age"', '50' ))
-# print(dtreeN.probability_of_feature_less_than_threshold( '"age"', '100' ))
-
-# ----- ProbOfFeatureValueLessThanThresholdGivenClass -----
-# print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"age"', '47', '"pgstat"=1' ))
-
 # dtreeN.calculate_first_order_probabilities()
 # dtreeN.calculate_class_priors()
 
@@ -60,13 +57,34 @@ dtreeN.get_training_data()
 # classificationN = dtreeN.classify(root_nodeN, test_sampleN)
 # print("Classification: " + str(classificationN))
 
+# ----- ProbOfFeatureValueLessThanThreshold -----
+# print(dtreeN.probability_of_feature_less_than_threshold( '"age"', '47' ))
+# print(dtreeN.probability_of_feature_less_than_threshold( '"age"', '50' ))
+# print(dtreeN.probability_of_feature_less_than_threshold( '"age"', '100' ))
+
+# ----- ProbOfFeatureValueLessThanThresholdGivenClass -----
+# print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"age"', '47', '"pgstat"=1' ))
+# print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"age"', '90', '"pgstat"=1' ))
+# print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"age"', '68', '"pgstat"=1' ))
+# print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"age"', '73', '"pgstat"=1' ))
+# print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"eet"', '2', '"pgstat"=1' ))
+# print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"g2"', '14.5', '"pgstat"=1' ))
+# print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"grade"', '3', '"pgstat"=1' ))
+# print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"gleason"', '6', '"pgstat"=1' ))
+
 # ----- ProbOfASequenceOfFeaturesAndValuesOrThresholds -----
+print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"age"<47.0'] ))
+print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"g2"<8.640000000000052'] ))
+print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"g2">49.20000000000039'] ))
+print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"gleason"=4.0', '"g2">49.20000000000039'] ))
+print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"ploidy"="aneuploid"'] ))
+print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"ploidy"="tetraploid"'] ))
 
 
 # ----- FindBoundedIntervalsForNumericFeatures -----
 # test with one feature
-print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2">51.360000000000404'] ))
+# print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2">51.360000000000404'] ))
 # test with overlapping feature bounds
-print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2"<3.840000000000012', '"g2"<2.4'] ))
+# print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2"<3.840000000000012', '"g2"<2.4'] ))
 # test with multiple features
-print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2"<3.840000000000012', '"age"<63.0'] ))
+# print(dtreeN.find_bounded_intervals_for_numeric_features( ['"g2"<3.840000000000012', '"age"<63.0'] ))

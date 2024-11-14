@@ -136,10 +136,10 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
     // check if getTrainingDataDict() contains the following randomly selected
     // data
     map<int, vector<string>> expectedTrainingDataDict = {
-        {  1, {"64", "2", "10.26", "2", "4", "diploid"}},
-        {146,  {"56", "2", "9.01", "3", "7", "diploid"}},
-        { 28, {"57", "2", "12.13", "3", "6", "diploid"}},
-        { 55,  {"61", "1", "2.4", "4", "10", "diploid"}}
+        {  1, { "64", "2", "10.26", "2", "4", "diploid" }},
+        { 146, { "56", "2", "9.01", "3", "7", "diploid" }},
+        { 28, { "57", "2", "12.13", "3", "6", "diploid" }},
+        { 55,  { "61", "1", "2.4", "4", "10", "diploid" }}
     };
     map<int, vector<string>> trainingDataDict = dt.getTrainingDataDict();
     for (auto data : expectedTrainingDataDict) {
@@ -149,12 +149,12 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
     // check if getFeaturesAndValuesDict() contains the following randomly
     // selected data
     map<string, vector<string>> expectedFeaturesAndValuesDict = {
-        {    "age",                     {"64", "57", "61"}},
-        {    "eet",                       {"2", "1", "NA"}},
-        {     "g2",      {"10.26", "9.01", "12.13", "2.4"}},
-        {  "grade",                        {"2", "3", "4"}},
-        {"gleason",             {"4", "7", "6", "8", "10"}},
-        { "ploidy", {"aneuploid", "diploid", "tetraploid"}}
+        {    "age",                     {"64", "57", "61" }},
+        {    "eet",                       {"2", "1", "NA" }},
+        {     "g2",      {"10.26", "9.01", "12.13", "2.4" }},
+        {  "grade",                        {"2", "3", "4" }},
+        { "gleason",            {"4", "7", "6", "8", "10" }},
+        { "ploidy", {"aneuploid", "diploid", "tetraploid" }}
     };
     map<string, vector<string>> featuresAndValuesDict = dt.getFeaturesAndValuesDict();
 
@@ -167,7 +167,7 @@ TEST_F(DecisionTreeTest, CheckGetTrainingData)
     }
 
     // check if _classNames is set correctly
-    vector<string> expectedClassNames = {"0", "1"};
+    vector<string> expectedClassNames = { "0", "1" };
     ASSERT_EQ(dt._classNames, expectedClassNames);
 }
 
@@ -176,9 +176,9 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
 {
     // Test case 1: Single feature with ">" condition only
     {
-        vector<string> input            = {"g2>51.360000000000404"};
+        vector<string> input            = { "g2>51.360000000000404" };
         vector<vector<string>> expected = {
-            {"g2", ">", "51.360000000000404"}
+            { "g2", ">", "51.360000000000404" }
         };
         auto output = dt.findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 1 ");
@@ -186,9 +186,9 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
 
     // Test case 2: Single feature with multiple "<" conditions; should return the minimum value for "<"
     {
-        vector<string> input            = {"g2<3.840000000000012", "g2<2.4"};
+        vector<string> input            = { "g2<3.840000000000012", "g2<2.4" };
         vector<vector<string>> expected = {
-            {"g2", "<", "2.4"}
+            { "g2", "<", "2.4" }
         };
         auto output = dt.findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 2 ");
@@ -196,12 +196,12 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
 
     // Test case 3: Multiple features with mixed "<" and ">" conditions
     {
-        vector<string> input            = {"g2<3.840000000000012", "age<63.0", "g2>1.5", "age>18.0"};
+        vector<string> input            = { "g2<3.840000000000012", "age<63.0", "g2>1.5", "age>18.0" };
         vector<vector<string>> expected = {
-            {"age", "<",              "63.0"},
-            {"age", ">",              "18.0"},
-            { "g2", "<", "3.840000000000012"},
-            { "g2", ">",               "1.5"}
+            { "age", "<",              "63.0" },
+            { "age", ">",              "18.0" },
+            { "g2", "<", "3.840000000000012" },
+            { "g2", ">",               "1.5" }
         };
         auto output = dt.findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 3 ");
@@ -209,10 +209,10 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
 
     // Test case 4: Mixed conditions with "<" and ">" for the same feature
     {
-        vector<string> input            = {"height<200.0", "height>150.0", "height>140.0", "height<180.0"};
+        vector<string> input            = { "height<200.0", "height>150.0", "height>140.0", "height<180.0" };
         vector<vector<string>> expected = {
-            {"height", "<", "180.0"},
-            {"height", ">", "150.0"}
+            { "height", "<", "180.0" },
+            { "height", ">", "150.0" }
         };
         auto output = dt.findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 4 ");
@@ -228,14 +228,14 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
 
     // Test case 6: Single feature with only one bound ("<" or ">")
     {
-        vector<string> input            = {"age>18.0"};
+        vector<string> input            = { "age>18.0" };
         vector<vector<string>> expected = {
-            {"age", ">", "18.0"}
+            { "age", ">", "18.0" }
         };
         auto output = dt.findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 6a ");
 
-        input    = {"age<63.0"};
+        input    = { "age<63.0" };
         expected = {
             {"age", "<", "63.0"}
         };
@@ -245,7 +245,7 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
 
     // Test case 7: Multiple "<" and ">" conditions for the same feature, where bounds overlap
     {
-        vector<string> input            = {"weight>50.0", "weight>60.0", "weight<100.0", "weight<90.0"};
+        vector<string> input            = { "weight>50.0", "weight>60.0", "weight<100.0", "weight<90.0" };
         vector<vector<string>> expected = {
             {"weight", "<", "90.0"},
             {"weight", ">", "60.0"}
@@ -256,10 +256,10 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
 
     // Test case 8: Large numbers and high precision
     {
-        vector<string> input            = {"g2>51.360000000000404", "g2<3.840000000000012", "g2<2.4000000000001"};
+        vector<string> input            = { "g2>51.360000000000404", "g2<3.840000000000012", "g2<2.4000000000001" };
         vector<vector<string>> expected = {
-            {"g2", "<",    "2.4000000000001"},
-            {"g2", ">", "51.360000000000404"}
+            { "g2", "<",    "2.4000000000001" },
+            { "g2", ">", "51.360000000000404" }
         };
         auto output = dt.findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 8 ");

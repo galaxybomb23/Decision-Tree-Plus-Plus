@@ -999,184 +999,194 @@ double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const strin
 	return probability;
 }
 
-// double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
-//     const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
-// {
-//     // This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array
-//     of
-//     // branch features and thresholds
-//     // check len of array to not be zero
-//     if (arrayOfFeaturesAndValuesOrThresholds.size() == 0)
-//     {
-//         return std::nan("");
-//     }
-//     // generate sequence string
-//     string sequence = "";
-//     for (const auto &item : arrayOfFeaturesAndValuesOrThresholds)
-//     {
-//         sequence += item + ":";
-//     }
-//     // check if the sequence is in the cache
-//     if (_probabilityCache.find(sequence) != _probabilityCache.end())
-//     {
-//         return _probabilityCache[sequence];
-//     }
+double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
+    const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
+{
+    // This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array
+    // of branch features and thresholds. The symbolic types should be expressed as 'feature=value' constructs.
 
-//     // setup the ritual table
-//     double probability = std::nan("");
-//     regex pattern1(R"((.+)=(.+))");
-//     regex pattern2(R"((.+)<(.+))");
-//     regex pattern3(R"((.+)>(.+))");
-//     vector<string> trueNumericTypes;
-//     vector<string> trueNumericTypesFeatureNames;
-//     vector<string> symbolicTypes;
-//     vector<string> symbolicTypesFeatureNames;
+    // Check len of array to not be zero
+    if (arrayOfFeaturesAndValuesOrThresholds.size() == 0)
+    {
+        return std::nan("");
+    }
+    // Generate sequence string
+    string sequence = "";
+    for (const auto &item : arrayOfFeaturesAndValuesOrThresholds)
+    {
+        // Append a colon to the sequence if it is not the last item
+        if (item != arrayOfFeaturesAndValuesOrThresholds.back())
+        {
+            sequence += item + ":";
+        }
+        else {
+            sequence += item;
+        }
+    }
 
-//     // cast draw the incantation
-//     for (const auto &item : arrayOfFeaturesAndValuesOrThresholds)
-//     {
-//         smatch match;
-//         string feature;
-//         string value;
-//         if (regex_search(item, match, pattern2))
-//         {
-//             feature = match[1];
-//             value = match[2];
-//             trueNumericTypes.push_back(item);
-//             trueNumericTypesFeatureNames.push_back(feature);
-//         }
-//         else if (regex_search(item, match, pattern3))
-//         {
-//             feature = match[1];
-//             value = match[2];
-//             trueNumericTypes.push_back(item);
-//             trueNumericTypesFeatureNames.push_back(feature);
-//         }
-//         else
-//         {
-//             feature = match[1]; // group 1
-//             value = match[2];   // group 2
-//             symbolicTypes.push_back(item);
-//             symbolicTypesFeatureNames.push_back(feature);
-//         }
-//     }
+    // Check if the sequence is in the cache
+    if (_probabilityCache.find(sequence) != _probabilityCache.end())
+    {
+        return _probabilityCache[sequence];
+    }
 
-//     // remove duplicates from feature names in-place
-//     trueNumericTypesFeatureNames.erase(unique(trueNumericTypesFeatureNames.begin(),
-//     trueNumericTypesFeatureNames.end()), trueNumericTypesFeatureNames.end());
-//     symbolicTypesFeatureNames.erase(unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()),
-//     symbolicTypesFeatureNames.end()); vector<string> boundedIntervalsNumericTypes =
-//     this->findBoundedIntervalsForNumericFeatures(trueNumericTypes);
+    // Setup the ritual table
+    double probability = 0.0;
+    regex pattern1(R"((.+)=(.+))"); // Symbolic feature pattern
+    regex pattern2(R"((.+)<(.+))"); // Numeric feature pattern
+    regex pattern3(R"((.+)>(.+))"); // Numeric feature pattern
+    vector<string> trueNumericTypes;
+    vector<string> trueNumericTypesFeatureNames;
+    vector<string> symbolicTypes;
+    vector<string> symbolicTypesFeatureNames;
 
-//     // Calculate the upper and the lower bounds to be used when searching for the best
-//     // threshold for each of the numeric features that are in play at the current node:
+    // Cast draw the incantation
+    for (const auto &item : arrayOfFeaturesAndValuesOrThresholds)
+    {
+        smatch match;
+        string feature;
+        string value;
+        if (regex_search(item, match, pattern2))
+        {
+            feature = match[1];
+            value = match[2];
+            trueNumericTypes.push_back(item);
+            trueNumericTypesFeatureNames.push_back(feature);
+        }
+        else if (regex_search(item, match, pattern3))
+        {
+            feature = match[1];
+            value = match[2];
+            trueNumericTypes.push_back(item);
+            trueNumericTypesFeatureNames.push_back(feature);
+        }
+        else
+        {
+            regex_search(item, match, pattern1);
+            feature = match[1]; // group 1
+            value = match[2];   // group 2
+            symbolicTypes.push_back(item);
+            symbolicTypesFeatureNames.push_back(feature);
+        }
+    }
 
-//     // populate bounds with feature names
-//     std::map<string, double> lowerBound;
-//     std::map<string, double> upperBound;
-//     for (const auto &feature : trueNumericTypesFeatureNames)
-//     {
-//         lowerBound[feature] = std::numeric_limits<double>::max();
-//         upperBound[feature] = std::numeric_limits<double>::min();
-//     }
+    // Remove duplicates from feature names in-place
+    trueNumericTypesFeatureNames.erase(unique(trueNumericTypesFeatureNames.begin(),
+        trueNumericTypesFeatureNames.end()), trueNumericTypesFeatureNames.end());
+    symbolicTypesFeatureNames.erase(unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()),
+        symbolicTypesFeatureNames.end());
+    vector<vector<string>> boundedIntervalsNumericTypes = findBoundedIntervalsForNumericFeatures(trueNumericTypes);
 
-//     // populate with values from the bounded intervals
-//     for (const auto &item : boundedIntervalsNumericTypes)
-//     {
-//         if (item[1] == ">")
-//         {
-//             lowerBound[item[0]] = convert(item[2]);
-//         }
-//         else
-//         {
-//             upperBound[item[0]] = convert(item[2]);
-//         }
-//     }
+    // Calculate the upper and the lower bounds to be used when searching for the best
+    // threshold for each of the numeric features that are in play at the current node:
 
-//     // Cast the black magic
-//     for (const auto &featureName : trueNumericTypesFeatureNames)
-//     {
-//         if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] !=
-//         std::numeric_limits<double>::min())
-//         {
-//             if (upperBound[featureName] <= lowerBound[featureName])
-//             {
-//                 return 0; // Return 0 if upper bound is less than or equal to lower bound
-//             }
-//             else
-//             {
-//                 if (!probability)
-//                 {
-//                     probability = this->probabilityOfFeatureLessThanThreshold(featureName,
-//                     std::to_string(upperBound[featureName])) -
-//                                   this->probabilityOfFeatureLessThanThreshold(featureName,
-//                                   std::to_string(lowerBound[featureName]));
-//                 }
-//                 else
-//                 {
-//                     probability *= (this->probabilityOfFeatureLessThanThreshold(featureName,
-//                     std::to_string(upperBound[featureName])) -
-//                                     this->probabilityOfFeatureLessThanThreshold(featureName,
-//                                     std::to_string(lowerBound[featureName])));
-//                 }
-//             }
-//         }
-//         else if (upperBound[featureName] != std::numeric_limits<double>::min() && lowerBound[featureName] ==
-//         std::numeric_limits<double>::max())
-//         {
-//             if (!probability)
-//             {
-//                 probability = this->probabilityOfFeatureLessThanThreshold(featureName,
-//                 std::to_string(upperBound[featureName]));
-//             }
-//             else
-//             {
-//                 probability *= this->probabilityOfFeatureLessThanThreshold(featureName,
-//                 std::to_string(upperBound[featureName]));
-//             }
-//         }
-//         else if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] ==
-//         std::numeric_limits<double>::min())
-//         {
-//             if (!probability)
-//             {
-//                 probability = 1.0 - this->probabilityOfFeatureLessThanThreshold(featureName,
-//                 std::to_string(lowerBound[featureName]));
-//             }
-//             else
-//             {
-//                 probability *= (1.0 - this->probabilityOfFeatureLessThanThreshold(featureName,
-//                 std::to_string(lowerBound[featureName])));
-//             }
-//         }
-//         else
-//         {
-//             // throw an error
-//             throw std::runtime_error("Ill formatted call to 'probability_of_sequence' method");
-//         }
-//     }
+    // Populate bounds with feature names
+    std::map<string, double> lowerBound;
+    std::map<string, double> upperBound;
+    for (const auto &feature : trueNumericTypesFeatureNames)
+    {
+        lowerBound[feature] = std::numeric_limits<double>::max();
+        upperBound[feature] = std::numeric_limits<double>::min();
+    }
 
-//     // Cast the white magic
-//     for (const auto &featureAndValue : symbolicTypes)
-//     {
-//         smatch match;
-//         if (regex_search(featureAndValue, match, pattern1))
-//         {
-//             string feature = match[1];
-//             string value = match[2];
-//             if (!probability)
-//             {
-//                 probability = this->probabilityOfFeatureValue(feature, value);
-//             }
-//             else
-//             {
-//                 probability *= this->probabilityOfFeatureValue(feature, value);
-//             }
-//         }
-//     }
-//     _probabilityCache[sequence] = probability;
-//     return probability;
-// }
+    // Populate with values from the bounded intervals
+    for (const auto &item : boundedIntervalsNumericTypes)
+    {
+        if (item[1] == ">")
+        {
+            lowerBound[item[0]] = convert(item[2]);
+        }
+        else
+        {
+            upperBound[item[0]] = convert(item[2]);
+        }
+    }
+
+    // Numeric feature case
+    for (const auto &featureName : trueNumericTypesFeatureNames)
+    {
+        if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] !=
+            std::numeric_limits<double>::min())
+        {
+            if (upperBound[featureName] <= lowerBound[featureName])
+            {
+                return 0; // Return 0 if upper bound is less than or equal to lower bound
+            }
+            else
+            {
+                if (!probability)
+                {
+                    probability = probabilityOfFeatureLessThanThreshold(featureName,
+                        std::to_string(upperBound[featureName])) -
+                                  probabilityOfFeatureLessThanThreshold(featureName,
+                                    std::to_string(lowerBound[featureName]));
+                }
+                else
+                {
+                    probability *= (probabilityOfFeatureLessThanThreshold(featureName,
+                        std::to_string(upperBound[featureName])) -
+                                    probabilityOfFeatureLessThanThreshold(featureName,
+                                        std::to_string(lowerBound[featureName])));
+                }
+            }
+        }
+        else if (upperBound[featureName] != std::numeric_limits<double>::min() && lowerBound[featureName] ==
+            std::numeric_limits<double>::max())
+        {
+            if (!probability)
+            {
+                probability = probabilityOfFeatureLessThanThreshold(featureName,
+                    std::to_string(upperBound[featureName]));
+            }
+            else
+            {
+                probability *= probabilityOfFeatureLessThanThreshold(featureName,
+                    std::to_string(upperBound[featureName]));
+            }
+        }
+        else if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] ==
+            std::numeric_limits<double>::min())
+        {
+            if (!probability)
+            {
+                probability = 1.0 - probabilityOfFeatureLessThanThreshold(featureName,
+                    std::to_string(lowerBound[featureName]));
+            }
+            else
+            {
+                probability *= (1.0 - probabilityOfFeatureLessThanThreshold(featureName,
+                    std::to_string(lowerBound[featureName])));
+            }
+        }
+        else
+        {
+            throw std::runtime_error("Ill formatted call to 'probability_of_sequence' method");
+        }
+    }
+
+    // Symbolic feature case
+    for (const auto &featureAndValue : symbolicTypes)
+    {
+        smatch match;
+        if (regex_search(featureAndValue, match, pattern1))
+        {
+            string feature = match[1];
+            string value = match[2];
+            if (!probability)
+            {
+                probability = probabilityOfFeatureValue(feature, value);
+            }
+            else
+            {
+                // MARK: This is where the problem is, probabilityOfFeatureValue("grade", "2.0") is returning 0.0
+                probability *= probabilityOfFeatureValue(feature, value);
+            }
+        }
+    }
+
+    _probabilityCache[sequence] = probability;
+    return probability;
+}
 
 //--------------- Class Based Utilities ----------------//
 
@@ -1212,7 +1222,7 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
 	unordered_map<string, bool> hasMinMax;					   // Tracks if a feature has a min or max bound
 	// Step 1: Parse each condition and update feature bounds
 	for (const string &condition : trueNumericTypes) {
-		cout << "condition: " << condition << endl;
+		// cout << "condition: " << condition << endl;
 		istringstream ss(condition);
 		string featureName, op, valueStr;
 		double value;
@@ -1228,7 +1238,7 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
 			// Handle the case where no operator is found (optional, if conditions are well-formed)
 			cerr << "Invalid condition: no operator found!" << endl;
 		}
-		cout << "featureName: " << featureName << ", op: " << op << ", valueStr: " << valueStr << endl;
+		// cout << "featureName: " << featureName << ", op: " << op << ", valueStr: " << valueStr << endl;
 		// Convert value to double for comparison
 		value = convert(valueStr);
 
@@ -1256,7 +1266,7 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
 	}
 
 	for (const auto &[featureName, bounds] : featureBounds) {
-		cout << "featureName: " << featureName << ", min: " << bounds.first << ", max: " << bounds.second << endl;
+		// cout << "featureName: " << featureName << ", min: " << bounds.first << ", max: " << bounds.second << endl;
 	}
 	// Step 2: Prepare the result in the required format
 	vector<vector<string>> result;
