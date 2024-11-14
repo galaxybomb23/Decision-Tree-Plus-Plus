@@ -65,4 +65,7 @@ template <typename T> double ClosestSamplingPoint(const std::vector<T> &vec, T c
 
 std::string CleanupCsvString(const std::string &str);
 
+std::string removeTrailingZeros(const std::string& str);
+std::string formatDouble(double value);
+
 #endif // UTILITY_HPP

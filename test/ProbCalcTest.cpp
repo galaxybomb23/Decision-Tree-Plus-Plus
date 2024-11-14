@@ -123,8 +123,10 @@ TEST_F(ProbCalcTest, calculateClassPriorsNumeric) {
     
 }
 
+// TODO: Write more asserts
 TEST_F(ProbCalcTest, probabilityOfFeatureValueNumeric) {
-    
+    double prob0 = dtN->probabilityOfFeatureValue("grade", "2.0");
+    ASSERT_NEAR(prob0, 0.404, 0.001);
 }
 
 TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClassNumeric) {
@@ -167,9 +169,9 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsNumeri
     double prob2 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({ "grade=2.0", "g2>49.20000000000039" });
     ASSERT_NEAR(prob2, 0.003, 0.001);
     double prob3 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({ "grade=2.0", "gleason=4.0", "g2>49.20000000000039" });
-    ASSERT_NEAR(prob3, 0.000122, 0.001);
+    ASSERT_NEAR(prob3, 0.000122, 0.000001);
     double prob4 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({ "grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=aneuploid" });
-    ASSERT_NEAR(prob4, 0.000161, 0.001);
+    ASSERT_NEAR(prob4, 0.000161, 0.000001);
     double prob5 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({ "grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=tetraploid" });
-    ASSERT_NEAR(prob5, 0.000994, 0.001);
+    ASSERT_NEAR(prob5, 0.000994, 0.000001);
 }

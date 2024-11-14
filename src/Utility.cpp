@@ -90,3 +90,21 @@ std::string CleanupCsvString(const std::string &line)
 
 	return result;
 }
+
+std::string removeTrailingZeros(const std::string& str) {
+    // Remove trailing zeros after the decimal point
+    std::string result = str;
+    result.erase(result.find_last_not_of('0') + 1, std::string::npos);
+
+    // If the last character is a decimal point, remove it
+    if (result.back() == '.') {
+        result.pop_back();
+    }
+    return result;
+}
+
+std::string formatDouble(double value) {
+    std::stringstream ss;
+    ss << std::fixed << value; // Convert double to string with fixed-point notation
+    return removeTrailingZeros(ss.str()); // Remove any unnecessary trailing zeros
+}

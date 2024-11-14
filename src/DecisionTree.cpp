@@ -208,12 +208,43 @@ void DecisionTree::getTrainingData()
 		_featuresAndValuesDict[_featureNames[i]]	   = allValues;
 		_featuresAndUniqueValuesDict[_featureNames[i]] = uniqueValues;
 	}
+
+    // Get the number of unique values for each feature
+    for (const auto &kv : _featuresAndUniqueValuesDict) {
+        _featureValuesHowManyUniquesDict[kv.first] = kv.second.size();
+    }
+
+    // Get the _numericFeaturesValuerangeDict
+    for (const auto &feature : _featureNames) {
+        // Get the min and max values of the feature and store them in a vector
+        vector<double> values;
+        double min = std::numeric_limits<double>::max();
+        double max = std::numeric_limits<double>::min();
+        for (const auto &value : _featuresAndUniqueValuesDict[feature]) {
+            double numericValue = convert(value);
+            if (std::isnan(numericValue)) {
+                continue;
+            }
+            if (numericValue < min) {
+                min = numericValue;
+            }
+            if (numericValue > max) {
+                max = numericValue;
+            }
+        }
+        if (min == std::numeric_limits<double>::max() && max == std::numeric_limits<double>::min()) {
+            continue;
+        }
+        values.push_back(min);
+        values.push_back(max);
+        _numericFeaturesValueRangeDict[feature] = values;
+    }
 }
 
 // Calculate first order probabilities
 void DecisionTree::calculateFirstOrderProbabilities()
 {
-	std::cout << "\nEstimating probabilities...\n";
+	cout << "\nEstimating probabilities...\n";
 	for (const auto &feature : _featureNames) {
 		// Calculate probability for the feature's value
 		probabilityOfFeatureValue(feature, "");
@@ -222,7 +253,7 @@ void DecisionTree::calculateFirstOrderProbabilities()
 		if (_debug2) {
 			// Check if the feature has a probability distribution for numeric values
 			if (_probDistributionNumericFeaturesDict.find(feature) != _probDistributionNumericFeaturesDict.end()) {
-				std::cout << "\nPresenting probability distribution for a feature "
+				cout << "\nPresenting probability distribution for a feature "
 							 "considered to be numeric:\n";
 				// Output sorted sampling points and their probabilities
 				for (auto it = _probDistributionNumericFeaturesDict[feature].begin();
@@ -231,17 +262,17 @@ void DecisionTree::calculateFirstOrderProbabilities()
 					string samplingPoint = std::to_string(it->first);
 
 					double prob = probabilityOfFeatureValue(feature, samplingPoint);
-					std::cout << feature << "::" << samplingPoint << " = " << std::setprecision(5) << prob << "\n";
+					cout << feature << "::" << samplingPoint << " = " << std::setprecision(5) << prob << "\n";
 				}
 			}
 			else {
 				// Output probabilities for symbolic feature values
-				std::cout << "\nPresenting probabilities for the values of a feature "
+				cout << "\nPresenting probabilities for the values of a feature "
 							 "considered to be symbolic:\n";
 				const auto &values_for_feature = _featuresAndUniqueValuesDict[feature];
 				for (const auto &value : values_for_feature) {
 					double prob = probabilityOfFeatureValue(feature, value);
-					std::cout << feature << "::" << value << " = " << std::setprecision(5) << prob << "\n";
+					cout << feature << "::" << value << " = " << std::setprecision(5) << prob << "\n";
 				}
 			}
 		}
@@ -252,11 +283,11 @@ void DecisionTree::calculateFirstOrderProbabilities()
 void DecisionTree::showTrainingData() const
 {
 	for (const auto &kv : _trainingDataDict) {
-		std::cout << kv.first << ": ";
+		cout << kv.first << ": ";
 		for (const auto &v : kv.second) {
-			std::cout << v << " ";
+			cout << v << " ";
 		}
-		std::cout << std::endl;
+		cout << endl;
 	}
 }
 
@@ -299,9 +330,9 @@ map<string, string> DecisionTree::classify(DecisionTreeNode* rootNode, const vec
 	}
 
 	if (_debug3) {
-		std::cout << "\nCL1 New features and values:\n";
+		cout << "\nCL1 New features and values:\n";
 		for (const auto &item : newFeaturesAndValues) {
-			std::cout << item << " ";
+			cout << item << " ";
 		}
 	}
 
@@ -315,9 +346,9 @@ map<string, string> DecisionTree::classify(DecisionTreeNode* rootNode, const vec
 	std::reverse(answer["solution_path"].begin(), answer["solution_path"].end());
 
 	if (_debug3) {
-		std::cout << "\nCL2 The classification:" << std::endl;
+		cout << "\nCL2 The classification:" << endl;
 		for (const auto &className : _classNames) {
-			std::cout << "    " << className << " with probability " << classification[className] << std::endl;
+			cout << "    " << className << " with probability " << classification[className] << endl;
 		}
 	}
 
@@ -361,7 +392,7 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
 
 	string featureTestedAtNode = node->GetFeature();
 	if (_debug3) {
-		std::cout << "\nCLRD1 Feature tested at node for classifcation: " << featureTestedAtNode << std::endl;
+		cout << "\nCLRD1 Feature tested at node for classifcation: " << featureTestedAtNode << endl;
 	}
 
 	string valueForFeature;
@@ -395,7 +426,7 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
 	// Numeric feature case
 	if (_probDistributionNumericFeaturesDict.find(featureTestedAtNode) != _probDistributionNumericFeaturesDict.end()) {
 		if (_debug3)
-			std::cout << "\nCLRD2 In the numeric section";
+			cout << "\nCLRD2 In the numeric section";
 		for (const auto &child : children) {
 			vector<string> branchFeaturesAndValues = child->GetBranchFeaturesAndValuesOrThresholds();
 			string lastFeatureAndValueOnBranch	   = branchFeaturesAndValues.back();
@@ -438,12 +469,12 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
 	else { // Symbolic feature case
 		string featureValueCombo = featureTestedAtNode + "=" + valueForFeature;
 		if (_debug3)
-			std::cout << "\nCLRD3 In the symbolic section with feature_value_combo: " << featureValueCombo;
+			cout << "\nCLRD3 In the symbolic section with feature_value_combo: " << featureValueCombo;
 
 		for (const auto &child : children) {
 			vector<string> branch_features_and_values = child->GetBranchFeaturesAndValuesOrThresholds();
 			if (_debug3)
-				std::cout << "\nCLRD4 branch features and values: " << branch_features_and_values.back();
+				cout << "\nCLRD4 branch features and values: " << branch_features_and_values.back();
 			string lastFeatureAndValueOnBranch = branch_features_and_values.back();
 
 			if (lastFeatureAndValueOnBranch == featureValueCombo) {
@@ -494,11 +525,11 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
 	Construct the root node object and set its entropy value as derived from the
 	priors associated with the different classes.
 	*/
-	std::cout << "\nConstructing a decision tree" << std::endl;
+	cout << "\nConstructing a decision tree" << endl;
 	if (_debug3) {
 		// TODO //
 		// determineDataCondition();
-		std::cout << std::endl << "Starting construction of the decision tree:" << std::endl;
+		cout << endl << "Starting construction of the decision tree:" << endl;
 	}
 
 	// Calculate prior class probabilities
@@ -509,15 +540,15 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
 	}
 
 	if (_debug3) {
-		std::cout << std::endl << "Prior probabilities for the classes:" << std::endl;
+		cout << endl << "Prior probabilities for the classes:" << endl;
 		for (size_t i = 0; i < _classNames.size(); ++i) {
-			std::cout << "    " << _classNames[i] << " with probability " << classProbabilities[i] << std::endl;
+			cout << "    " << _classNames[i] << " with probability " << classProbabilities[i] << endl;
 		}
 	}
 
 	double entropy = classEntropyOnPriors();
 	if (_debug3) {
-		std::cout << std::endl << "Entropy on priors: " << entropy << std::endl;
+		cout << endl << "Entropy on priors: " << entropy << endl;
 	}
 
 	// Create the root node
@@ -582,7 +613,7 @@ double DecisionTree::priorProbabilityForClass(const string &className, bool over
 
 void DecisionTree::calculateClassPriors()
 {
-	std::cout << "\nCalculating class priors...\n";
+	cout << "\nCalculating class priors...\n";
 	if (_samplesClassLabelDict.size() > 1) {
 		return;
 	}
@@ -591,9 +622,9 @@ void DecisionTree::calculateClassPriors()
 		priorProbabilityForClass(className, true);
 	}
 	if (_debug2) {
-		std::cout << "\nClass priors calculated:\n" << std::endl;
+		cout << "\nClass priors calculated:\n" << endl;
 		for (const auto &className : _classNames) {
-			std::cout << className << " = " << priorProbabilityForClass(className) << std::endl;
+			cout << className << " = " << priorProbabilityForClass(className) << endl;
 		}
 	}
 }
@@ -611,10 +642,18 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 		value = std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
 	}
 
+    // If the feature is numeric, assign is back to value
+    if (!std::isnan(valueAsDouble)) {
+        value = formatDouble(valueAsDouble);
+    }
+
 	// Create a combined feature and value string
 	if (!value.empty()) {
 		featureAndValue = feature + "=" + value;
 	}
+
+    cout << value << featureAndValue << endl;
+
 
 	// Check if the probability is already cached
 	if (_probabilityCache.find(featureAndValue) != _probabilityCache.end()) {
@@ -748,9 +787,9 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 		}
 		else {
 			// This section if for those numeric features treated symbolically
-			std::set<string> uniqvaluesForFeature =
+			std::set<string> uniqueValuesForFeature =
 				set(_featuresAndValuesDict[feature].begin(), _featuresAndValuesDict[feature].end());
-			vector<string> valuesForFeature(uniqvaluesForFeature.begin(), uniqvaluesForFeature.end());
+			vector<string> valuesForFeature(uniqueValuesForFeature.begin(), uniqueValuesForFeature.end());
 			// Remove NA values
 			valuesForFeature.erase(std::remove(valuesForFeature.begin(), valuesForFeature.end(), "NA"),
 								   valuesForFeature.end());
@@ -758,18 +797,46 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 			for (size_t i = 0; i < valuesForFeature.size(); ++i) {
 				valuesForFeature[i] = feature + "=" + valuesForFeature[i];
 			}
+
 			// Calculate the counts for each value
 			vector<int> valueCounts(valuesForFeature.size(), 0);
 			for (const auto &sample : _trainingDataDict) {
 				vector<string> featuresAndValues = sample.second;
 				for (size_t i = 0; i < valuesForFeature.size(); ++i) {
-					for (const auto &currentValue : featuresAndValues) {
-						if (valuesForFeature[i] == currentValue) {
-							valueCounts[i]++;
-						}
-					}
+					for (size_t j = 0; j < featuresAndValues.size(); ++j) {
+                        string name = _featureNames[j] + "=" + featuresAndValues[j];
+                        if (valuesForFeature[i] == name) {
+                            valueCounts[i]++;
+                        }
+                    }
 				}
 			}
+
+            // Assigning counts
+            int totalCounts = 0;
+            for (int count : valueCounts) {
+                totalCounts += count;
+            }
+
+            // Assigning probabilities
+            vector<double> probabilities;
+            for (int count : valueCounts) {
+                probabilities.push_back((double)count / (double)totalCounts);
+            }
+
+            // Assigning probability cache
+            for (size_t i = 0; i < valuesForFeature.size(); ++i) {
+                cout << valuesForFeature[i] << endl;
+                _probabilityCache[valuesForFeature[i]] = probabilities[i];
+            }
+
+            // If the feature and value exists in the probability cache, return it
+            if (_probabilityCache.find(featureAndValue) != _probabilityCache.end()) {
+                return _probabilityCache[featureAndValue];
+            }
+            else {
+                return 0.0;
+            }
 		}
 	}
 	else { // Symbolic feature case
@@ -825,6 +892,11 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 	if (!std::isnan(valueAsDouble) &&
 		_samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
 		Value = std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
+	}
+
+	// If the feature is numeric, assign is back to value
+	if (!std::isnan(valueAsDouble)) {
+		Value = formatDouble(valueAsDouble);
 	}
 
 	// Create a combined feature and value string
@@ -1179,6 +1251,7 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
             else
             {
                 // MARK: This is where the problem is, probabilityOfFeatureValue("grade", "2.0") is returning 0.0
+                // cout << "probabilityOfFeatureValue(feature, value): " << probabilityOfFeatureValue(feature, value) << endl;
                 probability *= probabilityOfFeatureValue(feature, value);
             }
         }
@@ -1399,38 +1472,38 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
 // print the stree variables
 void DecisionTree::printStats()
 {
-	std::cout << "Training Datafile:                            " << _trainingDatafile << std::endl;
-	std::cout << "Entropy Threshold:                            " << _entropyThreshold << std::endl;
-	std::cout << "Max Depth Desired:                            " << _maxDepthDesired << std::endl;
-	std::cout << "CSV Class Column Index:                       " << _csvClassColumnIndex << std::endl;
-	std::cout << "Symbolic To Numeric Cardinality Threshold:    " << _symbolicToNumericCardinalityThreshold
-			  << std::endl;
-	std::cout << "Number Of Histogram Bins:                     " << _numberOfHistogramBins << std::endl;
-	std::cout << "CSV Cleanup Needed:                           " << _csvCleanupNeeded << std::endl;
-	std::cout << "Debug1:                                       " << _debug1 << std::endl;
-	std::cout << "Debug2:                                       " << _debug2 << std::endl;
-	std::cout << "Debug3:                                       " << _debug3 << std::endl;
-	std::cout << "How Many Total Training Samples:              " << _howManyTotalTrainingSamples << std::endl;
-	std::cout << "Feature Names: \n";
+	cout << "Training Datafile:                            " << _trainingDatafile << endl;
+	cout << "Entropy Threshold:                            " << _entropyThreshold << endl;
+	cout << "Max Depth Desired:                            " << _maxDepthDesired << endl;
+	cout << "CSV Class Column Index:                       " << _csvClassColumnIndex << endl;
+	cout << "Symbolic To Numeric Cardinality Threshold:    " << _symbolicToNumericCardinalityThreshold
+			  << endl;
+	cout << "Number Of Histogram Bins:                     " << _numberOfHistogramBins << endl;
+	cout << "CSV Cleanup Needed:                           " << _csvCleanupNeeded << endl;
+	cout << "Debug1:                                       " << _debug1 << endl;
+	cout << "Debug2:                                       " << _debug2 << endl;
+	cout << "Debug3:                                       " << _debug3 << endl;
+	cout << "How Many Total Training Samples:              " << _howManyTotalTrainingSamples << endl;
+	cout << "Feature Names: \n";
 	for (const auto &feature : _featureNames) {
-		std::cout << feature << " ";
+		cout << feature << " ";
 	}
-	std::cout << std::endl;
-	std::cout << "Training Data Dict: \n";
+	cout << endl;
+	cout << "Training Data Dict: \n";
 	for (const auto &kv : _trainingDataDict) {
-		std::cout << kv.first << ": ";
+		cout << kv.first << ": ";
 		for (const auto &v : kv.second) {
-			std::cout << v << " ";
+			cout << v << " ";
 		}
-		std::cout << std::endl;
+		cout << endl;
 	}
-	std::cout << "Features And Values Dict: \n";
+	cout << "Features And Values Dict: \n";
 	for (const auto &kv : _featuresAndValuesDict) {
-		std::cout << kv.first << ": ";
+		cout << kv.first << ": ";
 		for (const auto &v : kv.second) {
-			std::cout << v << " ";
+			cout << v << " ";
 		}
-		std::cout << std::endl;
+		cout << endl;
 	}
 }
 

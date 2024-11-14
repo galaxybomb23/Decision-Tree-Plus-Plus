@@ -57,6 +57,9 @@ dtreeN.get_training_data()
 # classificationN = dtreeN.classify(root_nodeN, test_sampleN)
 # print("Classification: " + str(classificationN))
 
+# ----- ProbOfFeatureValue -----
+# print(dtreeN.probability_of_feature_value( '"grade"', '2.0' ))
+
 # ----- ProbOfFeatureValueLessThanThreshold -----
 # print(dtreeN.probability_of_feature_less_than_threshold( '"age"', '47' ))
 # print(dtreeN.probability_of_feature_less_than_threshold( '"age"', '50' ))
@@ -73,12 +76,12 @@ dtreeN.get_training_data()
 # print(dtreeN.probability_of_feature_less_than_threshold_given_class( '"gleason"', '6', '"pgstat"=1' ))
 
 # ----- ProbOfASequenceOfFeaturesAndValuesOrThresholds -----
-print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"age"<47.0'] ))
-print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"g2"<8.640000000000052'] ))
-print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"g2">49.20000000000039'] ))
-print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"gleason"=4.0', '"g2">49.20000000000039'] ))
-print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"ploidy"="aneuploid"'] ))
-print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"ploidy"="tetraploid"'] ))
+# print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"age"<47.0'] ))
+# print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"g2"<8.640000000000052'] ))
+# print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"g2">49.20000000000039'] ))
+# print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"gleason"=4.0', '"g2">49.20000000000039'] ))
+# print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"ploidy"="aneuploid"'] ))
+# print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"ploidy"="tetraploid"'] ))
 
 
 # ----- FindBoundedIntervalsForNumericFeatures -----
