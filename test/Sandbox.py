@@ -52,7 +52,8 @@ dtreeN = dt.DecisionTree(
                         csv_class_column_index = 2,
                         csv_columns_for_features = [3,4,5,6,7,8],
                         max_depth_desired = 8,
-                        entropy_threshold = 0.01,
+                        entropy_threshold = 0.01
+                        # debug2 = True
                      )
 
 dtreeN.get_training_data()
@@ -66,36 +67,44 @@ dtreeN.get_training_data()
 # classificationN = dtreeN.classify(root_nodeN, test_sampleN)
 # print("Classification: " + str(classificationN))
 
+# ----- PriorProbabilityForClass -----
+# print(dtreeN.prior_probability_for_class('"pgstat"=1'))
+# print(dtreeN.prior_probability_for_class('"pgstat"=0'))
+
 # ----- ProbOfFeatureValue -----
 # print(dtreeN.probability_of_feature_value( '"grade"', '2.0' ))
+# print(dtreeN.probability_of_feature_value( '"grade"', '3.0' ))
+# print(dtreeN.probability_of_feature_value( '"gleason"', '8.0' ))
+# print(dtreeN.probability_of_feature_value( '"ploidy"', 'tetraploid' ))
+# print(dtreeN.probability_of_feature_value( '"age"', '64' ))
 
 # ----- ProbOfFeatureValueGivenClass -----
-print(dtreeN.probability_of_feature_value_given_class('"grade"', '2.0', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"grade"', '3.0', '"pgstat"=0'))
-print(dtreeN.probability_of_feature_value_given_class('"grade"', '4.0', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"grade"', '2.0', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"grade"', '3.0', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"gleason"', '7', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"diploid"', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"tetraploid"', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"eet"', '2', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"gleason"', '8', '"pgstat"=0'))
-print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
-print(dtreeN.probability_of_feature_value_given_class('"eet"', '1', '"pgstat"=0'))
-print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
-print(dtreeN.probability_of_feature_value_given_class('"grade"', '2.0', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"grade"', '3.0', '"pgstat"=0'))
-print(dtreeN.probability_of_feature_value_given_class('"grade"', '4.0', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"grade"', '2.0', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"grade"', '3.0', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"gleason"', '7', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"diploid"', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"tetraploid"', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"eet"', '2', '"pgstat"=1'))
-print(dtreeN.probability_of_feature_value_given_class('"gleason"', '8', '"pgstat"=0'))
-print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
-print(dtreeN.probability_of_feature_value_given_class('"eet"', '1', '"pgstat"=0'))
-print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"grade"', '2.0', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"grade"', '3.0', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"grade"', '4.0', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"grade"', '2.0', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"grade"', '3.0', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"gleason"', '7', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"diploid"', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"tetraploid"', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"eet"', '2', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"gleason"', '8', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"eet"', '1', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"grade"', '2.0', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"grade"', '3.0', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"grade"', '4.0', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"grade"', '2.0', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"grade"', '3.0', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"gleason"', '7', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"diploid"', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"tetraploid"', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"eet"', '2', '"pgstat"=1'))
+# print(dtreeN.probability_of_feature_value_given_class('"gleason"', '8', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"eet"', '1', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
 
 
 
@@ -136,3 +145,10 @@ print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"',
 # print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"age">51.0'], '"pgstat"=0' ))
 # print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"ploidy"="aneuploid"'], '"pgstat"=0' ))
 # print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"grade"=2.0', '"g2">42.00000000000033'], '"pgstat"=0' ))
+
+# ----- ProbOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds -----
+# print(dtreeN.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds( '"pgstat"=0', ['"age">47.0'] ))
+# print(dtreeN.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds( '"pgstat"=1', ['"age">47.0'] ))
+# print(dtreeN.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds( '"pgstat"=0', ['"age">47.0', '"gleason"=4.0'] ))
+# print(dtreeN.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds( '"pgstat"=1', ['"grade"=2.0', '"gleason"=4.0', '"g2">3.840000000000012', '"age"<49.0', '"g2">13.440000000000092', '"g2">17.04000000000012', '"g2">49.20000000000039'] ))
+# print(dtreeN.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds( '"pgstat"=0', ['"grade"=2.0', '"g2"<36.960000000000285'] ))

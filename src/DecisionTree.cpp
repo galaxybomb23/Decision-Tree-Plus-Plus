@@ -618,7 +618,7 @@ void DecisionTree::calculateClassPriors()
 	cout << "\nCalculating class priors...\n";
 
 	// Return if the class priors have already been calculated
-	if (_samplesClassLabelDict.size() > 1) {
+	if (_classPriorsDict.size() > 1) {
 		return;
 	}
 
@@ -633,6 +633,7 @@ void DecisionTree::calculateClassPriors()
 			cout << className << " = " << priorProbabilityForClass(className) << endl;
 		}
 	}
+
 }
 
 double DecisionTree::probabilityOfFeatureValue(const string &feature, const string &value)
@@ -1122,7 +1123,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 double DecisionTree::probabilityOfFeatureLessThanThreshold(const string &featureName, const string &threshold)
 {
 	double thresholdAsDouble	 = convert(threshold);
-	string featureThresholdCombo = featureName + "<" + std::to_string(thresholdAsDouble);
+	string featureThresholdCombo = featureName + "<" + formatDouble(thresholdAsDouble);
 
 	// Check if the probability is already cached
 	if (_probabilityCache.find(featureThresholdCombo) != _probabilityCache.end()) {
@@ -1456,40 +1457,44 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 				return 0;
 			}
 			else {
+
 				if (!probability) {
 					probability =
-						probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName])) -
-						probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName]));
+						probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className) -
+						probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className);
 				}
 				else {
 					probability *=
-						(probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName])) -
-						 probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName])));
+						(probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className) -
+						 probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className));
 				}
 			}
 		}
 		// If the feature has only an upper bound
 		else if (upperBound[featureName] != std::numeric_limits<double>::min() &&
 				 lowerBound[featureName] == std::numeric_limits<double>::max()) {
+
 			if (!probability) {
 				probability =
-					probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName]));
+					probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className);
+
 			}
 			else {
 				probability *=
-					probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName]));
+					probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className);
 			}
 		}
 		// If the feature has only a lower bound
 		else if (lowerBound[featureName] != std::numeric_limits<double>::max() &&
 				 upperBound[featureName] == std::numeric_limits<double>::min()) {
+
 			if (!probability) {
 				probability =
-					1.0 - probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName]));
+					1.0 - probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className);
 			}
 			else {
 				probability *=
-					(1.0 - probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName])));
+					(1.0 - probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className));
 			}
 		}
 		else {
@@ -1508,10 +1513,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 			}
 			else {
 				probability *= probabilityOfFeatureValueGivenClass(feature, value, className);
-				if (probability == 0) {
-					cout << "probabilityOfFeatureValueGivenClass(" << feature << ", " << value << ", " << className
-						 << "): " << probabilityOfFeatureValueGivenClass(feature, value, className) << endl;
-				}
 			}
 		}
 	}
@@ -1520,7 +1521,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 	return probability;
 }
 
-// TODO: Implement this function
 double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
 	const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
@@ -1535,6 +1535,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 		}
 	}
 	string classAndSequence = className + "::" + sequence;
+	cout << "ClassAndSequence: " << classAndSequence << endl;
 
 	// Check if the probability is already cached
 	if (_probabilityCache.find(classAndSequence) != _probabilityCache.end()) {
@@ -1546,9 +1547,10 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 
 	for (size_t i = 0; i < _classNames.size(); ++i) {
 		string currentClassName = _classNames[i];
+		cout << "CurrClassName: " << currentClassName << endl;
 		double probability		= probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
 			 arrayOfFeaturesAndValuesOrThresholds, currentClassName);
-
+		cout << "	probOfSeqGivenClass: " << probability << endl;
 		// check if prob is ~ 0
 		if (probability < .000001) {
 			arrayOfClassProbabilities[i] = 0.0;
@@ -1556,9 +1558,10 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 		}
 		double probOfFeatureSequence =
 			probabilityOfASequenceOfFeaturesAndValuesOrThresholds(arrayOfFeaturesAndValuesOrThresholds);
-
+		cout << "	probFeatureSeq: "<< probOfFeatureSequence << endl;
 		// something
 		double prior = _classPriorsDict[currentClassName];
+		cout << "	prior: " << prior << endl;
 		if (probOfFeatureSequence) {
 			arrayOfClassProbabilities[i] = (probability * prior) / probOfFeatureSequence;
 		}
@@ -1566,8 +1569,14 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 			arrayOfClassProbabilities[i] = prior;
 		}
 	}
-	// sum of all probabilities
+	cout << "Pre-Normalized Vals: " << endl; 
+	for( auto val : arrayOfClassProbabilities){
+		cout << "	"<< val << endl;
+	}
+
+	// Normalize the probs
 	double sumProbabilities = std::accumulate(arrayOfClassProbabilities.begin(), arrayOfClassProbabilities.end(), 0.0);
+	cout << "Sum of probs: " << sumProbabilities << endl;
 	if (sumProbabilities == 0) {
 		arrayOfClassProbabilities = vector<double>(_classNames.size(), 1.0 / _classNames.size());
 	}
@@ -1576,6 +1585,12 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 		for (size_t i = 0; i < _classNames.size(); ++i) {
 			arrayOfClassProbabilities[i] /= sumProbabilities;
 		}
+	}
+	
+	//print normalized probabilites
+	cout << "post-Normalized Vals: " << endl; 
+	for( auto val : arrayOfClassProbabilities){
+		cout << "	"<< val << endl;
 	}
 
 	// Cache the probabilities
