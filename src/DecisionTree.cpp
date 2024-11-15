@@ -1524,7 +1524,67 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
 	const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
-	return 0.0;
+	// generate a sequence string for caching
+	string sequence = "";
+	for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
+		if (item != arrayOfFeaturesAndValuesOrThresholds.back()) {
+			sequence += item + ":";
+		}
+		else {
+			sequence += item;
+		}
+	}
+	string classAndSequence = className + "::" + sequence;
+
+	// Check if the probability is already cached
+	if (_probabilityCache.find(classAndSequence) != _probabilityCache.end()) {
+		return _probabilityCache[classAndSequence];
+	}
+
+	// Calculate the probability
+	vector<double> arrayOfClassProbabilities = vector<double>(_classNames.size(), 0.0);
+
+	for (size_t i = 0; i < _classNames.size(); ++i) {
+		string currentClassName = _classNames[i];
+		double probability		= probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
+			 arrayOfFeaturesAndValuesOrThresholds, currentClassName);
+
+		// check if prob is ~ 0
+		if (probability < .000001) {
+			arrayOfClassProbabilities[i] = 0.0;
+			continue;
+		}
+		double probOfFeatureSequence =
+			probabilityOfASequenceOfFeaturesAndValuesOrThresholds(arrayOfFeaturesAndValuesOrThresholds);
+
+		// something
+		double prior = _classPriorsDict[currentClassName];
+		if (probOfFeatureSequence) {
+			arrayOfClassProbabilities[i] = (probability * prior) / probOfFeatureSequence;
+		}
+		else {
+			arrayOfClassProbabilities[i] = prior;
+		}
+	}
+	// sum of all probabilities
+	double sumProbabilities = std::accumulate(arrayOfClassProbabilities.begin(), arrayOfClassProbabilities.end(), 0.0);
+	if (sumProbabilities == 0) {
+		arrayOfClassProbabilities = vector<double>(_classNames.size(), 1.0 / _classNames.size());
+	}
+	else {
+		// normalize the probabilities
+		for (size_t i = 0; i < _classNames.size(); ++i) {
+			arrayOfClassProbabilities[i] /= sumProbabilities;
+		}
+	}
+
+	// Cache the probabilities
+	for (size_t i = 0; i < _classNames.size(); ++i) {
+		_probabilityCache[_classNames[i] + "::" + sequence] = arrayOfClassProbabilities[i];
+	}
+
+	// Return the probability
+	return _probabilityCache[classAndSequence];
 }
 
 //--------------- Class Based Utilities ----------------//
