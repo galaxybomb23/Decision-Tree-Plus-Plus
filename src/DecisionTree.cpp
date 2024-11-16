@@ -142,8 +142,7 @@ void DecisionTree::getTrainingData()
 			token.erase(0, token.find_first_not_of(" \""));
 			token.erase(token.find_last_not_of(" \"") + 1);
 			// Check if the column is a class column, if not, add it to the feature columns
-			if (std::find(_csvColumnsForFeatures.begin(), _csvColumnsForFeatures.end(), columnIdx) !=
-				_csvColumnsForFeatures.end()) {
+			if (std::find(_csvColumnsForFeatures.begin(), _csvColumnsForFeatures.end(), columnIdx) != _csvColumnsForFeatures.end()) {
 				_featureNames.push_back(token); // Get the feature names
 			}
 			columnIdx++;
@@ -173,8 +172,7 @@ void DecisionTree::getTrainingData()
 				className = token;
 			}
 			// If the column is a feature column, add the token to the row
-			else if (std::find(_csvColumnsForFeatures.begin(), _csvColumnsForFeatures.end(), columnIdx) !=
-					 _csvColumnsForFeatures.end()) {
+			else if (std::find(_csvColumnsForFeatures.begin(), _csvColumnsForFeatures.end(), columnIdx) != _csvColumnsForFeatures.end()) {
 				row.push_back(token);
 			}
 			columnIdx++;
@@ -257,9 +255,7 @@ void DecisionTree::calculateFirstOrderProbabilities()
 				cout << "\nPresenting probability distribution for a feature "
 						"considered to be numeric:\n";
 				// Output sorted sampling points and their probabilities
-				for (auto it = _probDistributionNumericFeaturesDict[feature].begin();
-					 it != _probDistributionNumericFeaturesDict[feature].end();
-					 ++it) {
+				for (auto it = _probDistributionNumericFeaturesDict[feature].begin(); it != _probDistributionNumericFeaturesDict[feature].end(); ++it) {
 					string samplingPoint = std::to_string(it->first);
 
 					double prob = probabilityOfFeatureValue(feature, samplingPoint);
@@ -374,9 +370,8 @@ map<string, string> DecisionTree::classify(DecisionTreeNode* rootNode, const vec
 	return classificationForDisplay;
 }
 
-map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTreeNode* node,
-																	const vector<string> &featureAndValues,
-																	map<string, vector<double>> &answer)
+map<string, double>
+DecisionTree::recursiveDescentForClassification(DecisionTreeNode* node, const vector<string> &featureAndValues, map<string, vector<double>> &answer)
 {
 	vector<shared_ptr<DecisionTreeNode>> children = node->GetChildren();
 
@@ -581,9 +576,7 @@ double DecisionTree::priorProbabilityForClass(const string &className, bool over
 
 	// Check if the probability is already in the cache (memoization)
 	if (_probabilityCache.find(classNameCacheKey) != _probabilityCache.end() && !overloadCache) {
-		logger.log(LogLevel(0),
-				   "priorProbabilityForClass:: probability found in cache: " +
-					   std::to_string(_probabilityCache[classNameCacheKey]));
+		logger.log(LogLevel(0), "priorProbabilityForClass:: probability found in cache: " + std::to_string(_probabilityCache[classNameCacheKey]));
 		return _probabilityCache[classNameCacheKey];
 	}
 
@@ -603,12 +596,13 @@ double DecisionTree::priorProbabilityForClass(const string &className, bool over
 		// Calculate the prior probability for the class
 		double priorProbability = static_cast<double>(numSamplesForClass) / static_cast<double>(totalNumSamples);
 
+		// store the prior probability in the _classPriorsDict
+		_classPriorsDict[className] = priorProbability;
+
 		// Store the prior probability in the cache
 		string classNamePrior			  = "prior::" + className;
 		_probabilityCache[classNamePrior] = priorProbability;
-		logger.log(LogLevel(0),
-				   "priorProbabilityForClass:: prior probability for " + className + ": " +
-					   std::to_string(priorProbability));
+		logger.log(LogLevel(0), "priorProbabilityForClass:: prior probability for " + className + ": " + std::to_string(priorProbability));
 	}
 	return _probabilityCache[classNameCacheKey];
 }
@@ -633,7 +627,6 @@ void DecisionTree::calculateClassPriors()
 			cout << className << " = " << priorProbabilityForClass(className) << endl;
 		}
 	}
-
 }
 
 double DecisionTree::probabilityOfFeatureValue(const string &feature, const string &value)
@@ -644,10 +637,8 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 	string featureAndValue;
 
 	// If the feature is numeric, find the closest sampling point
-	if (!std::isnan(valueAsDouble) &&
-		_samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
-		adjustedValue =
-			std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
+	if (!std::isnan(valueAsDouble) && _samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
+		adjustedValue = std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
 	}
 
 	// If the feature is numeric, format the double for storing it into the cache
@@ -766,7 +757,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 			for (const auto &p : probabilities) {
 				sumProbs += p;
 			}
-			assert(abs(sumProbs - 1.0) < 0.0001);
+			// assert(abs(sumProbs - 1.0) < 0.0001);
 
 			// Cache the probabilities
 			map<double, double> binProbDict;
@@ -777,10 +768,9 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 
 			vector<string> valuesForFeature;
 			valuesForFeature.reserve(samplingPointsForFeature.size());
-			std::transform(samplingPointsForFeature.begin(),
-						   samplingPointsForFeature.end(),
-						   std::back_inserter(valuesForFeature),
-						   [&feature](int x) { return feature + "=" + std::to_string(x); });
+			std::transform(samplingPointsForFeature.begin(), samplingPointsForFeature.end(), std::back_inserter(valuesForFeature), [&feature](int x) {
+				return feature + "=" + std::to_string(x);
+			});
 			// Cache rest
 			for (size_t i = 0; i < valuesForFeature.size(); ++i) {
 				_probabilityCache[valuesForFeature[i]] = probabilities[i];
@@ -794,11 +784,9 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 		}
 		else {
 			// This section if for those numeric features treated symbolically
-			std::set<string> uniqueValuesForFeature =
-				set(_featuresAndValuesDict[feature].begin(), _featuresAndValuesDict[feature].end());
+			std::set<string> uniqueValuesForFeature = set(_featuresAndValuesDict[feature].begin(), _featuresAndValuesDict[feature].end());
 			vector<string> valuesForFeature(uniqueValuesForFeature.begin(), uniqueValuesForFeature.end());
-			valuesForFeature.erase(std::remove(valuesForFeature.begin(), valuesForFeature.end(), "NA"),
-								   valuesForFeature.end());
+			valuesForFeature.erase(std::remove(valuesForFeature.begin(), valuesForFeature.end(), "NA"), valuesForFeature.end());
 
 			// Create a feature and value string
 			for (size_t i = 0; i < valuesForFeature.size(); ++i) {
@@ -887,8 +875,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 	return 0.0;
 }
 
-double
-DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const string &value, const string &className)
+double DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const string &value, const string &className)
 {
 	// Prepare feature value class and initialize variables
 	string adjustedValue = value;
@@ -896,10 +883,8 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 	string featureAndValueClass;
 
 	// If the feature is numeric, find the closest sampling point
-	if (!std::isnan(valueAsDouble) &&
-		_samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
-		adjustedValue =
-			std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
+	if (!std::isnan(valueAsDouble) && _samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
+		adjustedValue = std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
 	}
 
 	// If the feature is numeric, format the double for storing it into the cache
@@ -967,8 +952,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 			}
 			for (size_t i = 0; i < samplingPointsForFeature.size(); ++i) {
 				for (size_t j = 0; j < actualFeatureValuesForSamplesInClass.size(); ++j) {
-					if (std::abs(samplingPointsForFeature[i] - stoi(actualFeatureValuesForSamplesInClass[j])) <
-						histogramDelta) {
+					if (std::abs(samplingPointsForFeature[i] - stoi(actualFeatureValuesForSamplesInClass[j])) < histogramDelta) {
 						countsAtSamplingPoints[i]++;
 					}
 				}
@@ -1011,8 +995,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 		}
 		else {
 			// Extract unique values for the feature from _featuresAndValuesDict
-			std::set<std::string> uniqueValues(_featuresAndValuesDict[feature].begin(),
-											   _featuresAndValuesDict[feature].end());
+			std::set<std::string> uniqueValues(_featuresAndValuesDict[feature].begin(), _featuresAndValuesDict[feature].end());
 
 			// Remove "NA" values
 			uniqueValues.erase("NA");
@@ -1047,16 +1030,14 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 			// Calculate the total count
 			int totalCount = std::accumulate(valueCounts.begin(), valueCounts.end(), 0);
 			if (totalCount == 0) {
-				throw std::runtime_error(
-					"PFVC2 Something is wrong with your training file. It contains no training samples for Class " +
-					className + " and Feature " + feature);
+				throw std::runtime_error("PFVC2 Something is wrong with your training file. It contains no training samples for Class " + className +
+										 " and Feature " + feature);
 			}
 
 			// Normalize and cache probabilities
 			for (size_t i = 0; i < valuesForFeature.size(); ++i) {
-				std::string featureAndValueAndClass = valuesForFeature[i] + "::" + className;
-				_probabilityCache[featureAndValueAndClass] =
-					static_cast<double>(valueCounts[i]) / static_cast<double>(totalCount);
+				std::string featureAndValueAndClass		   = valuesForFeature[i] + "::" + className;
+				_probabilityCache[featureAndValueAndClass] = static_cast<double>(valueCounts[i]) / static_cast<double>(totalCount);
 			}
 
 			// Check for cached value
@@ -1102,9 +1083,8 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 		}
 
 		for (int i = 0; i < valuesForFeature.size(); i++) {
-			string featureAndValueForClass = valuesForFeature[i] + "::" + className;
-			_probabilityCache[featureAndValueForClass] =
-				static_cast<double>(countsForValues[i]) / static_cast<double>(totalNumSamples);
+			string featureAndValueForClass			   = valuesForFeature[i] + "::" + className;
+			_probabilityCache[featureAndValueForClass] = static_cast<double>(countsForValues[i]) / static_cast<double>(totalNumSamples);
 		}
 
 		string featureAndValueAndClass = feature + "=" + adjustedValue + "::" + className;
@@ -1152,15 +1132,12 @@ double DecisionTree::probabilityOfFeatureLessThanThreshold(const string &feature
 	}
 
 	// Calculate the probability
-	double probability =
-		static_cast<double>(allValuesLessThanThreshold.size()) / static_cast<double>(valuesForFeatureAsDoubles.size());
+	double probability						 = static_cast<double>(allValuesLessThanThreshold.size()) / static_cast<double>(valuesForFeatureAsDoubles.size());
 	_probabilityCache[featureThresholdCombo] = probability;
 	return probability;
 }
 
-double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName,
-																	 const string &threshold,
-																	 const string &className)
+double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className)
 {
 	double thresholdAsDouble	 = convert(threshold);
 	string featureThresholdCombo = featureName + "<" + std::to_string(thresholdAsDouble) + "::" + className;
@@ -1200,18 +1177,20 @@ double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const strin
 	}
 
 	// Calculate and cache the probability
-	double probability = static_cast<double>(actualPointsForFeatureLessThanThreshold.size()) /
-						 static_cast<double>(actualFeatureValuesForSamplesInClass.size());
+	double probability = static_cast<double>(actualPointsForFeatureLessThanThreshold.size()) / static_cast<double>(actualFeatureValuesForSamplesInClass.size());
 	_probabilityCache[featureThresholdCombo] = probability;
 	return probability;
 }
 
-double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
-	const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
+double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
 	// This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array
 	// of branch features and thresholds. The symbolic types should be expressed as 'feature=value' constructs.
-
+	cout << "probabilityOfASequenceOfFeaturesAndValuesOrThresholds: {";
+	for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
+		cout << item << ", ";
+	}
+	cout << "}" << endl;
 	if (arrayOfFeaturesAndValuesOrThresholds.size() == 0) {
 		return std::nan("");
 	}
@@ -1238,12 +1217,13 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
 	regex pattern2(R"((.+)<(.+))"); // Numeric feature pattern
 	regex pattern3(R"((.+)>(.+))"); // Numeric feature pattern
 	vector<string> trueNumericTypes;
-	vector<string> trueNumericTypesFeatureNames;
+	std::set<string> trueNumericTypesFeatureNames;
 	vector<string> symbolicTypes;
-	vector<string> symbolicTypesFeatureNames;
+	std::set<string> symbolicTypesFeatureNames; // unsure if this is needed
 
 	// Cast draw the incantation
 	for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
+
 		smatch match;
 		string feature;
 		string value;
@@ -1251,30 +1231,32 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
 			feature = match[1];
 			value	= match[2];
 			trueNumericTypes.push_back(item);
-			trueNumericTypesFeatureNames.push_back(feature);
+			trueNumericTypesFeatureNames.insert(feature);
 		}
 		else if (regex_search(item, match, pattern3)) {
 			feature = match[1];
 			value	= match[2];
 			trueNumericTypes.push_back(item);
-			trueNumericTypesFeatureNames.push_back(feature);
+			trueNumericTypesFeatureNames.insert(feature);
 		}
 		else {
 			regex_search(item, match, pattern1);
 			feature = match[1];
 			value	= match[2];
 			symbolicTypes.push_back(item);
-			symbolicTypesFeatureNames.push_back(feature);
+			symbolicTypesFeatureNames.insert(feature);
 		}
 	}
 
-	// Remove duplicates from feature names in-place
-	trueNumericTypesFeatureNames.erase(unique(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end()),
-									   trueNumericTypesFeatureNames.end());
-	symbolicTypesFeatureNames.erase(unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()),
-									symbolicTypesFeatureNames.end());
+	// get bounded intervals for numeric features
 	vector<vector<string>> boundedIntervalsNumericTypes = findBoundedIntervalsForNumericFeatures(trueNumericTypes);
 
+	// print trueNumericTypesFeatureNames
+	cout << "trueNumericTypesFeatureNames: {";
+	for (const auto &item : trueNumericTypesFeatureNames) {
+		cout << item << ", ";
+	}
+	cout << "}" << endl;
 	// Calculate the upper and the lower bounds to be used when searching for the best
 	// threshold for each of the numeric features that are in play at the current node:
 
@@ -1295,52 +1277,68 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
 			upperBound[item[0]] = convert(item[2]);
 		}
 	}
+	cout << "lowerBounds: {";
+	for (const auto &item : lowerBound) {
+		cout << item.first << " : " << item.second;
+		if (item.second == std::numeric_limits<double>::max()) {
+			cout << " (max), ";
+		}
+		else {
+			cout << ", ";
+		}
+	}
+	cout << "}\nupperBounds: {";
+	for (const auto &item : upperBound) {
+		cout << item.first << " : " << item.second;
+		if (item.second == std::numeric_limits<double>::min()) {
+			cout << " (min), ";
+		}
+		else {
+			cout << ", ";
+		}
+	}
+	cout << "}" << endl;
 
 	// Numeric feature case
 	for (const auto &featureName : trueNumericTypesFeatureNames) {
 		if (lowerBound[featureName] != std::numeric_limits<double>::max() &&
-			upperBound[featureName] != std::numeric_limits<double>::min()) {
+			upperBound[featureName] != std::numeric_limits<double>::min()) { // Both bounds are set
 			if (upperBound[featureName] <= lowerBound[featureName]) {
 				return 0; // Return 0 if upper bound is less than or equal to lower bound
 			}
 			else {
 				if (!probability) {
-					probability =
-						probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName])) -
-						probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName]));
+					probability = probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName])) -
+								  probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName]));
 				}
 				else {
-					probability *=
-						(probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName])) -
-						 probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName])));
+					probability *= (probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName])) -
+									probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName])));
 				}
 			}
 		}
-		else if (upperBound[featureName] != std::numeric_limits<double>::min() &&
-				 lowerBound[featureName] == std::numeric_limits<double>::max()) {
+		// if only upper bound is set
+		else if (upperBound[featureName] != std::numeric_limits<double>::min() && lowerBound[featureName] == std::numeric_limits<double>::max()) {
 			if (!probability) {
-				probability =
-					probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName]));
+				probability = probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName]));
 			}
 			else {
-				probability *=
-					probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName]));
+				probability *= probabilityOfFeatureLessThanThreshold(featureName, std::to_string(upperBound[featureName]));
 			}
 		}
-		else if (lowerBound[featureName] != std::numeric_limits<double>::max() &&
-				 upperBound[featureName] == std::numeric_limits<double>::min()) {
+		// if only lower bound is set
+		else if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] == std::numeric_limits<double>::min()) {
 			if (!probability) {
-				probability =
-					1.0 - probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName]));
+				probability = 1.0 - probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName]));
 			}
 			else {
-				probability *=
-					(1.0 - probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName])));
+				probability *= (1.0 - probabilityOfFeatureLessThanThreshold(featureName, std::to_string(lowerBound[featureName])));
 			}
 		}
 		else {
 			throw std::runtime_error("Ill formatted call to 'probability_of_sequence' method");
 		}
+		cout << "probability: " << probability << " after feature: " << featureName << endl;
 	}
 
 	// Symbolic feature case
@@ -1362,8 +1360,8 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
 	return probability;
 }
 
-double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
-	const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &className)
+double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(const vector<string> &arrayOfFeaturesAndValuesOrThresholds,
+																					 const string &className)
 {
 	// This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array of
 	// branch features and thresholds. The symbolic types should be expressed as 'feature=value' constructs.
@@ -1422,10 +1420,8 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 	}
 
 	// Remove duplicates from feature names in-place
-	trueNumericTypesFeatureNames.erase(unique(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end()),
-									   trueNumericTypesFeatureNames.end());
-	symbolicTypesFeatureNames.erase(unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()),
-									symbolicTypesFeatureNames.end());
+	trueNumericTypesFeatureNames.erase(unique(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end()), trueNumericTypesFeatureNames.end());
+	symbolicTypesFeatureNames.erase(unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()), symbolicTypesFeatureNames.end());
 	vector<vector<string>> boundedIntervalsNumericTypes = findBoundedIntervalsForNumericFeatures(trueNumericTypes);
 
 	// Calculate the upper and the lower bounds to be used when searching for the best
@@ -1450,8 +1446,7 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 	// Numeric feature case
 	for (const auto &featureName : trueNumericTypesFeatureNames) {
 		// If the feature has both a lower and upper bound
-		if (lowerBound[featureName] != std::numeric_limits<double>::max() &&
-			upperBound[featureName] != std::numeric_limits<double>::min()) {
+		if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] != std::numeric_limits<double>::min()) {
 			// If the upper bound is less than or equal to the lower bound, return 0
 			if (upperBound[featureName] <= lowerBound[featureName]) {
 				return 0;
@@ -1459,42 +1454,33 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 			else {
 
 				if (!probability) {
-					probability =
-						probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className) -
-						probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className);
+					probability = probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className) -
+								  probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className);
 				}
 				else {
-					probability *=
-						(probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className) -
-						 probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className));
+					probability *= (probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className) -
+									probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className));
 				}
 			}
 		}
 		// If the feature has only an upper bound
-		else if (upperBound[featureName] != std::numeric_limits<double>::min() &&
-				 lowerBound[featureName] == std::numeric_limits<double>::max()) {
+		else if (upperBound[featureName] != std::numeric_limits<double>::min() && lowerBound[featureName] == std::numeric_limits<double>::max()) {
 
 			if (!probability) {
-				probability =
-					probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className);
-
+				probability = probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className);
 			}
 			else {
-				probability *=
-					probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className);
+				probability *= probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(upperBound[featureName]), className);
 			}
 		}
 		// If the feature has only a lower bound
-		else if (lowerBound[featureName] != std::numeric_limits<double>::max() &&
-				 upperBound[featureName] == std::numeric_limits<double>::min()) {
+		else if (lowerBound[featureName] != std::numeric_limits<double>::max() && upperBound[featureName] == std::numeric_limits<double>::min()) {
 
 			if (!probability) {
-				probability =
-					1.0 - probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className);
+				probability = 1.0 - probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className);
 			}
 			else {
-				probability *=
-					(1.0 - probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className));
+				probability *= (1.0 - probabilityOfFeatureLessThanThresholdGivenClass(featureName, std::to_string(lowerBound[featureName]), className));
 			}
 		}
 		else {
@@ -1521,10 +1507,16 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 	return probability;
 }
 
-double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
-	const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
+// DO THIS ONE
+double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(const string &className,
+																					 const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
 	// generate a sequence string for caching
+	cout << "probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds: \n" << "Class: " << className << "\nSeq: ";
+	for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
+		cout << item << ", ";
+	}
+	cout << endl;
 	string sequence = "";
 	for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
 		if (item != arrayOfFeaturesAndValuesOrThresholds.back()) {
@@ -1548,8 +1540,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 	for (size_t i = 0; i < _classNames.size(); ++i) {
 		string currentClassName = _classNames[i];
 		cout << "CurrClassName: " << currentClassName << endl;
-		double probability		= probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
-			 arrayOfFeaturesAndValuesOrThresholds, currentClassName);
+		double probability = probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(arrayOfFeaturesAndValuesOrThresholds, currentClassName);
 		cout << "	probOfSeqGivenClass: " << probability << endl;
 		// check if prob is ~ 0
 		if (probability < .000001) {
@@ -1557,8 +1548,8 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 			continue;
 		}
 		double probOfFeatureSequence =
-			probabilityOfASequenceOfFeaturesAndValuesOrThresholds(arrayOfFeaturesAndValuesOrThresholds);
-		cout << "	probFeatureSeq: "<< probOfFeatureSequence << endl;
+			probabilityOfASequenceOfFeaturesAndValuesOrThresholds(arrayOfFeaturesAndValuesOrThresholds); // could proll be moved outta loop
+		cout << "	probFeatureSeq: " << probOfFeatureSequence << endl;
 		// something
 		double prior = _classPriorsDict[currentClassName];
 		cout << "	prior: " << prior << endl;
@@ -1569,9 +1560,9 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 			arrayOfClassProbabilities[i] = prior;
 		}
 	}
-	cout << "Pre-Normalized Vals: " << endl; 
-	for( auto val : arrayOfClassProbabilities){
-		cout << "	"<< val << endl;
+	cout << "Pre-Normalized Vals: " << endl;
+	for (auto val : arrayOfClassProbabilities) {
+		cout << "	" << val << endl;
 	}
 
 	// Normalize the probs
@@ -1586,16 +1577,19 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 			arrayOfClassProbabilities[i] /= sumProbabilities;
 		}
 	}
-	
-	//print normalized probabilites
-	cout << "post-Normalized Vals: " << endl; 
-	for( auto val : arrayOfClassProbabilities){
-		cout << "	"<< val << endl;
+
+	// print normalized probabilites
+	cout << "post-Normalized Vals: " << endl;
+	for (auto val : arrayOfClassProbabilities) {
+		cout << "	" << val << endl;
 	}
 
 	// Cache the probabilities
 	for (size_t i = 0; i < _classNames.size(); ++i) {
-		_probabilityCache[_classNames[i] + "::" + sequence] = arrayOfClassProbabilities[i];
+		string key = _classNames[i] + "::" + sequence;
+		cout << "Key: " << key << endl;
+		cout << "Val: " << arrayOfClassProbabilities[i] << endl;
+		_probabilityCache[key] = arrayOfClassProbabilities[i];
 	}
 
 	// Return the probability

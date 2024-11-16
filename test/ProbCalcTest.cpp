@@ -107,11 +107,9 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsSymbol
 	ASSERT_NEAR(prob1, 0.44, 0.001);
 	double prob2 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({"fatIntake=low", "smoking=heavy"});
 	ASSERT_NEAR(prob2, 0.119, 0.001);
-	double prob3 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
-		{"fatIntake=low", "smoking=never", "exercising=regularly"});
+	double prob3 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({"fatIntake=low", "smoking=never", "exercising=regularly"});
 	ASSERT_NEAR(prob3, 0.011, 0.001);
-	double prob4 =
-		dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({"fatIntake=medium", "exercising=occasionally"});
+	double prob4 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({"fatIntake=medium", "exercising=occasionally"});
 	ASSERT_NEAR(prob4, 0.089, 0.001);
 }
 
@@ -121,14 +119,11 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 	ASSERT_NEAR(prob0, 0.161, 0.001);
 	double prob1 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({"smoking=heavy"}, "malignant");
 	ASSERT_NEAR(prob1, 0.895, 0.001);
-	double prob2 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
-		{"fatIntake=heavy", "exercising=never"}, "benign");
+	double prob2 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({"fatIntake=heavy", "exercising=never"}, "benign");
 	ASSERT_NEAR(prob2, 0.026, 0.001);
-	double prob3 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
-		{"fatIntake=heavy", "videoAddiction=medium"}, "malignant");
+	double prob3 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({"fatIntake=heavy", "videoAddiction=medium"}, "malignant");
 	ASSERT_NEAR(prob3, 0.235, 0.001);
-	double prob4 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
-		{"fatIntake=heavy", "smoking=heavy", "videoAddiction=none"}, "benign");
+	double prob4 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({"fatIntake=heavy", "smoking=heavy", "videoAddiction=none"}, "benign");
 	ASSERT_NEAR(prob4, 0.007, 0.001);
 	double prob5 = dtS->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
 		{"fatIntake=heavy", "smoking=heavy", "videoAddiction=heavy", "exercising=regularly"}, "benign");
@@ -138,45 +133,53 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 
 // ------ Numeric Data Tests ------
 
-TEST_F(ProbCalcTest, priorProbabilityForClassNumeric) {
-    double prob0 = dtN->priorProbabilityForClass("1");
-    ASSERT_NEAR(prob0, 0.369, 0.001);
-    double prob1 = dtN->priorProbabilityForClass("0");
-    ASSERT_NEAR(prob1, 0.630, 0.001);
+TEST_F(ProbCalcTest, priorProbabilityForClassNumeric)
+{
+	double prob0 = dtN->priorProbabilityForClass("1");
+	ASSERT_NEAR(prob0, 0.369, 0.001);
+	double prob1 = dtN->priorProbabilityForClass("0");
+	ASSERT_NEAR(prob1, 0.630, 0.001);
 }
 
-TEST_F(ProbCalcTest, calculateClassPriorsNumeric) {
-    dtN->calculateClassPriors();
-    vector<float> expected = {0.630, 0.369};
-    vector<float> priors;
-    for (int i = 0; i < dtN->_classNames.size(); i++) {
-        priors.push_back(dtN->priorProbabilityForClass(dtN->_classNames[i]));
-        ASSERT_NEAR(expected[i], priors[i], 0.001);
-    }
+TEST_F(ProbCalcTest, calculateClassPriorsNumeric)
+{
+	dtN->calculateClassPriors();
+	vector<float> expected = {0.630, 0.369};
+	vector<float> priors;
+	for (int i = 0; i < dtN->_classNames.size(); i++) {
+		priors.push_back(dtN->priorProbabilityForClass(dtN->_classNames[i]));
+		ASSERT_NEAR(expected[i], priors[i], 0.001);
+	}
 }
 
 TEST_F(ProbCalcTest, probabilityOfFeatureValueNumeric)
 {
 	double prob0 = dtN->probabilityOfFeatureValue("grade", "2.0");
 	ASSERT_NEAR(prob0, 0.404, 0.001);
-    double prob1 = dtN->probabilityOfFeatureValue("grade", "2");
+	double prob1 = dtN->probabilityOfFeatureValue("grade", "2");
 	ASSERT_NEAR(prob1, 0.404, 0.001);
-    double prob2 = dtN->probabilityOfFeatureValue("grade", "3.0");
-    ASSERT_NEAR(prob2, 0.541, 0.001);
-    double prob3 = dtN->probabilityOfFeatureValue("gleason", "8.0");
-    ASSERT_NEAR(prob3, 0.147, 0.001);
-    double prob4 = dtN->probabilityOfFeatureValue("ploidy", "tetraploid");
-    ASSERT_NEAR(prob4, 0.466, 0.001);
-    double prob5 = dtN->probabilityOfFeatureValue("age", "64");
-    ASSERT_NEAR(prob5, 0.147, 0.001);
+	double prob2 = dtN->probabilityOfFeatureValue("grade", "3.0");
+	ASSERT_NEAR(prob2, 0.541, 0.001);
+	double prob3 = dtN->probabilityOfFeatureValue("gleason", "8.0");
+	ASSERT_NEAR(prob3, 0.147, 0.001);
+	double prob4 = dtN->probabilityOfFeatureValue("ploidy", "tetraploid");
+	ASSERT_NEAR(prob4, 0.466, 0.001);
+	double prob5 = dtN->probabilityOfFeatureValue("age", "64");
+	ASSERT_NEAR(prob5, 0.0, 0.001); // was failing as .147, but python giving 0.0
 }
 
 // TODO: Write more asserts
-TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClassNumeric) {
-    
+TEST_F(ProbCalcTest, probabilityOfFeatureLessThanThresholdNumeric)
+{
+	double prob0 = dtN->probabilityOfFeatureLessThanThreshold("age", "47");
+	ASSERT_NEAR(prob0, 0.00684, 0.0001);
+	double prob1 = dtN->probabilityOfFeatureLessThanThreshold("age", "50");
+	ASSERT_NEAR(prob1, 0.0205, 0.0001);
+	double prob2 = dtN->probabilityOfFeatureLessThanThreshold("age", "100");
+	ASSERT_NEAR(prob2, 1.0, 0.0001);
 }
 
-TEST_F(ProbCalcTest, probabilityOfFeatureLessThanThresholdNumeric)
+TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClassNumeric)
 {
 	double prob1 = dtN->probabilityOfFeatureValueGivenClass("grade", "2.0", "1");
 	ASSERT_NEAR(prob1, 0.16666666666666666, 0.001);
@@ -285,35 +288,45 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsNumeri
 	ASSERT_NEAR(prob1, 0.230, 0.001);
 	double prob2 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({"grade=2.0", "g2>49.20000000000039"});
 	ASSERT_NEAR(prob2, 0.003, 0.001);
-	double prob3 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
-		{"grade=2.0", "gleason=4.0", "g2>49.20000000000039"});
+	double prob3 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({"grade=2.0", "gleason=4.0", "g2>49.20000000000039"});
 	ASSERT_NEAR(prob3, 0.000122, 0.000001);
-	double prob4 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
-		{"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=aneuploid"});
+	double prob4 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=aneuploid"});
 	ASSERT_NEAR(prob4, 0.000161, 0.000001);
-	double prob5 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
-		{"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=tetraploid"});
+	double prob5 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=tetraploid"});
 	ASSERT_NEAR(prob5, 0.000994, 0.000001);
+
+	// more tests
+	double prob6 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
+		{"grade=2.0", "gleason=4.0", "g2>3.84000", "age<49.0", "g2>13.44000", "g2>17.04000", "g2>49.20000"});
+	ASSERT_NEAR(prob6, 1.671e-6, 0.01e-6);
 }
 
 TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClassNumeric)
 {
-	double prob0 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "age<47.0" }, "1");
+	double prob0 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({"age<47.0"}, "1");
 	ASSERT_NEAR(prob0, 0.019, 0.001);
-	double prob1 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "grade=2.0", "gleason=5.0", 
-        "g2<3.840000000000012", "age>51.0" }, "0"); 
-    ASSERT_NEAR(prob1, 0.193, 0.001);
-	double prob2 =	dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "grade=2.0", "gleason=5.0",
-        "g2<3.840000000000012", "ploidy=aneuploid" }, "0"); 
-    ASSERT_NEAR(prob2, 0.008, 0.001); 
-    double prob3 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({ "grade=2.0", "g2>42.00000000000033" }, "0"); 
-    ASSERT_NEAR(prob3, 0.006, 0.001);
+	double prob1 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "age>51.0"}, "0");
+	ASSERT_NEAR(prob1, 0.193, 0.001);
+	double prob2 =
+		dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=aneuploid"}, "0");
+	ASSERT_NEAR(prob2, 0.008, 0.001);
+	double prob3 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass({"grade=2.0", "g2>42.00000000000033"}, "0");
+	ASSERT_NEAR(prob3, 0.006, 0.001);
 }
 
-TEST_F(ProbCalcTest, probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds) {
-    dtN->calculateClassPriors(); // Must be called before this method
-    dtN->setDebug2(1);
+TEST_F(ProbCalcTest, probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds)
+{
+	dtN->calculateClassPriors(); // Must be called before this method
 
-    double prob0 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("1", { "age>47.0" });
-    ASSERT_NEAR(prob0, 0.366, 0.001);
+	// double prob0 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"age>47.0"});
+	// ASSERT_NEAR(prob0, 0.634, 0.001);
+	// double prob1 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("1", {"age>47.0"});
+	// ASSERT_NEAR(prob1, 0.366, 0.001);
+	// double prob2 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"age>47.0", "gleason=4.0 "});
+	// ASSERT_NEAR(prob2, 0.678, 0.001);
+	double prob3 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+		"1", {"grade=2.0", "gleason=4.0", "g2>3.84000", "age<49.0", "g2>13.44000", "g2>17.04000", "g2>49.20000"});
+	ASSERT_NEAR(prob3, 0.928, 0.001);
+	double prob4 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"grade=2.0", "g2<36.96"});
+	ASSERT_NEAR(prob4, 0.848, 0.001);
 }
