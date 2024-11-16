@@ -27,9 +27,8 @@ class DecisionTree {
 
 	//--------------- Classify ----------------//
 	map<string, string> classify(DecisionTreeNode* rootNode, const vector<string> &featuresAndValues);
-	map<string, double> recursiveDescentForClassification(DecisionTreeNode* node,
-														  const vector<string> &feature_and_values,
-														  map<string, vector<double>> &answer);
+	map<string, double>
+	recursiveDescentForClassification(DecisionTreeNode* node, const vector<string> &feature_and_values, map<string, vector<double>> &answer);
 
 	//--------------- Construct Tree ----------------//
 	DecisionTreeNode* constructDecisionTreeClassifier();
@@ -44,15 +43,11 @@ class DecisionTree {
 	double probabilityOfFeatureValue(const string &feature, const string &value);
 	double probabilityOfFeatureValueGivenClass(const string &feature, const string &value, const string &className);
 	double probabilityOfFeatureLessThanThreshold(const string &featureName, const string &threshold);
-	double probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName,
-														   const string &threshold,
-														   const string &className);
-														   
+	double probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName, const string &threshold, const string &className);
+
 	double probabilityOfASequenceOfFeaturesAndValuesOrThresholds(const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
-	double probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
-		const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &className);
-	double probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
-		const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
+	double probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &className);
+	double probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 
 	//--------------- Class Based Utilities ----------------//
 	bool checkNamesUsed(const vector<string> &featuresAndValues);
@@ -61,6 +56,7 @@ class DecisionTree {
 	void printStats();
 
 	int _nodesCreated;
+	string _classLabel; // The class label for the training data currently unused
 	vector<string> _classNames;
 
 	// --------------- Getters ----------------//
