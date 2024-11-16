@@ -318,12 +318,12 @@ TEST_F(ProbCalcTest, probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 {
 	dtN->calculateClassPriors(); // Must be called before this method
 
-	// double prob0 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"age>47.0"});
-	// ASSERT_NEAR(prob0, 0.634, 0.001);
-	// double prob1 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("1", {"age>47.0"});
-	// ASSERT_NEAR(prob1, 0.366, 0.001);
-	// double prob2 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"age>47.0", "gleason=4.0 "});
-	// ASSERT_NEAR(prob2, 0.678, 0.001);
+	double prob0 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"age>47.0"});
+	ASSERT_NEAR(prob0, 0.634, 0.001);
+	double prob1 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("1", {"age>47.0"});
+	ASSERT_NEAR(prob1, 0.366, 0.001);
+	double prob2 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"age>47.0", "gleason=4.0 "});
+	ASSERT_NEAR(prob2, 0.678, 0.001);
 	double prob3 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
 		"1", {"grade=2.0", "gleason=4.0", "g2>3.84000", "age<49.0", "g2>13.44000", "g2>17.04000", "g2>49.20000"});
 	ASSERT_NEAR(prob3, 0.928, 0.001);
