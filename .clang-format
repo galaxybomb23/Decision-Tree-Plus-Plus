@@ -11,7 +11,7 @@ TabWidth: 4                      # Number of spaces per tab
 UseTab: Always                    # Use spaces instead of tabs
 
 # Column width and line breaking
-ColumnLimit: 120                  # Maximum width for lines
+ColumnLimit: 160                  # Maximum width for lines
 BreakBeforeBraces: Stroustrup     # Braces on new line for functions and control blocks
 
 # Spacing settings
