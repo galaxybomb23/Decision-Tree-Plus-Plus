@@ -1512,7 +1512,8 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 																					 const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
 	// generate a sequence string for caching
-	cout << "probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds: \n" << "Class: " << className << "\nSeq: ";
+	cout << "probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds: \n"
+		 << "Class: " << className << "\nSeq: ";
 	for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
 		cout << item << ", ";
 	}

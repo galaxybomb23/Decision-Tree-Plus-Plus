@@ -39,8 +39,7 @@ class TrainingDataGeneratorNumeric {
 	void GenerateTrainingDataNumeric(); // Generate the training data for numeric data
 
 	// Helpers
-	std::vector<Eigen::VectorXd>
-	GenerateMultivariateSamples(const std::vector<double> &mean, const Eigen::MatrixXd &cov, int numSamples);
+	std::vector<Eigen::VectorXd> GenerateMultivariateSamples(const std::vector<double> &mean, const Eigen::MatrixXd &cov, int numSamples);
 
 	// Getters
 	std::string getOutputCsvFile() const;

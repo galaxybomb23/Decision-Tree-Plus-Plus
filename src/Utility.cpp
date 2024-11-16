@@ -40,8 +40,7 @@ std::string CleanupCsvString(const std::string &line)
 		std::string match	   = (*i).str();
 		std::string cleanMatch = std::regex_replace(match.substr(1, match.size() - 2), std::regex(","), "");
 		cleanMatch			   = std::regex_replace(cleanMatch, std::regex("\\s+"), "_");
-		cleaned				   = std::regex_replace(
-			   cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), cleanMatch);
+		cleaned				   = std::regex_replace(cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), cleanMatch);
 	}
 	// std::cout << "Double-quoted: " << cleaned << "|" << std::endl;
 
@@ -55,8 +54,7 @@ std::string CleanupCsvString(const std::string &line)
 		// std::cout << "Clean-Match: " << cleanMatch << std::endl;
 		cleanMatch = std::regex_replace(cleanMatch, std::regex("^\\s*_|_\\s*$"), "");
 		// std::cout << "Clean-Match: " << cleanMatch << std::endl;
-		cleaned = std::regex_replace(
-			cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), " " + cleanMatch);
+		cleaned = std::regex_replace(cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), " " + cleanMatch);
 	}
 	// std::cout << "Whitespace: " << cleaned << "|" << std::endl;
 
@@ -91,20 +89,22 @@ std::string CleanupCsvString(const std::string &line)
 	return result;
 }
 
-std::string removeTrailingZeros(const std::string& str) {
-    // Remove trailing zeros after the decimal point
-    std::string result = str;
-    result.erase(result.find_last_not_of('0') + 1, std::string::npos);
+std::string removeTrailingZeros(const std::string &str)
+{
+	// Remove trailing zeros after the decimal point
+	std::string result = str;
+	result.erase(result.find_last_not_of('0') + 1, std::string::npos);
 
-    // If the last character is a decimal point, remove it
-    if (result.back() == '.') {
-        result.pop_back();
-    }
-    return result;
+	// If the last character is a decimal point, remove it
+	if (result.back() == '.') {
+		result.pop_back();
+	}
+	return result;
 }
 
-std::string formatDouble(double value) {
-    std::stringstream ss;
-    ss << std::fixed << value; // Convert double to string with fixed-point notation
-    return removeTrailingZeros(ss.str()); // Remove any unnecessary trailing zeros
+std::string formatDouble(double value)
+{
+	std::stringstream ss;
+	ss << std::fixed << value;			  // Convert double to string with fixed-point notation
+	return removeTrailingZeros(ss.str()); // Remove any unnecessary trailing zeros
 }

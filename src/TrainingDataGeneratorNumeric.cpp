@@ -2,8 +2,7 @@
 
 TrainingDataGeneratorNumeric::TrainingDataGeneratorNumeric(std::map<std::string, std::string> kwargs)
 {
-	std::vector<std::string> allowedKeys = {
-		"output_csv_file", "parameter_file", "number_of_samples_per_class", "debug"};
+	std::vector<std::string> allowedKeys = {"output_csv_file", "parameter_file", "number_of_samples_per_class", "debug"};
 
 	if (kwargs.empty()) {
 		throw std::invalid_argument("Missing parameters.");
@@ -156,8 +155,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 	/*
 	 *  Regex search for class names and their parameter values
 	 */
-	std::regex classParamsRegex(R"(params for class:\s+(\w+)\W*mean:\s*([\d\s.-]+)\W*covariance:\s*([\d\s.-]+))",
-								std::regex_constants::icase);
+	std::regex classParamsRegex(R"(params for class:\s+(\w+)\W*mean:\s*([\d\s.-]+)\W*covariance:\s*([\d\s.-]+))", std::regex_constants::icase);
 	std::smatch match;
 
 	std::string::const_iterator searchStart(params.cbegin());
@@ -202,8 +200,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 
 		// Flatten the covariance matrix into a single vector
 		for (const auto &row : covarianceMatrix) {
-			classesAndTheirParamValues[className]["covariance"].insert(
-				classesAndTheirParamValues[className]["covariance"].end(), row.begin(), row.end());
+			classesAndTheirParamValues[className]["covariance"].insert(classesAndTheirParamValues[className]["covariance"].end(), row.begin(), row.end());
 		}
 
 		// Update searchStart to the end of the current match
@@ -235,9 +232,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 // Function to generate multivariate normal samples, since Eigen does not have a built-in function for this
 // Original Python implementation uses numpy.random.multivariate_normal, but this is not available in cpp
 // We will use the Cholesky decomposition method to generate multivariate normal samples
-std::vector<VectorXd> TrainingDataGeneratorNumeric::GenerateMultivariateSamples(const std::vector<double> &mean,
-																				const MatrixXd &cov,
-																				int numSamples)
+std::vector<VectorXd> TrainingDataGeneratorNumeric::GenerateMultivariateSamples(const std::vector<double> &mean, const MatrixXd &cov, int numSamples)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -320,9 +315,7 @@ void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
 		 << std::accumulate(_featuresOrdered.begin(),
 							_featuresOrdered.end(),
 							std::string(),
-							[](const std::string &acc, const std::string &feature) {
-								return acc + (acc.empty() ? "" : ",") + feature;
-							})
+							[](const std::string &acc, const std::string &feature) { return acc + (acc.empty() ? "" : ",") + feature; })
 		 << "\n";
 
 	// Write the data records to the CSV file
@@ -375,8 +368,7 @@ std::map<std::string, std::pair<double, double>> TrainingDataGeneratorNumeric::g
 	return _featuresWithValueRange;
 }
 
-std::map<std::string, std::map<std::string, std::vector<double>>>
-TrainingDataGeneratorNumeric::getClassesAndTheirParamValues() const
+std::map<std::string, std::map<std::string, std::vector<double>>> TrainingDataGeneratorNumeric::getClassesAndTheirParamValues() const
 {
 	return _classesAndTheirParamValues;
 }
