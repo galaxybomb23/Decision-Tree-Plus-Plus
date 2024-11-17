@@ -1532,7 +1532,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 
 	for (size_t i = 0; i < _classNames.size(); ++i) {
 		string currentClassName = _classNames[i];
-		double probability = probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(arrayOfFeaturesAndValuesOrThresholds, currentClassName);
+		double probability		= probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(arrayOfFeaturesAndValuesOrThresholds, currentClassName);
 		// check if prob is ~ 0
 		if (probability < .000001) {
 			arrayOfClassProbabilities[i] = 0.0;
@@ -1563,7 +1563,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 
 	// Cache the probabilities
 	for (size_t i = 0; i < _classNames.size(); ++i) {
-		string key = _classNames[i] + "::" + sequence;
+		string key			   = _classNames[i] + "::" + sequence;
 		_probabilityCache[key] = arrayOfClassProbabilities[i];
 	}
 
