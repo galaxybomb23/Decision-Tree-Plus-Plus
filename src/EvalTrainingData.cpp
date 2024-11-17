@@ -1,12 +1,12 @@
 #include "EvalTrainingData.hpp"
 
 EvalTrainingData::EvalTrainingData(){
-    // Constructor
+	// Constructor
 };
 EvalTrainingData::~EvalTrainingData(){
-    // Destructor
+	// Destructor
 };
 
 void EvalTrainingData::evaluateTrainingData(){
-    // Evaluate the training data
+	// Evaluate the training data
 };
