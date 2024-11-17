@@ -168,7 +168,6 @@ TEST_F(ProbCalcTest, probabilityOfFeatureValueNumeric)
 	ASSERT_NEAR(prob5, 0.0, 0.001); // was failing as .147, but python giving 0.0
 }
 
-// TODO: Write more asserts
 TEST_F(ProbCalcTest, probabilityOfFeatureLessThanThresholdNumeric)
 {
 	double prob0 = dtN->probabilityOfFeatureLessThanThreshold("age", "47");
@@ -295,7 +294,6 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsNumeri
 	double prob5 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds({"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=tetraploid"});
 	ASSERT_NEAR(prob5, 0.000994, 0.000001);
 
-	// more tests
 	double prob6 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
 		{"grade=2.0", "gleason=4.0", "g2>3.84000", "age<49.0", "g2>13.44000", "g2>17.04000", "g2>49.20000"});
 	ASSERT_NEAR(prob6, 1.671e-6, 0.01e-6);
