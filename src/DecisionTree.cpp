@@ -1511,13 +1511,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(const string &className,
 																					 const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
-	// generate a sequence string for caching
-	cout << "probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds: \n"
-		 << "Class: " << className << "\nSeq: ";
-	for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
-		cout << item << ", ";
-	}
-	cout << endl;
 	string sequence = "";
 	for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
 		if (item != arrayOfFeaturesAndValuesOrThresholds.back()) {
@@ -1528,7 +1521,6 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 		}
 	}
 	string classAndSequence = className + "::" + sequence;
-	cout << "ClassAndSequence: " << classAndSequence << endl;
 
 	// Check if the probability is already cached
 	if (_probabilityCache.find(classAndSequence) != _probabilityCache.end()) {
@@ -1540,9 +1532,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 
 	for (size_t i = 0; i < _classNames.size(); ++i) {
 		string currentClassName = _classNames[i];
-		cout << "CurrClassName: " << currentClassName << endl;
 		double probability = probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(arrayOfFeaturesAndValuesOrThresholds, currentClassName);
-		cout << "	probOfSeqGivenClass: " << probability << endl;
 		// check if prob is ~ 0
 		if (probability < .000001) {
 			arrayOfClassProbabilities[i] = 0.0;
@@ -1550,10 +1540,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 		}
 		double probOfFeatureSequence =
 			probabilityOfASequenceOfFeaturesAndValuesOrThresholds(arrayOfFeaturesAndValuesOrThresholds); // could proll be moved outta loop
-		cout << "	probFeatureSeq: " << probOfFeatureSequence << endl;
-		// something
 		double prior = _classPriorsDict[currentClassName];
-		cout << "	prior: " << prior << endl;
 		if (probOfFeatureSequence) {
 			arrayOfClassProbabilities[i] = (probability * prior) / probOfFeatureSequence;
 		}
@@ -1561,14 +1548,9 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 			arrayOfClassProbabilities[i] = prior;
 		}
 	}
-	cout << "Pre-Normalized Vals: " << endl;
-	for (auto val : arrayOfClassProbabilities) {
-		cout << "	" << val << endl;
-	}
 
 	// Normalize the probs
 	double sumProbabilities = std::accumulate(arrayOfClassProbabilities.begin(), arrayOfClassProbabilities.end(), 0.0);
-	cout << "Sum of probs: " << sumProbabilities << endl;
 	if (sumProbabilities == 0) {
 		arrayOfClassProbabilities = vector<double>(_classNames.size(), 1.0 / _classNames.size());
 	}
@@ -1579,17 +1561,9 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 		}
 	}
 
-	// print normalized probabilites
-	cout << "post-Normalized Vals: " << endl;
-	for (auto val : arrayOfClassProbabilities) {
-		cout << "	" << val << endl;
-	}
-
 	// Cache the probabilities
 	for (size_t i = 0; i < _classNames.size(); ++i) {
 		string key = _classNames[i] + "::" + sequence;
-		cout << "Key: " << key << endl;
-		cout << "Val: " << arrayOfClassProbabilities[i] << endl;
 		_probabilityCache[key] = arrayOfClassProbabilities[i];
 	}
 
