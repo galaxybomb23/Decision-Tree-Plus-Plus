@@ -1,6 +1,17 @@
 #ifndef TRAINING_DATA_GENERATOR_SYMBOLIC_HPP
 #define TRAINING_DATA_GENERATOR_SYMBOLIC_HPP
 
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <regex>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+
 class TrainingDataGeneratorSymbolic {
   private:
     std::string _outputDatafile;
