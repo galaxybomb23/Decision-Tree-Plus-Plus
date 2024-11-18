@@ -632,6 +632,7 @@ void DecisionTree::entropyScannerForANumericFeature(const std::string &feature)
     // }
     // std::cout << "]" << std::endl;
 }
+
 double DecisionTree::EntropyForThresholdForFeature(const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds,
                                                    const std::string &feature,
                                                    const double &threshold,
