@@ -1,24 +1,23 @@
 #ifndef TRAINING_DATA_GENERATOR_NUMERIC_HPP
 #define TRAINING_DATA_GENERATOR_NUMERIC_HPP
 
-#include <iostream>
-#include <algorithm> // for std::shuffle
-#include <map>
 #include <Eigen/Dense> // For multivariate normal generation
-#include <ctime>       // For seeding random shuffle
-#include <string>
-#include <vector>
+#include <algorithm>   // for std::shuffle
 #include <algorithm>
+#include <ctime> // For seeding random shuffle
+#include <fstream>
+#include <iostream>
+#include <map>
 #include <random>
 #include <regex>
-#include <fstream>
+#include <string>
+#include <vector>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
-class TrainingDataGeneratorNumeric
-{
-private:
+class TrainingDataGeneratorNumeric {
+  private:
     // Attributes
     std::string _outputCsvFile;
     std::string _parameterFile;
@@ -32,7 +31,7 @@ private:
     std::map<std::string, std::pair<double, double>> _featuresWithValueRange;
     std::map<std::string, std::map<std::string, std::vector<double>>> _classesAndTheirParamValues;
 
-public:
+  public:
     TrainingDataGeneratorNumeric(std::map<std::string, std::string> kwargs);
     ~TrainingDataGeneratorNumeric();
 
@@ -40,7 +39,8 @@ public:
     void GenerateTrainingDataNumeric(); // Generate the training data for numeric data
 
     // Helpers
-    std::vector<Eigen::VectorXd> GenerateMultivariateSamples(const std::vector<double> &mean, const Eigen::MatrixXd &cov, int numSamples);
+    std::vector<Eigen::VectorXd>
+    GenerateMultivariateSamples(const std::vector<double> &mean, const Eigen::MatrixXd &cov, int numSamples);
 
     // Getters
     std::string getOutputCsvFile() const;
