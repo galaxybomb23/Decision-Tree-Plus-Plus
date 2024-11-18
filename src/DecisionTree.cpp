@@ -1213,11 +1213,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
 {
     // This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array
     // of branch features and thresholds. The symbolic types should be expressed as 'feature=value' constructs.
-    cout << "probabilityOfASequenceOfFeaturesAndValuesOrThresholds: {";
-    for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
-        cout << item << ", ";
-    }
-    cout << "}" << endl;
     if (arrayOfFeaturesAndValuesOrThresholds.size() == 0) {
         return std::nan("");
     }
@@ -1250,10 +1245,10 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
 
     // Cast draw the incantation
     for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
-
         smatch match;
         string feature;
         string value;
+
         if (regex_search(item, match, pattern2)) {
             feature = match[1];
             value   = match[2];
@@ -1278,12 +1273,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
     // get bounded intervals for numeric features
     vector<vector<string>> boundedIntervalsNumericTypes = findBoundedIntervalsForNumericFeatures(trueNumericTypes);
 
-    // print trueNumericTypesFeatureNames
-    cout << "trueNumericTypesFeatureNames: {";
-    for (const auto &item : trueNumericTypesFeatureNames) {
-        cout << item << ", ";
-    }
-    cout << "}" << endl;
     // Calculate the upper and the lower bounds to be used when searching for the best
     // threshold for each of the numeric features that are in play at the current node:
 
@@ -1304,27 +1293,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
             upperBound[item[0]] = convert(item[2]);
         }
     }
-    cout << "lowerBounds: {";
-    for (const auto &item : lowerBound) {
-        cout << item.first << " : " << item.second;
-        if (item.second == std::numeric_limits<double>::max()) {
-            cout << " (max), ";
-        }
-        else {
-            cout << ", ";
-        }
-    }
-    cout << "}\nupperBounds: {";
-    for (const auto &item : upperBound) {
-        cout << item.first << " : " << item.second;
-        if (item.second == std::numeric_limits<double>::min()) {
-            cout << " (min), ";
-        }
-        else {
-            cout << ", ";
-        }
-    }
-    cout << "}" << endl;
 
     // Numeric feature case
     for (const auto &featureName : trueNumericTypesFeatureNames) {
@@ -1373,7 +1341,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
         else {
             throw std::runtime_error("Ill formatted call to 'probability_of_sequence' method");
         }
-        cout << "probability: " << probability << " after feature: " << featureName << endl;
     }
 
     // Symbolic feature case
@@ -1555,7 +1522,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
     return probability;
 }
 
-// DO THIS ONE
 double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
     const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
