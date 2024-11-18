@@ -11,12 +11,13 @@ protected:
 
     void TearDown() override
     {
-        // called after each test ends
+        // Remove the output file
+        std::remove("../test/resources/training_symbolic_1.csv");
     }
 
     // Class members to be used in tests
     std::map<std::string, std::string> kwargs = {
-        {"output_datafile", "../test/resources/training_symbolic.csv"},
+        {"output_datafile", "../test/resources/training_symbolic_1.csv"},
         {"parameter_file", "../test/resources/param_symbolic.txt"},
         {"number_of_training_samples", "100"},
         {"write_to_file", "1"},
@@ -39,7 +40,7 @@ TEST_F(TrainingDataGeneratorSymbolicTest, WriteToFileAfterReadAndGenerate)
 
 TEST_F(TrainingDataGeneratorSymbolicTest, CheckParamsTdgs)
 {
-    ASSERT_EQ(tdgs.getOutputDatafile(), "../test/resources/training_symbolic.csv");
+    ASSERT_EQ(tdgs.getOutputDatafile(), "../test/resources/training_symbolic_1.csv");
     ASSERT_EQ(tdgs.getParameterFile(), "../test/resources/param_symbolic.txt");
     ASSERT_EQ(tdgs.getNumberOfTrainingSamples(), 100);
     ASSERT_EQ(tdgs.getWriteToFile(), 1);
