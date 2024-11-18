@@ -12,10 +12,13 @@
 #include <iterator>
 #include <numeric>
 #include <regex>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <vector>
+
 
 // --------------- Logger --------------- //
 Logger logger("../logs/decisionTree.log");
@@ -629,10 +632,10 @@ void DecisionTree::entropyScannerForANumericFeature(const std::string &feature)
     // }
     // std::cout << "]" << std::endl;
 }
-
-double DecisionTree::classEntropyForLessThanThresholdForFeature(
-    const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &feature, const double &threshold)
-
+double DecisionTree::EntropyForThresholdForFeature(const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds,
+                                                   const std::string &feature,
+                                                   const double &threshold,
+                                                   const string &comparison)
 {
     cout << "\nClass Entropy For Less Than Threshold For Feature" << endl;
     cout << "arrayOfFeaturesAndValuesOrThresholds: {";
@@ -671,7 +674,7 @@ double DecisionTree::classEntropyForLessThanThresholdForFeature(
         double logProb = 0.0;
         double prob    = probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
             className, arrayOfFeaturesAndValuesOrThresholdsCopy);
-        cout << "	Prob: " << prob << endl;
+        cout << "	Class Name: " << className << ", Prob: " << prob << endl;
         if (prob >= .0001 && prob <= .999) {
             logProb = std::log2(prob);
         }
@@ -687,14 +690,20 @@ double DecisionTree::classEntropyForLessThanThresholdForFeature(
     }
     // cache the result
     _entropyCache[sequence] = entropy;
-    cout << "Entropy: " << entropy << endl;
+    cout << "Entropy for " << featureThresholdCombo << " is " << entropy << endl;
     return entropy;
+}
+
+double DecisionTree::classEntropyForLessThanThresholdForFeature(
+    const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &feature, const double &threshold)
+{
+    return EntropyForThresholdForFeature(arrayOfFeaturesAndValuesOrThresholds, feature, threshold, "<");
 }
 
 double DecisionTree::classEntropyForGreaterThanThresholdForFeature(
     const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &feature, const double &threshold)
 {
-    return 0.0;
+    return EntropyForThresholdForFeature(arrayOfFeaturesAndValuesOrThresholds, feature, threshold, ">");
 }
 
 double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
@@ -752,17 +761,17 @@ double DecisionTree::priorProbabilityForClass(const string &className, bool over
 {
     // Generate a cache key for prior probability of a specific class
     string classNameCacheKey = "prior::" + className;
-    logger.log(LogLevel(0), "priorProbabilityForClass:: classNameInCache: " + classNameCacheKey);
+    // logger.log(LogLevel(0), "priorProbabilityForClass:: classNameInCache: " + classNameCacheKey);
 
     // Check if the probability is already in the cache (memoization)
     if (_probabilityCache.find(classNameCacheKey) != _probabilityCache.end() && !overloadCache) {
-        logger.log(LogLevel(0),
-                   "priorProbabilityForClass:: probability found in cache: " +
-                       std::to_string(_probabilityCache[classNameCacheKey]));
+        // // logger.log(LogLevel(0),
+        //            "priorProbabilityForClass:: probability found in cache: " +
+        //                std::to_string(_probabilityCache[classNameCacheKey]));
         return _probabilityCache[classNameCacheKey];
     }
 
-    logger.log(LogLevel(0), "priorProbabilityForClass:: probability not found in cache");
+    // logger.log(LogLevel(0), "priorProbabilityForClass:: probability not found in cache");
 
     // Calculate prior probability for all classes and store in cache
     size_t totalNumSamples   = _samplesClassLabelDict.size();
@@ -784,9 +793,9 @@ double DecisionTree::priorProbabilityForClass(const string &className, bool over
         // Store the prior probability in the cache
         string classNamePrior             = "prior::" + className;
         _probabilityCache[classNamePrior] = priorProbability;
-        logger.log(LogLevel(0),
-                   "priorProbabilityForClass:: prior probability for " + className + ": " +
-                       std::to_string(priorProbability));
+        // logger.log(LogLevel(0),
+        //            "priorProbabilityForClass:: prior probability for " + className + ": " +
+        //                std::to_string(priorProbability));
     }
     return _probabilityCache[classNameCacheKey];
 }
@@ -1700,6 +1709,7 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
     const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
+
     string sequence = "";
     for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
         if (item != arrayOfFeaturesAndValuesOrThresholds.back()) {
@@ -1791,8 +1801,8 @@ DecisionTree &DecisionTree::operator=(const DecisionTree &dt)
 
 vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes)
 {
-    unordered_map<string, pair<double, double>> featureBounds; // Stores {featureName, {min < value, max > value}}
-    unordered_map<string, bool> hasMinMax;                     // Tracks if a feature has a min or max bound
+    std::unordered_map<string, pair<double, double>> featureBounds; // Stores {featureName, {min < value, max > value}}
+    std::unordered_map<string, bool> hasMinMax;                     // Tracks if a feature has a min or max bound
     // Step 1: Parse each condition and update feature bounds
     for (const string &condition : trueNumericTypes) {
         // cout << "condition: " << condition << endl;
@@ -1823,7 +1833,7 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
                 hasMinMax[featureName]            = true;
             }
             else {
-                featureBounds[featureName].first = min(featureBounds[featureName].first, value);
+                featureBounds[featureName].first = std::min(featureBounds[featureName].first, value);
             }
         }
         else if (op == ">") {
@@ -1833,15 +1843,15 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
                 hasMinMax[featureName]            = true;
             }
             else {
-                featureBounds[featureName].second = max(featureBounds[featureName].second, value);
+                featureBounds[featureName].second = std::max(featureBounds[featureName].second, value);
             }
         }
     }
 
-    for (const auto &[featureName, bounds] : featureBounds) {
-        // cout << "featureName: " << featureName << ", min: " << bounds.first << ", max: " << bounds.second <<
-        // endl;
-    }
+    // for (const auto &[featureName, bounds] : featureBounds) {
+    // cout << "featureName: " << featureName << ", min: " << bounds.first << ", max: " << bounds.second <<
+    // endl;
+    // }
     // Step 2: Prepare the result in the required format
     vector<vector<string>> result;
     for (const auto &[featureName, bounds] : featureBounds) {

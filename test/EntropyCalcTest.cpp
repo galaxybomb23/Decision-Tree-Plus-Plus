@@ -121,6 +121,54 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
     }
 }
 
-TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric) {}
+TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
+{
+    double result, expected, threshold;
+    vector<string> arrayOfFeaturesAndValuesOrThresholds;
+    string feature;
+    double Tol = 1e-4;
+    {
+        // setup
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0"};
+        feature                              = "g2";
+        threshold                            = 46.56000;
+        expected                             = 0.26824793612598297;
+
+        // tests
+        result = dtN->classEntropyForGreaterThanThresholdForFeature(
+            arrayOfFeaturesAndValuesOrThresholds, feature, threshold);
+
+        // assert
+        ASSERT_NEAR(result, expected, Tol);
+    }
+    {
+        // setup
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
+        feature                              = "age";
+        threshold                            = 57.0;
+        expected                             = 0.01606423071045408;
+
+        // tests
+        result = dtN->classEntropyForGreaterThanThresholdForFeature(
+            arrayOfFeaturesAndValuesOrThresholds, feature, threshold);
+
+        // assert
+        ASSERT_NEAR(result, expected, Tol);
+    }
+    {
+        // setup
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
+        feature                              = "g2";
+        threshold                            = 3.84;
+        expected                             = 1.0;
+
+        // tests
+        result = dtN->classEntropyForGreaterThanThresholdForFeature(
+            arrayOfFeaturesAndValuesOrThresholds, feature, threshold);
+
+        // assert
+        ASSERT_NEAR(result, expected, Tol);
+    }
+}
 
 TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholdsNumeric) {}
