@@ -77,6 +77,8 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
     vector<string> arrayOfFeaturesAndValuesOrThresholds;
     string feature;
     double Tol = 1e-4;
+    dtN->calculateFirstOrderProbabilities();
+    dtN->calculateClassPriors();
     {
         // setup
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0"};
@@ -96,7 +98,7 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
         feature                              = "age";
         threshold                            = 57.0;
-        expected                             = 0.004453027563883287;
+        expected                             = 0.02443053983169013;
 
         // tests
         result =
@@ -110,7 +112,7 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
         feature                              = "g2";
         threshold                            = 3.84;
-        expected                             = 1.0;
+        expected                             = 0.01747604016929538;
 
         // tests
         result =
@@ -127,6 +129,8 @@ TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
     vector<string> arrayOfFeaturesAndValuesOrThresholds;
     string feature;
     double Tol = 1e-4;
+    dtN->calculateFirstOrderProbabilities();
+    dtN->calculateClassPriors();
     {
         // setup
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0"};

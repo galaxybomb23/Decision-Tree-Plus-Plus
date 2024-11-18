@@ -646,7 +646,7 @@ double DecisionTree::EntropyForThresholdForFeature(const std::vector<std::string
     cout << "Threshold: " << threshold << endl;
 
     // build a sequence string
-    string featureThresholdCombo = feature + "<" + formatDouble(threshold);
+    string featureThresholdCombo = feature + comparison + formatDouble(threshold);
     string sequence;
     for (const auto &featureValue : arrayOfFeaturesAndValuesOrThresholds) {
         if (!sequence.empty()) {

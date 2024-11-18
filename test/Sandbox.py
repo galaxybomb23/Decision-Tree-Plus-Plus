@@ -33,7 +33,7 @@ dtreeN.get_training_data()
 dtreeN.calculate_first_order_probabilities()
 dtreeN.calculate_class_priors()
 
-root_nodeN = dtreeN.construct_decision_tree_classifier()
+# root_nodeN = dtreeN.construct_decision_tree_classifier()
 
 # test_sampleN = ["pgtime=6.1","pgstat=1","age=70","eet=1","g2=11.7","grade=3","gleason=8","ploidy=diplooid"]
 # classificationN = dtreeN.classify(root_nodeN, test_sampleN)
