@@ -262,6 +262,8 @@ TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClassNumeric)
 
     double prob26 = dtN->probabilityOfFeatureValueGivenClass("ploidy", "aneuploid", "0");
     ASSERT_NEAR(prob26, 0.043478260869565216, 0.001);
+    double prob27 = dtN->probabilityOfFeatureValueGivenClass("age", "62", "0");
+    ASSERT_NEAR(prob27, 0.1, 0.001);
 }
 
 TEST_F(ProbCalcTest, probabilityOfFeatureLessThanThresholdGivenClassNumeric)
@@ -320,6 +322,9 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
     double prob3 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
         {"grade=2.0", "g2>42.00000000000033"}, "0");
     ASSERT_NEAR(prob3, 0.006, 0.001);
+    double prob4 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
+        {"grade=2.0", "gleason=5.0", "g2>25", "age=62", "g2<28.0"}, "0");
+    ASSERT_NEAR(prob4, 0.001016260162601626, 0.001);
 }
 
 TEST_F(ProbCalcTest, probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds)
@@ -345,6 +350,6 @@ TEST_F(ProbCalcTest, probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
         "1", {"grade=2.0", "gleason=5.0", "g2<46.56"});
     ASSERT_NEAR(prob6, 0.0268, 0.001);
     double prob7 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
-        "1", {"grade=2.0", "gleason5.0", "g2>25", "age=62", "g2<28.0"});
+        "1", {"grade=2.0", "gleason=5.0", "g2>25", "age=62", "g2<28.0"});
     ASSERT_NEAR(prob7, 0.40176006566048017, 0.0001);
 }

@@ -54,7 +54,7 @@ class DecisionTree {
         const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds);
 
     //--------------- Probability Calculators ----------------//
-    double priorProbabilityForClass(const string &className, bool overloadCache = false);
+    double priorProbabilityForClass(const string &className);
     void calculateClassPriors();
     double probabilityOfFeatureValue(const string &feature, const string &value);
     double probabilityOfFeatureValueGivenClass(const string &feature, const string &value, const string &className);

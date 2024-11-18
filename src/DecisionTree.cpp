@@ -764,14 +764,14 @@ double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThreshold
 }
 
 //--------------- Probability Calculators ----------------//
-double DecisionTree::priorProbabilityForClass(const string &className, bool overloadCache)
+double DecisionTree::priorProbabilityForClass(const string &className)
 {
     // Generate a cache key for prior probability of a specific class
     string classNameCacheKey = "prior::" + className;
     // logger.log(LogLevel(0), "priorProbabilityForClass:: classNameInCache: " + classNameCacheKey);
 
     // Check if the probability is already in the cache (memoization)
-    if (_probabilityCache.find(classNameCacheKey) != _probabilityCache.end() && !overloadCache) {
+    if (_probabilityCache.find(classNameCacheKey) != _probabilityCache.end()) {
         // // logger.log(LogLevel(0),
         //            "priorProbabilityForClass:: probability found in cache: " +
         //                std::to_string(_probabilityCache[classNameCacheKey]));
@@ -816,15 +816,24 @@ void DecisionTree::calculateClassPriors()
         return;
     }
 
-    // Calculate and cache the priors for each class
     for (const auto &className : _classNames) {
-        priorProbabilityForClass(className, true);
+        int totalNumSamples      = _samplesClassLabelDict.size();
+        vector<string> allValues = {};
+        for (const auto &kv : _samplesClassLabelDict) {
+            allValues.push_back(kv.second);
+        }
+        int numSamplesForClass  = std::count(allValues.begin(), allValues.end(), className);
+        double priorProbability = static_cast<double>(numSamplesForClass) / static_cast<double>(totalNumSamples);
+
+        _classPriorsDict[className]       = priorProbability;
+        string classNamePrior             = "prior::" + className;
+        _probabilityCache[classNamePrior] = priorProbability;
     }
 
     if (_debug2) {
         cout << "\nClass priors calculated:\n" << endl;
         for (const auto &className : _classNames) {
-            cout << className << " = " << priorProbabilityForClass(className) << endl;
+            cout << className << " = " << _classPriorsDict[className] << endl;
         }
     }
 }
@@ -1700,6 +1709,7 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
         if (regex_search(featureAndValue, match, pattern1)) {
             string feature = match[1];
             string value   = match[2];
+            // cout << "feature: " << feature << ", value: " << value << ", className: " << className << endl;
             if (!probability) {
                 probability = probabilityOfFeatureValueGivenClass(feature, value, className);
             }
@@ -1738,7 +1748,13 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 
     for (size_t i = 0; i < _classNames.size(); ++i) {
         string currentClassName = _classNames[i];
-        double probability      = probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
+        // print params to prob func
+        for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
+            cout << item << " ";
+        }
+        cout << endl;
+        cout << "currentClassName: " << currentClassName << endl;
+        double probability = probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
             arrayOfFeaturesAndValuesOrThresholds, currentClassName);
         // check if prob is ~ 0
         if (probability < .000001) {
