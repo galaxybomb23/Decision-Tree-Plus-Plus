@@ -567,128 +567,184 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node) {}
 
 //--------------- Entropy Calculators ----------------//
 
-double DecisionTree::classEntropyOnPriors() { 
-  // Check if the entropy for 'priors' is already cached
-  if (_entropyCache.find("priors") != _entropyCache.end()) {
-      return _entropyCache["priors"];
-  }
+double DecisionTree::classEntropyOnPriors()
+{
+    // Check if the entropy for 'priors' is already cached
+    if (_entropyCache.find("priors") != _entropyCache.end()) {
+        return _entropyCache["priors"];
+    }
 
-  double entropy = 0.0;  // Initialize entropy
+    double entropy = 0.0; // Initialize entropy
 
-  // Calculate entropy based on class priors
-  for (const auto& className : _classNames) {
-      double prob = priorProbabilityForClass(className);
+    // Calculate entropy based on class priors
+    for (const auto &className : _classNames) {
+        double prob = priorProbabilityForClass(className);
 
-      double logProb = 0.0;
-      if (prob >= 0.0001 && prob <= 0.999) {
-          logProb = std::log2(prob);
-      }
+        double logProb = 0.0;
+        if (prob >= 0.0001 && prob <= 0.999) {
+            logProb = std::log2(prob);
+        }
 
-      if (prob < 0.0001 || prob > 0.999) {
-          logProb = 0.0;
-      }
+        if (prob < 0.0001 || prob > 0.999) {
+            logProb = 0.0;
+        }
 
-      // Calculate entropy incrementally
-      entropy += -1.0 * prob * logProb;
-  }
+        // Calculate entropy incrementally
+        entropy += -1.0 * prob * logProb;
+    }
 
-  if (std::abs(entropy) < 0.0000001) {
-      entropy = 0.0;
-  }
+    if (std::abs(entropy) < 0.0000001) {
+        entropy = 0.0;
+    }
 
-  // Cache the calculated entropy
-  _entropyCache["priors"] = entropy;
+    // Cache the calculated entropy
+    _entropyCache["priors"] = entropy;
 
-  return entropy;
- }
+    return entropy;
+}
 
-void DecisionTree::entropyScannerForANumericFeature(const std::string& feature) {
-  // Retrieve all sampling points for the feature
-  std::vector<double> allSamplingPoints = _samplingPointsForNumericFeatureDict[feature];
-  std::vector<double> entropiesForLessThanThresholds;
-  std::vector<double> entropiesForGreaterThanThresholds;
+void DecisionTree::entropyScannerForANumericFeature(const std::string &feature)
+{
+    // Retrieve all sampling points for the feature
+    std::vector<double> allSamplingPoints = _samplingPointsForNumericFeatureDict[feature];
+    std::vector<double> entropiesForLessThanThresholds;
+    std::vector<double> entropiesForGreaterThanThresholds;
 
-  // Iterate over all sampling points and calculate entropies
-  for (double point : allSamplingPoints) {
-      entropiesForLessThanThresholds.push_back(
-          classEntropyForLessThanThresholdForFeature({}, feature, point));
-      entropiesForGreaterThanThresholds.push_back(
-          classEntropyForGreaterThanThresholdForFeature({}, feature, point));
-  }
+    // Iterate over all sampling points and calculate entropies
+    for (double point : allSamplingPoints) {
+        entropiesForLessThanThresholds.push_back(classEntropyForLessThanThresholdForFeature({}, feature, point));
+        entropiesForGreaterThanThresholds.push_back(classEntropyForGreaterThanThresholdForFeature({}, feature, point));
+    }
 
-  // Output the results
-  std::cout << "\nSCANNER: All entropies less than thresholds for feature " << feature << " are: [";
-  for (const auto& entropy : entropiesForLessThanThresholds) {
-      std::cout << entropy << " ";
-  }
-  std::cout << "]" << std::endl;
+    // // Output the results
+    // std::cout << "\nSCANNER: All entropies less than thresholds for feature " << feature << " are: [";
+    // for (const auto &entropy : entropiesForLessThanThresholds) {
+    //     std::cout << entropy << " ";
+    // }
+    // std::cout << "]" << std::endl;
 
-  std::cout << "\nSCANNER: All entropies greater than thresholds for feature " << feature << " are: [";
-  for (const auto& entropy : entropiesForGreaterThanThresholds) {
-      std::cout << entropy << " ";
-  }
-  std::cout << "]" << std::endl;
+    // std::cout << "\nSCANNER: All entropies greater than thresholds for feature " << feature << " are: [";
+    // for (const auto &entropy : entropiesForGreaterThanThresholds) {
+    //     std::cout << entropy << " ";
+    // }
+    // std::cout << "]" << std::endl;
 }
 
 double DecisionTree::classEntropyForLessThanThresholdForFeature(
-    const std::vector<std::string>& attributes, const std::string& feature,
-    double point) {
-  return 0.0;
+    const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &feature, const double &threshold)
+
+{
+    cout << "\nClass Entropy For Less Than Threshold For Feature" << endl;
+    cout << "arrayOfFeaturesAndValuesOrThresholds: {";
+    for (const auto &featureValue : arrayOfFeaturesAndValuesOrThresholds) {
+        cout << featureValue << ", ";
+    }
+    cout << "}\n" << "Feature: " << feature << endl;
+    cout << "Threshold: " << threshold << endl;
+
+    // build a sequence string
+    string featureThresholdCombo = feature + "<" + formatDouble(threshold);
+    string sequence;
+    for (const auto &featureValue : arrayOfFeaturesAndValuesOrThresholds) {
+        if (!sequence.empty()) {
+            sequence += ":";
+        }
+        sequence += featureValue;
+    }
+    sequence += ":" + featureThresholdCombo;
+    cout << "Sequence: " << sequence << endl;
+
+    // Check if the entropy for the sequence is already cached
+    if (_entropyCache.find(sequence) != _entropyCache.end()) {
+        return _entropyCache[sequence];
+    }
+
+    // make a copy of the array of features and values or thresholds
+    vector<string> arrayOfFeaturesAndValuesOrThresholdsCopy = arrayOfFeaturesAndValuesOrThresholds;
+    arrayOfFeaturesAndValuesOrThresholdsCopy.push_back(featureThresholdCombo);
+
+    // Calculate the entropy for the sequence
+    double entropy = 0.0;
+
+    // Calculate the entropy for each class
+    for (const auto &className : _classNames) {
+        double logProb = 0.0;
+        double prob    = probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+            className, arrayOfFeaturesAndValuesOrThresholdsCopy);
+        cout << "	Prob: " << prob << endl;
+        if (prob >= .0001 && prob <= .999) {
+            logProb = std::log2(prob);
+        }
+        else {
+            logProb = 0.0;
+        }
+        entropy += -1.0 * prob * logProb;
+    }
+
+    // check floating point precision
+    if (std::abs(entropy) < 0.0000001) {
+        entropy = 0.0;
+    }
+    // cache the result
+    _entropyCache[sequence] = entropy;
+    cout << "Entropy: " << entropy << endl;
+    return entropy;
 }
 
 double DecisionTree::classEntropyForGreaterThanThresholdForFeature(
-    const std::vector<std::string>& attributes, const std::string& feature,
-    double point) {
-  return 0.0;
+    const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &feature, const double &threshold)
+{
+    return 0.0;
 }
 
 double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
-  const std::vector<std::string>& arrayOfFeaturesAndValuesOrThresholds) {
-        // Join the array of features and values or thresholds into a sequence string
-        std::string sequence;
-        for (const auto& featureValue : arrayOfFeaturesAndValuesOrThresholds) {
-            if (!sequence.empty()) {
-                sequence += ":";
-            }
-            sequence += featureValue;
+    const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds)
+{
+    // Join the array of features and values or thresholds into a sequence string
+    std::string sequence;
+    for (const auto &featureValue : arrayOfFeaturesAndValuesOrThresholds) {
+        if (!sequence.empty()) {
+            sequence += ":";
+        }
+        sequence += featureValue;
+    }
+
+    // Check if the entropy for the sequence is already cached
+    if (_entropyCache.find(sequence) != _entropyCache.end()) {
+        return _entropyCache[sequence];
+    }
+
+    double entropy = 0.0;
+
+    // Calculate the entropy for each class
+    for (const auto &className : _classNames) {
+        // TODO //
+        // double prob = probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+        // className, arrayOfFeaturesAndValuesOrThresholds);
+        double prob = 0.0;
+
+        double logProb = 0.0;
+        if (prob >= 0.0001 && prob <= 0.999) {
+            logProb = std::log2(prob);
         }
 
-        // Check if the entropy for the sequence is already cached
-        if (_entropyCache.find(sequence) != _entropyCache.end()) {
-            return _entropyCache[sequence];
+        // If probability is too small or too large, set logProb to zero
+        if (prob < 0.0001 || prob > 0.999) {
+            logProb = 0.0;
         }
 
-        double entropy = 0.0;
+        // Calculate entropy incrementally
+        entropy += -1.0 * prob * logProb;
+    }
 
-        // Calculate the entropy for each class
-        for (const auto& className : _classNames) {
-            // TODO //
-            // double prob = probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
-                // className, arrayOfFeaturesAndValuesOrThresholds);
-            double prob = 0.0;
+    if (std::abs(entropy) < 0.0000001) {
+        entropy = 0.0;
+    }
 
-            double logProb = 0.0;
-            if (prob >= 0.0001 && prob <= 0.999) {
-                logProb = std::log2(prob);
-            }
+    // Cache the result
+    _entropyCache[sequence] = entropy;
 
-            // If probability is too small or too large, set logProb to zero
-            if (prob < 0.0001 || prob > 0.999) {
-                logProb = 0.0;
-            }
-
-            // Calculate entropy incrementally
-            entropy += -1.0 * prob * logProb;
-        }
-
-        if (std::abs(entropy) < 0.0000001) {
-            entropy = 0.0;
-        }
-
-        // Cache the result
-        _entropyCache[sequence] = entropy;
-
-        return entropy;
+    return entropy;
 }
 
 //--------------- Probability Calculators ----------------//
@@ -1783,7 +1839,8 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
     }
 
     for (const auto &[featureName, bounds] : featureBounds) {
-        // cout << "featureName: " << featureName << ", min: " << bounds.first << ", max: " << bounds.second << endl;
+        // cout << "featureName: " << featureName << ", min: " << bounds.first << ", max: " << bounds.second <<
+        // endl;
     }
     // Step 2: Prepare the result in the required format
     vector<vector<string>> result;

@@ -35,12 +35,19 @@ class DecisionTree {
     DecisionTreeNode* constructDecisionTreeClassifier();
     void recursiveDescent(DecisionTreeNode* node);
 
-  //--------------- Entropy Calculators ----------------//
-  double classEntropyOnPriors();
-  void entropyScannerForANumericFeature(const std::string& feature);
-  double classEntropyForLessThanThresholdForFeature(const std::vector<std::string>& attributes, const std::string& feature, double point);
-  double classEntropyForGreaterThanThresholdForFeature(const std::vector<std::string>& attributes, const std::string& feature, double point);
-  double classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(const std::vector<std::string>& arrayOfFeaturesAndValuesOrThresholds);
+    //--------------- Entropy Calculators ----------------//
+    double classEntropyOnPriors();
+    void entropyScannerForANumericFeature(const std::string &feature);
+    double classEntropyForLessThanThresholdForFeature(const vector<string> &arrayOfFeaturesAndValuesOrThresholds,
+                                                      const string &feature,
+                                                      const double &threshold);
+
+    double classEntropyForGreaterThanThresholdForFeature(const vector<string> &arrayOfFeaturesAndValuesOrThresholds,
+                                                         const string &feature,
+                                                         const double &threshold);
+
+    double classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
+        const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds);
 
     //--------------- Probability Calculators ----------------//
     double priorProbabilityForClass(const string &className, bool overloadCache = false);
