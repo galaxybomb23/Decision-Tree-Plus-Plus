@@ -32,6 +32,5 @@ bias:  class: benign
           fatIntake:   heavy=0.2
           videoAddiction: heavy=0.2
 
-          
 
 
