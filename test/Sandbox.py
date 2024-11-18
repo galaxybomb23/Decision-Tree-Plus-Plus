@@ -63,6 +63,10 @@ print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
     ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"age"', '57.0'))
 print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
     ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"g2"', '3.84'))
+print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
+    ['"grade"=2.0', '"gleason"=5.0', '"g2">3.84'], '"g2"', '3.84'))
+print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
+    ['"grade"=2.0', '"gleason"<5.0', '"g2">3.84'], '"g2"', '46.56'))
 
 # ----- CLassEntropyForGreaterThanThresholdForFeature -----
 print("\n\nTESTS- Greater Than")
@@ -72,6 +76,11 @@ print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
     ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"age"', '57.0'))
 print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
     ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"g2"', '3.84'))
+print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
+    ['"grade"=2.0', '"gleason"=5.0', '"g2">3.84'], '"g2"', '3.84'))
+print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
+    ['"grade"=2.0', '"gleason"<5.0', '"g2">3.84'], '"g2"', '46.56'))
+
 # /***************************/ PROBABILITY /***************************/
 # SYMBOLIC
 # ----- ProbOfFeatureValue -----

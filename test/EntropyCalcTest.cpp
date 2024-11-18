@@ -82,7 +82,7 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
 
     {
         // Setup
-        arrayOfFeaturesAndValuesOrThresholds = { "grade=2.0", "gleason=5.0" };
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0"};
         feature                              = "g2";
         threshold                            = 46.56000000000365;
         expected                             = 0.17828975177544815;
@@ -96,7 +96,7 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
     }
     {
         // Setup
-        arrayOfFeaturesAndValuesOrThresholds = { "grade=2.0", "gleason=5.0", "g2<3.84" };
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
         feature                              = "age";
         threshold                            = 57.0;
         expected                             = 0.02443053983169013;
@@ -110,10 +110,38 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
     }
     {
         // Setup
-        arrayOfFeaturesAndValuesOrThresholds = { "grade=2.0", "gleason=5.0", "g2<3.84" };
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
         feature                              = "g2";
         threshold                            = 3.84;
         expected                             = 0.01747604016929538;
+
+        // Tests
+        result =
+            dtN->classEntropyForLessThanThresholdForFeature(arrayOfFeaturesAndValuesOrThresholds, feature, threshold);
+
+        // Assert
+        ASSERT_NEAR(result, expected, Tol);
+    }
+    {
+        // Setup
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2>3.84"};
+        feature                              = "g2";
+        threshold                            = 3.84;
+        expected                             = 1.0;
+
+        // Tests
+        result =
+            dtN->classEntropyForLessThanThresholdForFeature(arrayOfFeaturesAndValuesOrThresholds, feature, threshold);
+
+        // Assert
+        ASSERT_NEAR(result, expected, Tol);
+    }
+    {
+        // Setup
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason<5.0", "g2>3.84"};
+        feature                              = "g2";
+        threshold                            = 46.56;
+        expected                             = 0.21940130771341496;
 
         // Tests
         result =
@@ -134,7 +162,7 @@ TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
     dtN->calculateClassPriors();
     {
         // Setup
-        arrayOfFeaturesAndValuesOrThresholds = { "grade=2.0", "gleason=5.0" };
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0"};
         feature                              = "g2";
         threshold                            = 46.56000;
         expected                             = 0.26824793612598297;
@@ -148,7 +176,7 @@ TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
     }
     {
         // Setup
-        arrayOfFeaturesAndValuesOrThresholds = { "grade=2.0", "gleason=5.0", "g2<3.84" };
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
         feature                              = "age";
         threshold                            = 57.0;
         expected                             = 0.01606423071045408;
@@ -162,10 +190,38 @@ TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
     }
     {
         // Setup
-        arrayOfFeaturesAndValuesOrThresholds = { "grade=2.0", "gleason=5.0", "g2<3.84" };
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
         feature                              = "g2";
         threshold                            = 3.84;
         expected                             = 1.0;
+
+        // Tests
+        result = dtN->classEntropyForGreaterThanThresholdForFeature(
+            arrayOfFeaturesAndValuesOrThresholds, feature, threshold);
+
+        // Assert
+        ASSERT_NEAR(result, expected, Tol);
+    }
+    {
+        // Setup
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2>3.84"};
+        feature                              = "g2";
+        threshold                            = 3.84;
+        expected                             = 0.1713422270378175;
+
+        // Tests
+        result = dtN->classEntropyForGreaterThanThresholdForFeature(
+            arrayOfFeaturesAndValuesOrThresholds, feature, threshold);
+
+        // Assert
+        ASSERT_NEAR(result, expected, Tol);
+    }
+    {
+        // Setup
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason<5.0", "g2>3.84"};
+        feature                              = "g2";
+        threshold                            = 46.56;
+        expected                             = 0.3396464907040562;
 
         // Tests
         result = dtN->classEntropyForGreaterThanThresholdForFeature(
