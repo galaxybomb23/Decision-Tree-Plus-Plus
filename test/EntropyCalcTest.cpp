@@ -49,7 +49,8 @@ TEST_F(EntropyCalcTest, CheckdtExists)
 
 TEST_F(EntropyCalcTest, classEntropyOnPriorsSymbolic)
 {
-
+    double classEntropy = dtS->classEntropyOnPriors();
+    ASSERT_NEAR(classEntropy, 0.958, 0.001);
 }
 
 TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureSymbolic)
@@ -76,7 +77,8 @@ TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresh
 
 TEST_F(EntropyCalcTest, classEntropyOnPriorsNumeric)
 {
-
+    double classEntropy = dtN->classEntropyOnPriors();
+    ASSERT_NEAR(classEntropy, 0.951, 0.001);
 }
 
 TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureNumeric)
