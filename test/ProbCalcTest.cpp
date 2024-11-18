@@ -344,4 +344,7 @@ TEST_F(ProbCalcTest, probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
     double prob6 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
         "1", {"grade=2.0", "gleason=5.0", "g2<46.56"});
     ASSERT_NEAR(prob6, 0.0268, 0.001);
+    double prob7 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+        "1", {"grade=2.0", "gleason5.0", "g2>25", "age=62", "g2<28.0"});
+    ASSERT_NEAR(prob7, 0.40176006566048017, 0.0001);
 }

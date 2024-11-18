@@ -56,30 +56,46 @@ dtreeN.calculate_class_priors()
 # print(dtreeN.entropy_scanner_for_a_numeric_feature('"age"'))
 
 # ----- ClassEntropyForLessThanThresholdForFeature -----
-print("\n\nTESTS - Less Than Threshold")
-print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
-    ['"grade"=2.0', '"gleason"=5.0'], '"g2"', '46.56'))
-print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
-    ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"age"', '57.0'))
-print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
-    ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"g2"', '3.84'))
-print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
-    ['"grade"=2.0', '"gleason"=5.0', '"g2">3.84'], '"g2"', '3.84'))
-print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
-    ['"grade"=2.0', '"gleason"<5.0', '"g2">3.84'], '"g2"', '46.56'))
+# print("\n\nTESTS - Less Than Threshold")
+# print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
+#     ['"grade"=2.0', '"gleason"=5.0'], '"g2"', '46.56'))
+# print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
+#     ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"age"', '57.0'))
+# print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
+#     ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"g2"', '3.84'))
+# print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
+#     ['"grade"=2.0', '"gleason"=5.0', '"g2">3.84'], '"g2"', '3.84'))
+# print(dtreeN.class_entropy_for_less_than_threshold_for_feature(
+#     ['"grade"=2.0', '"gleason"<5.0', '"g2">3.84'], '"g2"', '46.56'))
 
 # ----- CLassEntropyForGreaterThanThresholdForFeature -----
-print("\n\nTESTS- Greater Than")
-print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
-    ['"grade"=2.0', '"gleason"=5.0'], '"g2"', '46.56'))
-print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
-    ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"age"', '57.0'))
-print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
-    ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"g2"', '3.84'))
-print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
-    ['"grade"=2.0', '"gleason"=5.0', '"g2">3.84'], '"g2"', '3.84'))
-print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
-    ['"grade"=2.0', '"gleason"<5.0', '"g2">3.84'], '"g2"', '46.56'))
+# print("\n\nTESTS- Greater Than")
+# print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
+#     ['"grade"=2.0', '"gleason"=5.0'], '"g2"', '46.56'))
+# print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
+#     ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"age"', '57.0'))
+# print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
+#     ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84'], '"g2"', '3.84'))
+# print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
+#     ['"grade"=2.0', '"gleason"=5.0', '"g2">3.84'], '"g2"', '3.84'))
+# print(dtreeN.class_entropy_for_greater_than_threshold_for_feature(
+#     ['"grade"=2.0', '"gleason"<5.0', '"g2">3.84'], '"g2"', '46.56'))
+
+# ----- classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds
+print("\n\nTESTS - Class Entropy For A Given Sequence Of Features And Values Or Thresholds")
+# print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
+#     ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84', '"age">57.0']))
+# print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
+#     ['"grade"=2.0']))
+# print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
+#     ['"grade"=2.0', '"gleason"=5.0', '"g2">3.84']))
+# print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
+#     ['"grade"=2.0', '"gleason"=5.0', '"g2">3.84', '"age">47.0']))
+# print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
+#     ['"grade"=2.0', '"gleason">2', '"g2">3.84', '"age"<49.0']))
+print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
+    ['"grade"=2', '"gleason"=5.0', '"g2">25.0', '"age"=62',  '"g2"<28.0']))
+
 
 # /***************************/ PROBABILITY /***************************/
 # SYMBOLIC
