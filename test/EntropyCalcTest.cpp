@@ -44,9 +44,57 @@ TEST_F(EntropyCalcTest, CheckdtExists)
 	ASSERT_NE(&dtS, nullptr);
 }
 
+// TODO: Write these tests
 // ------ Symbolic Data Tests ------
 
+TEST_F(EntropyCalcTest, classEntropyOnPriorsSymbolic)
+{
 
+}
+
+TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureSymbolic)
+{
+
+}
+
+TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureSymbolic)
+{
+
+}
+
+TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureSymbolic)
+{
+
+}
+
+TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholdsSymbolic)
+{
+
+}
 
 // ------ Numeric Data Tests ------
 
+TEST_F(EntropyCalcTest, classEntropyOnPriorsNumeric)
+{
+
+}
+
+TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureNumeric)
+{
+
+}
+
+TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
+{
+
+}
+
+TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
+{
+
+}
+
+TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholdsNumeric)
+{
+
+}
