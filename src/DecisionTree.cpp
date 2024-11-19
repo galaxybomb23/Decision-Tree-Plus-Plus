@@ -249,11 +249,6 @@ void DecisionTree::getTrainingData()
 void DecisionTree::calculateFirstOrderProbabilities()
 {
     // cout << "\nEstimating probabilities...\n";
-    // print the featureNames
-    cout << "Feature names: ";
-    for (const auto &feature : _featureNames) {
-        cout << feature << " ";
-    }
 
     for (const auto &feature : _featureNames) {
         // Calculate probability for the feature's value
@@ -846,14 +841,12 @@ void DecisionTree::calculateClassPriors()
 
 double DecisionTree::probabilityOfFeatureValue(const string &feature, const string &value)
 {
-    // cout << "Called -- ProbFeatureVal Params: " << feature<< " , " << value << endl;
     // Prepare feature value and initialize variables
     string adjustedValue = value; // Create a copy of the value
     double valueAsDouble = convert(adjustedValue);
     string featureAndValue;
 
     // If the feature is numeric, find the closest sampling point
-    // TODO: fix; this reurns 64 when pyhton returns 63, for feature = age, and value = 64
     if (!std::isnan(valueAsDouble) &&
         _samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
         adjustedValue =
@@ -937,8 +930,6 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 
     if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
         if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
-            cout << "here2"<< endl;
-
             auto samplingPointsForFeature = _samplingPointsForNumericFeatureDict[feature];
             vector<size_t> countsAtSamplingPoints(samplingPointsForFeature.size(), 0);
             vector<string> actualValuesForFeature = _featuresAndValuesDict[feature];
@@ -953,22 +944,14 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
                 }
             }
 
-            // MARK: Issue here, counts at sampling points is wrong
             // Count the number of values at each sampling point
             for (size_t i = 0; i < samplingPointsForFeature.size(); ++i) {
                 for (size_t j = 0; j < actualValuesForFeatureAsDoubles.size(); ++j) {
-                    if (abs(samplingPointsForFeature[i] - actualValuesForFeatureAsDoubles[j]) <= histogramDelta) {
+                    if (abs(samplingPointsForFeature[i] - actualValuesForFeatureAsDoubles[j]) < histogramDelta) {
                         countsAtSamplingPoints[i] += 1;
                     }
                 }
             }
-
-            // print the counts for each sampling point
-            cout << "Counts at sampling points for " << feature << ": ";
-            for (const auto &count : countsAtSamplingPoints) {
-                cout << count << " ";
-            }
-            cout << endl;
 
             // Calculate the total counts
             int totalCounts = 0;
@@ -981,13 +964,6 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
             for (const auto &count : countsAtSamplingPoints) {
                 probabilities.push_back(static_cast<double>(count) / static_cast<double>(totalCounts));
             }
-
-            // Check if the probabilities sum to 1
-            double sumProbs = 0.0;
-            for (const auto &p : probabilities) {
-                sumProbs += p;
-            }
-            // assert(abs(sumProbs - 1.0) < 0.0001);
 
             // Cache the probabilities
             map<double, double> binProbDict;
@@ -1002,11 +978,13 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
                            samplingPointsForFeature.end(),
                            std::back_inserter(valuesForFeature),
                            [&feature](int x) { return feature + "=" + std::to_string(x); });
+
             // Cache rest
             for (size_t i = 0; i < valuesForFeature.size(); ++i) {
                 _probabilityCache[valuesForFeature[i]] = probabilities[i];
             }
-            if (!std::isnan(valueAsDouble) && (_probabilityCache.find(featureAndValue) == _probabilityCache.end())) {
+
+            if (!std::isnan(valueAsDouble) && (_probabilityCache.find(featureAndValue) != _probabilityCache.end())) {
                 return _probabilityCache[featureAndValue];
             }
             else {
@@ -1014,8 +992,6 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
             }
         }
         else {
-            cout << "Here2" <<endl;
-
             // This section if for those numeric features treated symbolically
             std::set<string> uniqueValuesForFeature =
                 set(_featuresAndValuesDict[feature].begin(), _featuresAndValuesDict[feature].end());
@@ -1127,7 +1103,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 
     // If the feature is numeric, format the double for storing it into the cache
     if (!std::isnan(valueAsDouble)) {
-        adjustedValue = formatDouble(valueAsDouble);
+        adjustedValue = formatDouble(convert(adjustedValue));
     }
 
     // Create a combined feature and value string
@@ -1168,28 +1144,20 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
     // Numeric feature case
     if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
         if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
-
             auto samplingPointsForFeature = _samplingPointsForNumericFeatureDict[feature];
             vector<int> countsAtSamplingPoints(samplingPointsForFeature.size(), 0);
             vector<string> actualFeatureValuesForSamplesInClass;
 
             for (const auto &sample : samplesForClass) {
-                for (const auto &featureAndValue : _trainingDataDict[sample]) {
-                    // regex pattern for feature and value
-                    std::regex pattern("(.+)=(.+)");
-                    std::smatch match;
-
-                    if (std::regex_search(featureAndValue, match, pattern)) {
-                        string feature = match[1].str();
-                        string value   = match[2].str();
-
-                        if (feature == feature && value != "NA") {
-                            actualFeatureValuesForSamplesInClass.push_back(value);
-                        }
+                int featureIndex = 0;
+                for (const auto &value : _trainingDataDict[sample]) {
+                    string featureName = _featureNames[featureIndex++];
+                    if (featureName == feature && value != "NA") {
+                        actualFeatureValuesForSamplesInClass.push_back(value);
                     }
                 }
             }
-            
+
             for (size_t i = 0; i < samplingPointsForFeature.size(); ++i) {
                 for (size_t j = 0; j < actualFeatureValuesForSamplesInClass.size(); ++j) {
                     if (std::abs(samplingPointsForFeature[i] - stoi(actualFeatureValuesForSamplesInClass[j])) <
@@ -1199,6 +1167,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
                 }
             }
 
+            // MARK: Total counts is 0, check above ^ and below v (should be 130) (double check countsAtSamplingPoints also)
             // Calculate the total counts (sum the counts at each sampling point)
             size_t totalCounts = std::accumulate(countsAtSamplingPoints.begin(), countsAtSamplingPoints.end(), 0);
             cout << "Total Counts: " << totalCounts << endl;

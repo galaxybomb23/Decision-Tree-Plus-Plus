@@ -138,8 +138,8 @@ print("\n\nTESTS - Class Entropy For A Given Sequence Of Features And Values Or 
 # print(dtreeN.probability_of_feature_value( '"grade"', '3.0' ))
 # print(dtreeN.probability_of_feature_value( '"gleason"', '8.0' ))
 # print(dtreeN.probability_of_feature_value( '"ploidy"', 'tetraploid' ))
-print(dtreeN.probability_of_feature_value('"age"', '63'))
-print(dtreeN.probability_of_feature_value('"age"', '64'))
+# print(dtreeN.probability_of_feature_value('"age"', '63'))
+# print(dtreeN.probability_of_feature_value('"age"', '64'))
 
 # ----- ProbOfFeatureValueGivenClass -----
 # print(dtreeN.probability_of_feature_value_given_class('"grade"', '2.0', '"pgstat"=1'))
@@ -168,7 +168,7 @@ print(dtreeN.probability_of_feature_value('"age"', '64'))
 # print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
 # print(dtreeN.probability_of_feature_value_given_class('"eet"', '1', '"pgstat"=0'))
 # print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
-# print(dtreeN.probability_of_feature_value_given_class('"age"', '62', '"pgstat"=0'))
+print(dtreeN.probability_of_feature_value_given_class('"age"', '62', '"pgstat"=0'))
 
 # ----- ProbOfFeatureValueLessThanThreshold -----
 # print(dtreeN.probability_of_feature_less_than_threshold('"age"', '47'))

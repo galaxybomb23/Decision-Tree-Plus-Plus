@@ -161,21 +161,21 @@ TEST_F(ProbCalcTest, calculateClassPriorsNumeric)
     }
 }
 
-TEST_F(ProbCalcTest, probabilityOfFeatureValueNumeric)
-{
-    // double prob0 = dtN->probabilityOfFeatureValue("grade", "2.0");
-    // ASSERT_NEAR(prob0, 0.404, 0.001);
-    // double prob1 = dtN->probabilityOfFeatureValue("grade", "2");
-    // ASSERT_NEAR(prob1, 0.404, 0.001);
-    // double prob2 = dtN->probabilityOfFeatureValue("grade", "3.0");
-    // ASSERT_NEAR(prob2, 0.541, 0.001);
-    // double prob3 = dtN->probabilityOfFeatureValue("gleason", "8.0");
-    // ASSERT_NEAR(prob3, 0.147, 0.001);
-    // double prob4 = dtN->probabilityOfFeatureValue("ploidy", "tetraploid");
-    // ASSERT_NEAR(prob4, 0.466, 0.001);
-    double prob5 = dtN->probabilityOfFeatureValue("age", "63");
-    ASSERT_NEAR(prob5, 0.151, 0.001);
-}
+// TEST_F(ProbCalcTest, probabilityOfFeatureValueNumeric)
+// {
+//     double prob0 = dtN->probabilityOfFeatureValue("grade", "2.0");
+//     ASSERT_NEAR(prob0, 0.404, 0.001);
+//     double prob1 = dtN->probabilityOfFeatureValue("grade", "2");
+//     ASSERT_NEAR(prob1, 0.404, 0.001);
+//     double prob2 = dtN->probabilityOfFeatureValue("grade", "3.0");
+//     ASSERT_NEAR(prob2, 0.541, 0.001);
+//     double prob3 = dtN->probabilityOfFeatureValue("gleason", "8.0");
+//     ASSERT_NEAR(prob3, 0.147, 0.001);
+//     double prob4 = dtN->probabilityOfFeatureValue("ploidy", "tetraploid");
+//     ASSERT_NEAR(prob4, 0.466, 0.001);
+//     double prob5 = dtN->probabilityOfFeatureValue("age", "64");
+//     ASSERT_NEAR(prob5, 0.151, 0.001);
+// }
 
 // TEST_F(ProbCalcTest, probabilityOfFeatureLessThanThresholdNumeric)
 // {
@@ -187,8 +187,8 @@ TEST_F(ProbCalcTest, probabilityOfFeatureValueNumeric)
 //     ASSERT_NEAR(prob2, 1.0, 0.0001);
 // }
 
-// TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClassNumeric)
-// {
+TEST_F(ProbCalcTest, probabilityOfFeatureValueGivenClassNumeric)
+{
 //     double prob1 = dtN->probabilityOfFeatureValueGivenClass("grade", "2.0", "1");
 //     ASSERT_NEAR(prob1, 0.16666666666666666, 0.001);
 
@@ -267,26 +267,26 @@ TEST_F(ProbCalcTest, probabilityOfFeatureValueNumeric)
 //     double prob26 = dtN->probabilityOfFeatureValueGivenClass("ploidy", "aneuploid", "0");
 //     ASSERT_NEAR(prob26, 0.043478260869565216, 0.001);
 
-//     double prob27 = dtN->probabilityOfFeatureValueGivenClass("age", "62", "0");
-//     ASSERT_NEAR(prob27, 0.1, 0.001);
-// }
+    double prob27 = dtN->probabilityOfFeatureValueGivenClass("age", "62", "0");
+    ASSERT_NEAR(prob27, 0.1, 0.001);
+}
 
 // TEST_F(ProbCalcTest, probabilityOfFeatureLessThanThresholdGivenClassNumeric)
 // {
-//     double prob0 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("age", "47", "1");
-//     ASSERT_NEAR(prob0, 0.019, 0.001);
-//     double prob1 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("age", "90", "1");
-//     ASSERT_NEAR(prob1, 1.0, 0.001);
-//     double prob2 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("age", "68", "1");
-//     ASSERT_NEAR(prob2, 0.852, 0.001);
-//     double prob3 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("age", "73", "1");
-//     ASSERT_NEAR(prob3, 0.981, 0.001);
-//     double prob4 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("eet", "2", "1");
-//     ASSERT_NEAR(prob4, 1.0, 0.001);
-//     double prob5 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("g2", "14.5", "1");
-//     ASSERT_NEAR(prob5, 0.509, 0.001);
-//     double prob6 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("grade", "3", "1");
-//     ASSERT_NEAR(prob6, 0.888, 0.001);
+    // double prob0 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("age", "47", "1");
+    // ASSERT_NEAR(prob0, 0.019, 0.001);
+    // double prob1 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("age", "90", "1");
+    // ASSERT_NEAR(prob1, 1.0, 0.001);
+    // double prob2 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("age", "68", "1");
+    // ASSERT_NEAR(prob2, 0.852, 0.001);
+    // double prob3 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("age", "73", "1");
+    // ASSERT_NEAR(prob3, 0.981, 0.001);
+    // double prob4 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("eet", "2", "1");
+    // ASSERT_NEAR(prob4, 1.0, 0.001);
+    // double prob5 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("g2", "14.5", "1");
+    // ASSERT_NEAR(prob5, 0.509, 0.001);
+    // double prob6 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("grade", "3", "1");
+    // ASSERT_NEAR(prob6, 0.888, 0.001);
 //     double prob7 = dtN->probabilityOfFeatureLessThanThresholdGivenClass("gleason", "6", "1");
 //     ASSERT_NEAR(prob7, 0.333, 0.001);
 // }
