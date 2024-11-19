@@ -863,14 +863,13 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
     // If the feature is numeric, format the double for storing it into the cache
     // This will remove trailing zeroes from the double as a string
     if (!std::isnan(valueAsDouble)) {
-        adjustedValue = formatDouble(valueAsDouble);
+        adjustedValue = formatDouble(convert(adjustedValue));
     }
 
     // Create a combined feature and value string
     if (!adjustedValue.empty()) {
         featureAndValue = feature + "=" + adjustedValue;
     }
-    cout << "FeatVal: " <<featureAndValue << endl;
 
     // Check if the probability is already cached, if so, return it
     if (_probabilityCache.find(featureAndValue) != _probabilityCache.end()) {
@@ -885,7 +884,6 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 
     // Check if feature is numeric with sufficient unique values for histogram calculations
     if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
-        cout << "here0"<< endl;
         if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
             // Calculate histogram delta based on median difference between unique sorted values
             if (_samplingPointsForNumericFeatureDict.find(feature) == _samplingPointsForNumericFeatureDict.end()) {
@@ -937,19 +935,9 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
         }
     }
 
-    // print numericFeaturesValueRangeDict
-    cout << "NumericFeaturesValueRangeDict: " << endl;
-    for (const auto &kv : _numericFeaturesValueRangeDict) {
-        cout << kv.first << " : ";
-        for (const auto &v : kv.second) {
-            cout << v << " ";
-        }
-        cout << endl;
-    }
-
     if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
-        cout << "FeatureName: " << feature << endl; 
         if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
+            cout << "here2"<< endl;
 
             auto samplingPointsForFeature = _samplingPointsForNumericFeatureDict[feature];
             vector<size_t> countsAtSamplingPoints(samplingPointsForFeature.size(), 0);
@@ -965,6 +953,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
                 }
             }
 
+            // MARK: Issue here, counts at sampling points is wrong
             // Count the number of values at each sampling point
             for (size_t i = 0; i < samplingPointsForFeature.size(); ++i) {
                 for (size_t j = 0; j < actualValuesForFeatureAsDoubles.size(); ++j) {
@@ -973,6 +962,13 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
                     }
                 }
             }
+
+            // print the counts for each sampling point
+            cout << "Counts at sampling points for " << feature << ": ";
+            for (const auto &count : countsAtSamplingPoints) {
+                cout << count << " ";
+            }
+            cout << endl;
 
             // Calculate the total counts
             int totalCounts = 0;

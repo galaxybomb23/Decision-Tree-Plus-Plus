@@ -138,6 +138,7 @@ print("\n\nTESTS - Class Entropy For A Given Sequence Of Features And Values Or 
 # print(dtreeN.probability_of_feature_value( '"grade"', '3.0' ))
 # print(dtreeN.probability_of_feature_value( '"gleason"', '8.0' ))
 # print(dtreeN.probability_of_feature_value( '"ploidy"', 'tetraploid' ))
+print(dtreeN.probability_of_feature_value('"age"', '63'))
 print(dtreeN.probability_of_feature_value('"age"', '64'))
 
 # ----- ProbOfFeatureValueGivenClass -----

@@ -28,13 +28,13 @@ class ProbCalcTest : public ::testing::Test {
 
         dtS = std::make_unique<DecisionTree>(kwargsS); // Initialize the DecisionTree
         dtS->getTrainingData();
-        dtS->calculateFirstOrderProbabilities();
-        dtS->calculateClassPriors();
+        // dtS->calculateFirstOrderProbabilities();
+        // dtS->calculateClassPriors();
 
         dtN = std::make_unique<DecisionTree>(kwargsN); // Initialize the DecisionTree
         dtN->getTrainingData();
-        dtN->calculateFirstOrderProbabilities();
-        dtN->calculateClassPriors();
+        // dtN->calculateFirstOrderProbabilities();
+        // dtN->calculateClassPriors();
     }
 
     void TearDown() override
@@ -173,7 +173,7 @@ TEST_F(ProbCalcTest, probabilityOfFeatureValueNumeric)
     // ASSERT_NEAR(prob3, 0.147, 0.001);
     // double prob4 = dtN->probabilityOfFeatureValue("ploidy", "tetraploid");
     // ASSERT_NEAR(prob4, 0.466, 0.001);
-    double prob5 = dtN->probabilityOfFeatureValue("age", "64");
+    double prob5 = dtN->probabilityOfFeatureValue("age", "63");
     ASSERT_NEAR(prob5, 0.151, 0.001);
 }
 

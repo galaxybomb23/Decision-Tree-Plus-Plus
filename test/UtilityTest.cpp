@@ -59,8 +59,8 @@ TEST_F(UtilityTest, convert)
 TEST_F(UtilityTest, ClosestSamplingPoint)
 {
     // Test the ClosestSamplingPoint function on a vector of integers
-    std::vector<int> vec = {1, 2, 3, 5, 8, 13, 21};
-    std::optional<int> result = ClosestSamplingPoint(vec, 20);
+    std::vector<double> vec = {1, 2, 3, 5, 8, 13, 21};
+    std::optional<double> result = ClosestSamplingPoint(vec, 20);
     ASSERT_EQ(result.value(), 21);
 
     // Test the ClosestSamplingPoint function on a vector of doubles
