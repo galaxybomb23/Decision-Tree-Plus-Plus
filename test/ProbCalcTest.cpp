@@ -334,25 +334,25 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 
 TEST_F(ProbCalcTest, probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds)
 {
-    // double prob0 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"age>47.0"});
-    // ASSERT_NEAR(prob0, 0.634, 0.001);
-    // double prob1 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("1", {"age>47.0"});
-    // ASSERT_NEAR(prob1, 0.366, 0.001);
-    // double prob2 =
-    //     dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"age>47.0", "gleason=4.0 "});
-    // ASSERT_NEAR(prob2, 0.678, 0.001);
-    // double prob3 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
-    //     "1", {"grade=2.0", "gleason=4.0", "g2>3.84000", "age<49.0", "g2>13.44000", "g2>17.04000", "g2>49.20000"});
-    // ASSERT_NEAR(prob3, 0.928, 0.001);
-    // double prob4 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"grade=2.0", "g2<36.96"});
-    // ASSERT_NEAR(prob4, 0.848, 0.001);
-    // double prob5 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
-    //     "0", {"grade=2.0", "gleason=5.0", "g2<46.56"});
-    // ASSERT_NEAR(prob5, 0.973, 0.001);
-    // double prob6 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
-    //     "1", {"grade=2.0", "gleason=5.0", "g2<46.56"});
-    // ASSERT_NEAR(prob6, 0.0268, 0.001);
+    double prob0 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"age>47.0"});
+    ASSERT_NEAR(prob0, 0.634, 0.001);
+    double prob1 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("1", {"age>47.0"});
+    ASSERT_NEAR(prob1, 0.366, 0.001);
+    double prob2 =
+        dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"age>47.0", "gleason=4.0 "});
+    ASSERT_NEAR(prob2, 0.678, 0.001);
+    double prob3 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+        "1", {"grade=2.0", "gleason=4.0", "g2>3.84000", "age<49.0", "g2>13.44000", "g2>17.04000", "g2>49.20000"});
+    ASSERT_NEAR(prob3, 0.928, 0.001);
+    double prob4 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds("0", {"grade=2.0", "g2<36.96"});
+    ASSERT_NEAR(prob4, 0.848, 0.001);
+    double prob5 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+        "0", {"grade=2.0", "gleason=5.0", "g2<46.56"});
+    ASSERT_NEAR(prob5, 0.973, 0.001);
+    double prob6 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+        "1", {"grade=2.0", "gleason=5.0", "g2<46.56"});
+    ASSERT_NEAR(prob6, 0.0268, 0.001);
     double prob7 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
         "1", {"grade=2.0", "gleason=5.0", "g2>25", "age=65", "g2<28.0"});
-    ASSERT_NEAR(prob7, 0.984090, 0.000001);
+    ASSERT_NEAR(prob7, 0.425881, 0.000001);
 }

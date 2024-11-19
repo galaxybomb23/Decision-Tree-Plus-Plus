@@ -209,12 +209,10 @@ print("\n\nTESTS - Class Entropy For A Given Sequence Of Features And Values Or 
 # print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"age">51.0'], '"pgstat"=0' ))
 # print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.840000000000012', '"ploidy"="aneuploid"'], '"pgstat"=0' ))
 # print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"grade"=2.0', '"g2">42.00000000000033'], '"pgstat"=0' ))
-print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class(
-    ['"grade"=2', '"gleason"=5.0', '"g2">25.0', '"age"=62',  '"g2"<28.0'], '"pgstat"=1'))
+# print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class(
+    # ['"grade"=2', '"gleason"=5.0', '"g2">25.0', '"age"=62',  '"g2"<28.0'], '"pgstat"=1'))
 
 # ----- ProbOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds -----
-# dtreeN.calculate_class_priors()
-
 # print(dtreeN.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds(
 #     '"pgstat"=0', ['"age">47.0']), end='\n\n')
 # print(dtreeN.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds(
@@ -225,3 +223,5 @@ print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_give
 #       '"grade"=2.0', '"gleason"=4.0', '"g2">3.840000000000012', '"age"<49.0', '"g2">13.440000000000092', '"g2">17.04000000000012', '"g2">49.20000000000039']), end='\n\n')
 # print(dtreeN.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds(
 #     '"pgstat"=0', ['"grade"=2.0', '"g2"<36.960000000000285']), end='\n\n')
+# print(dtreeN.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds(
+#     '"pgstat"=1', ['"grade"=2.0', '"gleason"=5.0', '"g2">25', '"age"=65', '"g2"<28']), end='\n\n')
