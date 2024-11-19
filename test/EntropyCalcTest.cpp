@@ -42,6 +42,7 @@ class EntropyCalcTest : public ::testing::Test {
 TEST_F(EntropyCalcTest, CheckdtExists)
 {
     ASSERT_NE(&dtS, nullptr);
+    ASSERT_NE(&dtN, nullptr);
 }
 
 // TODO: Write these Tests

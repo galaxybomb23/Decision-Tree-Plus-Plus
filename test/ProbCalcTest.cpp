@@ -46,6 +46,7 @@ class ProbCalcTest : public ::testing::Test {
 TEST_F(ProbCalcTest, CheckdtExists)
 {
     ASSERT_NE(&dtS, nullptr);
+    ASSERT_NE(&dtN, nullptr);
 }
 
 // ------ Symbolic Data Tests ------
