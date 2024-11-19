@@ -1,30 +1,29 @@
 #ifndef DECISION_TREE_NODE_HPP
 #define DECISION_TREE_NODE_HPP
 
+#include "DecisionTree.hpp"
+
 #include <iomanip>
 #include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include "DecisionTree.hpp"
-#include "Utility.hpp"
 // Forward declaration
 class DecisionTree;
 
 using namespace std;
 
-class DecisionTreeNode
-{
-public:
+class DecisionTreeNode {
+  public:
     DecisionTreeNode(DecisionTree &dt); // Constructor
 
-    DecisionTreeNode(
-        const std::string &feature, double entropy,
-        const std::vector<double> &class_probabilities,
-        const std::vector<string> &branch_features_and_values_or_thresholds,
-        DecisionTree &dt, const bool isRoot);
+    DecisionTreeNode(const std::string &feature,
+                     double entropy,
+                     const std::vector<double> &class_probabilities,
+                     const std::vector<string> &branch_features_and_values_or_thresholds,
+                     DecisionTree &dt,
+                     const bool isRoot);
     ~DecisionTreeNode(); // Destructor
 
     int HowManyNodes();
@@ -50,7 +49,7 @@ public:
     void DisplayNode(const std::string &offset) const;
     void DisplayDecisionTree(const std::string &offset) const;
 
-private:
+  private:
     // Private members
     DecisionTree &_dt; // by reference may be a problem later
     int _serialNumber;

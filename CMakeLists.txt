@@ -7,12 +7,39 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include_directories(include)
 
+# Find Eigen3
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+
 # Gather source files for the library
 file(GLOB_RECURSE LIB_SOURCES "src/*.cpp")
 add_library(DecisionTreeLibrary STATIC ${LIB_SOURCES})
 
 # Make the library exportable for use in other projects
-target_include_directories(DecisionTreeLibrary PUBLIC include)
+target_include_directories(DecisionTreeLibrary
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+
+# Link Eigen to the library
+target_link_libraries(DecisionTreeLibrary PUBLIC Eigen3::Eigen)
+
+# Set up installation paths
+include(GNUInstallDirs)
+install(TARGETS DecisionTreeLibrary
+        EXPORT DecisionTreeLibraryConfig
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+# Export library configuration for use in other projects
+install(EXPORT DecisionTreeLibraryConfig
+        NAMESPACE DecisionTree::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/DecisionTreeLibrary
+)
 
 # Testing
 enable_testing()
@@ -20,6 +47,6 @@ find_package(GTest REQUIRED)
 file(GLOB_RECURSE TEST_SOURCES "test/*Test.cpp")
 add_executable(DecisionTreeTests ${TEST_SOURCES})
 
-# Link the test executable to the library and Google Test
-target_link_libraries(DecisionTreeTests DecisionTreeLibrary GTest::gtest_main)
+# Link the test executable to the library, Google Test, and Eigen
+target_link_libraries(DecisionTreeTests DecisionTreeLibrary GTest::gtest_main Eigen3::Eigen)
 add_test(NAME DecisionTreeTests COMMAND DecisionTreeTests)
