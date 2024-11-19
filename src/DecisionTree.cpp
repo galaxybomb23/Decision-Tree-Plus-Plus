@@ -248,7 +248,13 @@ void DecisionTree::getTrainingData()
 // Calculate first order probabilities
 void DecisionTree::calculateFirstOrderProbabilities()
 {
-    cout << "\nEstimating probabilities...\n";
+    // cout << "\nEstimating probabilities...\n";
+    // print the featureNames
+    cout << "Feature names: ";
+    for (const auto &feature : _featureNames) {
+        cout << feature << " ";
+    }
+
     for (const auto &feature : _featureNames) {
         // Calculate probability for the feature's value
         probabilityOfFeatureValue(feature, "");
@@ -809,7 +815,7 @@ double DecisionTree::priorProbabilityForClass(const string &className)
 
 void DecisionTree::calculateClassPriors()
 {
-    cout << "\nCalculating class priors...\n";
+    // cout << "\nCalculating class priors...\n";
 
     // Return if the class priors have already been calculated
     if (_classPriorsDict.size() > 1) {
@@ -840,12 +846,14 @@ void DecisionTree::calculateClassPriors()
 
 double DecisionTree::probabilityOfFeatureValue(const string &feature, const string &value)
 {
+    // cout << "Called -- ProbFeatureVal Params: " << feature<< " , " << value << endl;
     // Prepare feature value and initialize variables
     string adjustedValue = value; // Create a copy of the value
     double valueAsDouble = convert(adjustedValue);
     string featureAndValue;
 
     // If the feature is numeric, find the closest sampling point
+    // TODO: fix; this reurns 64 when pyhton returns 63, for feature = age, and value = 64
     if (!std::isnan(valueAsDouble) &&
         _samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
         adjustedValue =
@@ -862,6 +870,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
     if (!adjustedValue.empty()) {
         featureAndValue = feature + "=" + adjustedValue;
     }
+    cout << "FeatVal: " <<featureAndValue << endl;
 
     // Check if the probability is already cached, if so, return it
     if (_probabilityCache.find(featureAndValue) != _probabilityCache.end()) {
@@ -876,33 +885,35 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
 
     // Check if feature is numeric with sufficient unique values for histogram calculations
     if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
+        cout << "here0"<< endl;
         if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
             // Calculate histogram delta based on median difference between unique sorted values
-            if (_samplingPointsForNumericFeatureDict.find(feature) != _samplingPointsForNumericFeatureDict.end()) {
+            if (_samplingPointsForNumericFeatureDict.find(feature) == _samplingPointsForNumericFeatureDict.end()) {
                 valueRange = _numericFeaturesValueRangeDict[feature];
                 diffRange  = valueRange[1] - valueRange[0];
 
                 vector<string> values = _featuresAndValuesDict[feature];
-                std::set<string> uniqueValues;
+                std::set<double> uniqueValues;
                 for (const auto &v : values) { // Remove NA values
                     if (v != "NA") {
-                        uniqueValues.insert(v);
+                        uniqueValues.insert(convert(v));
                     }
                 }
 
                 // Get unique values
-                vector<string> sortedUniqueValues(uniqueValues.begin(), uniqueValues.end());
+                vector<double> sortedUniqueValues(uniqueValues.begin(), uniqueValues.end());
                 std::sort(sortedUniqueValues.begin(), sortedUniqueValues.end());
 
                 // Calc diffs
                 vector<double> diffs;
                 for (size_t diffIdx = 1; diffIdx < sortedUniqueValues.size(); ++diffIdx) {
-                    diffs.push_back(convert(sortedUniqueValues[diffIdx]) - convert(sortedUniqueValues[diffIdx - 1]));
+                    diffs.push_back(sortedUniqueValues[diffIdx] - sortedUniqueValues[diffIdx - 1]);
                 }
                 std::sort(diffs.begin(), diffs.end());
 
-                auto medianDiff = diffs[(diffs.size() / 2) - 1];
+                double medianDiff = diffs[(diffs.size() / 2) - 1];
                 histogramDelta  = medianDiff * 2.0;
+
                 if (histogramDelta < diffRange / 500.0) {
                     if (_numberOfHistogramBins > 0) {
                         histogramDelta = diffRange / static_cast<double>(_numberOfHistogramBins);
@@ -913,7 +924,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
                 }
 
                 _histogramDeltaDict[feature]     = histogramDelta;
-                numOfHistogramBins               = static_cast<int>(diffRange / histogramDelta);
+                numOfHistogramBins               = static_cast<int>(diffRange / histogramDelta) + 1;
                 _numOfHistogramBinsDict[feature] = numOfHistogramBins;
 
                 vector<double> samplingPointsForFeature;
@@ -926,8 +937,20 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
         }
     }
 
+    // print numericFeaturesValueRangeDict
+    cout << "NumericFeaturesValueRangeDict: " << endl;
+    for (const auto &kv : _numericFeaturesValueRangeDict) {
+        cout << kv.first << " : ";
+        for (const auto &v : kv.second) {
+            cout << v << " ";
+        }
+        cout << endl;
+    }
+
     if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
+        cout << "FeatureName: " << feature << endl; 
         if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
+
             auto samplingPointsForFeature = _samplingPointsForNumericFeatureDict[feature];
             vector<size_t> countsAtSamplingPoints(samplingPointsForFeature.size(), 0);
             vector<string> actualValuesForFeature = _featuresAndValuesDict[feature];
@@ -995,6 +1018,8 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
             }
         }
         else {
+            cout << "Here2" <<endl;
+
             // This section if for those numeric features treated symbolically
             std::set<string> uniqueValuesForFeature =
                 set(_featuresAndValuesDict[feature].begin(), _featuresAndValuesDict[feature].end());
@@ -1149,8 +1174,9 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
         if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
 
             auto samplingPointsForFeature = _samplingPointsForNumericFeatureDict[feature];
-            vector<size_t> countsAtSamplingPoints(samplingPointsForFeature.size(), 0);
+            vector<int> countsAtSamplingPoints(samplingPointsForFeature.size(), 0);
             vector<string> actualFeatureValuesForSamplesInClass;
+
             for (const auto &sample : samplesForClass) {
                 for (const auto &featureAndValue : _trainingDataDict[sample]) {
                     // regex pattern for feature and value
@@ -1167,6 +1193,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
                     }
                 }
             }
+            
             for (size_t i = 0; i < samplingPointsForFeature.size(); ++i) {
                 for (size_t j = 0; j < actualFeatureValuesForSamplesInClass.size(); ++j) {
                     if (std::abs(samplingPointsForFeature[i] - stoi(actualFeatureValuesForSamplesInClass[j])) <
@@ -1178,6 +1205,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 
             // Calculate the total counts (sum the counts at each sampling point)
             size_t totalCounts = std::accumulate(countsAtSamplingPoints.begin(), countsAtSamplingPoints.end(), 0);
+            cout << "Total Counts: " << totalCounts << endl;
 
             // Probabilities
             vector<double> probabilities(countsAtSamplingPoints.size(), 0.0);
