@@ -1101,6 +1101,8 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
             std::to_string(ClosestSamplingPoint(_samplingPointsForNumericFeatureDict[feature], valueAsDouble));
     }
 
+    
+
     // If the feature is numeric, format the double for storing it into the cache
     if (!std::isnan(valueAsDouble)) {
         adjustedValue = formatDouble(convert(adjustedValue));
@@ -1144,7 +1146,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
     // Numeric feature case
     if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
         if (_featureValuesHowManyUniquesDict[feature] > _symbolicToNumericCardinalityThreshold) {
-            auto samplingPointsForFeature = _samplingPointsForNumericFeatureDict[feature];
+            vector<double> samplingPointsForFeature = _samplingPointsForNumericFeatureDict[feature];
             vector<int> countsAtSamplingPoints(samplingPointsForFeature.size(), 0);
             vector<string> actualFeatureValuesForSamplesInClass;
 
@@ -1167,17 +1169,9 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
                 }
             }
 
-            // MARK: Total counts is 0, check above ^ and below v (should be 130) (double check countsAtSamplingPoints also)
             // Calculate the total counts (sum the counts at each sampling point)
             size_t totalCounts = std::accumulate(countsAtSamplingPoints.begin(), countsAtSamplingPoints.end(), 0);
-            cout << "Total Counts: " << totalCounts << endl;
-
-            // Probabilities
-            vector<double> probabilities(countsAtSamplingPoints.size(), 0.0);
-            for (size_t i = 0; i < countsAtSamplingPoints.size(); ++i) {
-                probabilities[i] = static_cast<double>(countsAtSamplingPoints[i]) / static_cast<double>(totalCounts);
-            }
-
+            
             // Check for total counts being zero
             if (totalCounts == 0) {
                 throw std::runtime_error("PFVC1 Something is wrong with your training file. It contains no training "
@@ -1185,10 +1179,16 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
                                          className + " and Feature " + feature);
             }
 
+            // Probabilities
+            vector<double> probabilities(countsAtSamplingPoints.size(), 0.0);
+            for (size_t i = 0; i < countsAtSamplingPoints.size(); ++i) {
+                probabilities[i] = static_cast<double>(countsAtSamplingPoints[i]) / static_cast<double>(totalCounts);
+            }
+
             // Create values for feature and class (should be the same as list of a map)
             vector<string> valuesForFeatureAndClass;
             for (const auto &point : samplingPointsForFeature) {
-                valuesForFeatureAndClass.push_back(feature + "=" + std::to_string(point) + "::" + className);
+                valuesForFeatureAndClass.push_back(feature + "=" + formatDouble(point) + "::" + className);
             }
 
             // Cache probabilities
