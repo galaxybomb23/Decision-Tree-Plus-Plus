@@ -750,6 +750,7 @@ double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThreshold
         else {
             logProb = 0.0;
         }
+        
         // Calculate entropy incrementally
         entropy += -1.0 * prob * logProb;
     }
