@@ -1650,7 +1650,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
                 return 0;
             }
             else {
-
                 if (!probability) {
                     probability = probabilityOfFeatureLessThanThresholdGivenClass(
                                       featureName, std::to_string(upperBound[featureName]), className) -
@@ -1702,7 +1701,6 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
         if (regex_search(featureAndValue, match, pattern1)) {
             string feature = match[1];
             string value   = match[2];
-            // cout << "feature: " << feature << ", value: " << value << ", className: " << className << endl;
             if (!probability) {
                 probability = probabilityOfFeatureValueGivenClass(feature, value, className);
             }
@@ -1711,6 +1709,7 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
             }
         }
     }
+
 
     _probabilityCache[sequenceWithClass] = probability;
     return probability;
@@ -1815,7 +1814,6 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
     std::unordered_map<string, bool> hasMinMax;                     // Tracks if a feature has a min or max bound
     // Step 1: Parse each condition and update feature bounds
     for (const string &condition : trueNumericTypes) {
-        // cout << "condition: " << condition << endl;
         istringstream ss(condition);
         string featureName, op, valueStr;
         double value;
@@ -1831,7 +1829,7 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
             // Handle the case where no operator is found (optional, if conditions are well-formed)
             cerr << "Invalid condition: no operator found!" << endl;
         }
-        // cout << "featureName: " << featureName << ", op: " << op << ", valueStr: " << valueStr << endl;
+
         // Convert value to double for comparison
         value = convert(valueStr);
 
@@ -1858,10 +1856,6 @@ vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(cons
         }
     }
 
-    // for (const auto &[featureName, bounds] : featureBounds) {
-    // cout << "featureName: " << featureName << ", min: " << bounds.first << ", max: " << bounds.second <<
-    // endl;
-    // }
     // Step 2: Prepare the result in the required format
     vector<vector<string>> result;
     for (const auto &[featureName, bounds] : featureBounds) {
