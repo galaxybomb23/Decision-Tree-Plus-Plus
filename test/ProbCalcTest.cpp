@@ -23,7 +23,7 @@ class ProbCalcTest : public ::testing::Test {
             {  "csv_class_column_index",                                  "2"},
             {"csv_columns_for_features",                   {3, 4, 5, 6, 7, 8}},
             {       "max_depth_desired",                                  "8"},
-            {       "entropy_threshold",                               "0.01"}
+            {       "entropy_threshold",                               "0.01"},
         };
 
         dtS = std::make_unique<DecisionTree>(kwargsS); // Initialize the DecisionTree
@@ -350,6 +350,6 @@ TEST_F(ProbCalcTest, probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
         "1", {"grade=2.0", "gleason=5.0", "g2<46.56"});
     ASSERT_NEAR(prob6, 0.0268, 0.001);
     double prob7 = dtN->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
-        "1", {"grade=2.0", "gleason=5.0", "g2>25", "age=62", "g2<28.0"});
-    ASSERT_NEAR(prob7, 0.40176006566048017, 0.0001);
+        "1", {"grade=2.0", "gleason=5.0", "g2>25", "age=65", "g2<28.0"});
+    ASSERT_NEAR(prob7, 0.9840902467406283, 0.0001);
 }

@@ -25,7 +25,7 @@ dtreeN = dt.DecisionTree(
     csv_columns_for_features=[3, 4, 5, 6, 7, 8],
     max_depth_desired=8,
     entropy_threshold=0.01
-    #  ,debug2=True
+    # , debug2=True
 )
 
 dtreeN.get_training_data()
@@ -93,8 +93,8 @@ print("\n\nTESTS - Class Entropy For A Given Sequence Of Features And Values Or 
 #     ['"grade"=2.0', '"gleason"=5.0', '"g2">3.84', '"age">47.0']))
 # print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
 #     ['"grade"=2.0', '"gleason">2', '"g2">3.84', '"age"<49.0']))
-# print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
-#     ['"grade"=2', '"gleason"=5.0', '"g2">25.0', '"age"=62',  '"g2"<28.0']))
+print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
+    ['"grade"=2', '"gleason"=5.0', '"g2">25.0', '"age"=65',  '"g2"<28.0']))
 
 
 # /***************************/ PROBABILITY /***************************/
@@ -167,7 +167,7 @@ print("\n\nTESTS - Class Entropy For A Given Sequence Of Features And Values Or 
 # print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
 # print(dtreeN.probability_of_feature_value_given_class('"eet"', '1', '"pgstat"=0'))
 # print(dtreeN.probability_of_feature_value_given_class('"ploidy"', '"aneuploid"', '"pgstat"=0'))
-print(dtreeN.probability_of_feature_value_given_class('"age"', '62', '"pgstat"=0'))
+# print(dtreeN.probability_of_feature_value_given_class('"age"', '62', '"pgstat"=0'))
 
 # ----- ProbOfFeatureValueLessThanThreshold -----
 # print(dtreeN.probability_of_feature_less_than_threshold('"age"', '47'))

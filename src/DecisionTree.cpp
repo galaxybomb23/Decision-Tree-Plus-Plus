@@ -1748,13 +1748,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 
     for (size_t i = 0; i < _classNames.size(); ++i) {
         string currentClassName = _classNames[i];
-        // print params to prob func
-        for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
-            cout << item << " ";
-        }
-        cout << endl;
-        cout << "currentClassName: " << currentClassName << endl;
-        double probability = probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
+        double probability      = probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
             arrayOfFeaturesAndValuesOrThresholds, currentClassName);
         // check if prob is ~ 0
         if (probability < .000001) {

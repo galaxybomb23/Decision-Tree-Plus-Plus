@@ -300,16 +300,16 @@ TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresh
         // Assert
         ASSERT_NEAR(result, expected, Tol);
     }
-    // {
-    //     // Setup Test 6
-    //     arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5", "g2>25", "age=62", "g2<28.0"};
-    //     expected                             = 0.9719708605070024;
+    {
+        // Setup Test 6
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2>25.0", "age=65", "g2<28.0"};
+        expected                             = 0.9840902467406283;
 
-    //     // Tests
-    //     result =
-    //         dtN->classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(arrayOfFeaturesAndValuesOrThresholds);
+        // Tests
+        result =
+            dtN->classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(arrayOfFeaturesAndValuesOrThresholds);
 
-    //     // Assert
-    //     ASSERT_NEAR(result, expected, Tol);
-    // }
+        // Assert
+        ASSERT_NEAR(result, expected, Tol);
+    }
 }
