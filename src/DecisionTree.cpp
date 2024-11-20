@@ -248,7 +248,7 @@ void DecisionTree::getTrainingData()
 // Calculate first order probabilities
 void DecisionTree::calculateFirstOrderProbabilities()
 {
-    // cout << "\nEstimating probabilities...\n";
+    cout << "\nEstimating probabilities...\n";
 
     for (const auto &feature : _featureNames) {
         // Calculate probability for the feature's value
@@ -430,8 +430,9 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
 
     // Numeric feature case
     if (_probDistributionNumericFeaturesDict.find(featureTestedAtNode) != _probDistributionNumericFeaturesDict.end()) {
-        if (_debug3)
+        if (_debug3) {
             cout << "\nCLRD2 In the numeric section";
+        }
         for (const auto &child : children) {
             vector<string> branchFeaturesAndValues = child->GetBranchFeaturesAndValuesOrThresholds();
             string lastFeatureAndValueOnBranch     = branchFeaturesAndValues.back();
@@ -473,13 +474,15 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
     }
     else { // Symbolic feature case
         string featureValueCombo = featureTestedAtNode + "=" + valueForFeature;
-        if (_debug3)
+        if (_debug3) {
             cout << "\nCLRD3 In the symbolic section with feature_value_combo: " << featureValueCombo;
+        }
 
         for (const auto &child : children) {
             vector<string> branch_features_and_values = child->GetBranchFeaturesAndValuesOrThresholds();
-            if (_debug3)
+            if (_debug3) {
                 cout << "\nCLRD4 branch features and values: " << branch_features_and_values.back();
+            }
             string lastFeatureAndValueOnBranch = branch_features_and_values.back();
 
             if (lastFeatureAndValueOnBranch == featureValueCombo) {
@@ -531,6 +534,7 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
     priors associated with the different classes.
     */
     cout << "\nConstructing a decision tree" << endl;
+
     if (_debug3) {
         // TODO //
         // determineDataCondition();
@@ -571,6 +575,18 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node) {}
 
 //--------------- Entropy Calculators ----------------//
 
+/**
+ * @brief Calculates the entropy of the class priors.
+ *
+ * This function computes the entropy based on the prior probabilities of the classes.
+ * It first checks if the entropy for 'priors' is already cached. If so, it returns the cached value.
+ * Otherwise, it calculates the entropy.
+ * 
+ * The function ensures that probabilities very close to 0 or 1 are handled appropriately to avoid
+ * numerical issues with the logarithm function.
+ * 
+ * @return The entropy of the class priors.
+ */
 double DecisionTree::classEntropyOnPriors()
 {
     // Check if the entropy for 'priors' is already cached
@@ -607,6 +623,15 @@ double DecisionTree::classEntropyOnPriors()
     return entropy;
 }
 
+/**
+ * @brief Scans and calculates the entropy for a numeric feature at various sampling points.
+ *
+ * This function retrieves all sampling points for the specified numeric feature and calculates
+ * the entropy for values less than and greater than each sampling point. The results are then
+ * printed to the standard output.
+ *
+ * @param feature The name of the numeric feature to scan.
+ */
 void DecisionTree::entropyScannerForANumericFeature(const std::string &feature)
 {
     // Retrieve all sampling points for the feature
@@ -620,20 +645,35 @@ void DecisionTree::entropyScannerForANumericFeature(const std::string &feature)
         entropiesForGreaterThanThresholds.push_back(classEntropyForGreaterThanThresholdForFeature({}, feature, point));
     }
 
-    // // Output the results
-    // std::cout << "\nSCANNER: All entropies less than thresholds for feature " << feature << " are: [";
-    // for (const auto &entropy : entropiesForLessThanThresholds) {
-    //     std::cout << entropy << " ";
-    // }
-    // std::cout << "]" << std::endl;
+    // Output the results
+    std::cout << "\nSCANNER: All entropies less than thresholds for feature " << feature << " are: [";
+    for (const auto &entropy : entropiesForLessThanThresholds) {
+        std::cout << entropy << " ";
+    }
+    std::cout << "]" << std::endl;
 
-    // std::cout << "\nSCANNER: All entropies greater than thresholds for feature " << feature << " are: [";
-    // for (const auto &entropy : entropiesForGreaterThanThresholds) {
-    //     std::cout << entropy << " ";
-    // }
-    // std::cout << "]" << std::endl;
+    std::cout << "\nSCANNER: All entropies greater than thresholds for feature " << feature << " are: [";
+    for (const auto &entropy : entropiesForGreaterThanThresholds) {
+        std::cout << entropy << " ";
+    }
+    std::cout << "]" << std::endl;
 }
 
+/**
+ * @brief Calculates the entropy for a given feature and threshold combination.
+ *
+ * This function computes the entropy for a specific feature and threshold combination
+ * within a given set of features and values or thresholds. It first constructs a sequence
+ * string representing the combination, checks if the entropy for this sequence is already
+ * cached, and if not, calculates the entropy and caches the result.
+ *
+ * @param arrayOfFeaturesAndValuesOrThresholds A vector of strings representing the features
+ *        and their corresponding values or thresholds.
+ * @param feature The feature for which the entropy is being calculated.
+ * @param threshold The threshold value for the feature.
+ * @param comparison The comparison operator (e.g., "<", ">", "<=", ">=") used with the threshold.
+ * @return The calculated entropy for the given feature and threshold combination.
+ */
 double DecisionTree::EntropyForThresholdForFeature(const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds,
                                                    const std::string &feature,
                                                    const double &threshold,
@@ -685,18 +725,48 @@ double DecisionTree::EntropyForThresholdForFeature(const std::vector<std::string
     return entropy;
 }
 
+/**
+ * @brief Calculates the entropy of a class for a given feature when the feature's value is less than a specified threshold.
+ *
+ * @param arrayOfFeaturesAndValuesOrThresholds A vector containing the features and their corresponding values or thresholds.
+ * @param feature The feature for which the entropy is to be calculated.
+ * @param threshold The threshold value to compare the feature's value against.
+ * @return The entropy of the class for the given feature when its value is less than the specified threshold.
+ */
 double DecisionTree::classEntropyForLessThanThresholdForFeature(
     const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &feature, const double &threshold)
 {
     return EntropyForThresholdForFeature(arrayOfFeaturesAndValuesOrThresholds, feature, threshold, "<");
 }
 
+/**
+ * @brief Calculates the entropy of a class for a given feature when the feature's value is greater than a specified threshold.
+ *
+ * This function computes the entropy for a specific feature in the dataset when the feature's value is greater than the provided threshold.
+ * It utilizes the EntropyForThresholdForFeature function with the ">" operator to determine the entropy.
+ *
+ * @param arrayOfFeaturesAndValuesOrThresholds A vector of strings representing the features and their corresponding values or thresholds.
+ * @param feature The feature for which the entropy is to be calculated.
+ * @param threshold The threshold value for the feature.
+ * @return The entropy of the class for the given feature when the feature's value is greater than the threshold.
+ */
 double DecisionTree::classEntropyForGreaterThanThresholdForFeature(
     const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &feature, const double &threshold)
 {
     return EntropyForThresholdForFeature(arrayOfFeaturesAndValuesOrThresholds, feature, threshold, ">");
 }
 
+/**
+ * @brief Calculates the entropy for a given sequence of features and values or thresholds.
+ *
+ * This function computes the entropy for a given sequence of features and values or thresholds.
+ * It first joins the array of features and values or thresholds into a sequence string and checks
+ * if the entropy for the sequence is already cached. If cached, it returns the cached value.
+ * Otherwise, it calculates the entropy for each class and caches the result.
+ *
+ * @param arrayOfFeaturesAndValuesOrThresholds A vector of strings representing the sequence of features and values or thresholds.
+ * @return The calculated entropy for the given sequence.
+ */
 double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
     const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds)
 {
@@ -790,7 +860,7 @@ double DecisionTree::priorProbabilityForClass(const string &className)
 
 void DecisionTree::calculateClassPriors()
 {
-    // cout << "\nCalculating class priors...\n";
+    cout << "\nCalculating class priors...\n";
 
     // Return if the class priors have already been calculated
     if (_classPriorsDict.size() > 1) {
