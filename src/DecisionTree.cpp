@@ -639,14 +639,6 @@ double DecisionTree::EntropyForThresholdForFeature(const std::vector<std::string
                                                    const double &threshold,
                                                    const string &comparison)
 {
-    cout << "\nClass Entropy For Less Than Threshold For Feature" << endl;
-    cout << "arrayOfFeaturesAndValuesOrThresholds: {";
-    for (const auto &featureValue : arrayOfFeaturesAndValuesOrThresholds) {
-        cout << featureValue << ", ";
-    }
-    cout << "}\n" << "Feature: " << feature << endl;
-    cout << "Threshold: " << threshold << endl;
-
     // build a sequence string
     string featureThresholdCombo = feature + comparison + formatDouble(threshold);
     string sequence;
@@ -657,7 +649,6 @@ double DecisionTree::EntropyForThresholdForFeature(const std::vector<std::string
         sequence += featureValue;
     }
     sequence += ":" + featureThresholdCombo;
-    cout << "Sequence: " << sequence << endl;
 
     // Check if the entropy for the sequence is already cached
     if (_entropyCache.find(sequence) != _entropyCache.end()) {
@@ -676,7 +667,6 @@ double DecisionTree::EntropyForThresholdForFeature(const std::vector<std::string
         double logProb = 0.0;
         double prob    = probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
             className, arrayOfFeaturesAndValuesOrThresholdsCopy);
-        cout << "	Class Name: " << className << ", Prob: " << prob << endl;
         if (prob >= .0001 && prob <= .999) {
             logProb = std::log2(prob);
         }
@@ -692,7 +682,6 @@ double DecisionTree::EntropyForThresholdForFeature(const std::vector<std::string
     }
     // cache the result
     _entropyCache[sequence] = entropy;
-    cout << "Entropy for " << featureThresholdCombo << " is " << entropy << endl;
     return entropy;
 }
 
@@ -711,14 +700,6 @@ double DecisionTree::classEntropyForGreaterThanThresholdForFeature(
 double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
     const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds)
 {
-    cout << "\nClass Entropy For A Given Sequence Of Features And Values Or Thresholds: ";
-    for (const auto &featureValue : arrayOfFeaturesAndValuesOrThresholds) {
-        cout << featureValue;
-        if (featureValue != arrayOfFeaturesAndValuesOrThresholds.back()) {
-            cout << ", ";
-        }
-    }
-    cout << endl;
     // Join the array of features and values or thresholds into a sequence string
     std::string sequence;
     for (const auto &featureValue : arrayOfFeaturesAndValuesOrThresholds) {
@@ -738,10 +719,8 @@ double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThreshold
 
     // Calculate the entropy for each class
     for (const auto &className : _classNames) {
-        // TODO //
         double prob = probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
             className, arrayOfFeaturesAndValuesOrThresholds);
-        cout << "	Class Name: " << className << ", Prob: " << prob << endl;
 
         if (prob >= 0.0001 && prob <= 0.999) {
             logProb = std::log2(prob);

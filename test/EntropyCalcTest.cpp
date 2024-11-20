@@ -28,9 +28,13 @@ class EntropyCalcTest : public ::testing::Test {
 
         dtS = std::make_unique<DecisionTree>(kwargsS); // Initialize the DecisionTree
         dtS->getTrainingData();
+        dtS->calculateFirstOrderProbabilities();
+        dtS->calculateClassPriors();
 
         dtN = std::make_unique<DecisionTree>(kwargsN); // Initialize the DecisionTree
         dtN->getTrainingData();
+        dtN->calculateFirstOrderProbabilities();
+        dtN->calculateClassPriors();
     }
 
     void TearDown() override
@@ -54,13 +58,17 @@ TEST_F(EntropyCalcTest, classEntropyOnPriorsSymbolic)
     ASSERT_NEAR(classEntropy, 0.958, 0.001);
 }
 
-TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureSymbolic) {}
+TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureSymbolic) {
+    
+}
 
-TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureSymbolic) {}
+TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureSymbolic) {
 
-TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureSymbolic) {}
+}
 
-TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholdsSymbolic) {}
+TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholdsSymbolic) {
+
+}
 
 // ------ Numeric Data Tests ------
 
@@ -70,7 +78,9 @@ TEST_F(EntropyCalcTest, classEntropyOnPriorsNumeric)
     ASSERT_NEAR(classEntropy, 0.951, 0.001);
 }
 
-TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureNumeric) {}
+TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureNumeric) {
+    // dtN->entropyScannerForANumericFeature("age");
+}
 
 TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
 {
@@ -78,8 +88,6 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
     vector<string> arrayOfFeaturesAndValuesOrThresholds;
     string feature;
     double Tol = 1e-4;
-    dtN->calculateFirstOrderProbabilities();
-    dtN->calculateClassPriors();
 
     {
         // Setup
@@ -159,8 +167,7 @@ TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
     vector<string> arrayOfFeaturesAndValuesOrThresholds;
     string feature;
     double Tol = 1e-4;
-    dtN->calculateFirstOrderProbabilities();
-    dtN->calculateClassPriors();
+
     {
         // Setup
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0"};
@@ -238,8 +245,7 @@ TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresh
     double result, expected;
     vector<string> arrayOfFeaturesAndValuesOrThresholds;
     double Tol = 1e-4;
-    dtN->calculateFirstOrderProbabilities();
-    dtN->calculateClassPriors();
+
     {
         // Setup Test 1
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84", "age>57.0"};

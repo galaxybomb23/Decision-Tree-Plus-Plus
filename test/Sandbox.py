@@ -10,9 +10,11 @@ dtree = dt.DecisionTree(training_datafile="test/resources/training_symbolic.csv"
                         )
 
 dtree.get_training_data()
+dtree.calculate_class_priors()
+dtree.calculate_first_order_probabilities()
 # dtree.determine_data_condition()
 
-# root_node = dtree.construct_decision_tree_classifier()
+root_node = dtree.construct_decision_tree_classifier()
 
 # test_sample = ['exercising=never', 'smoking=heavy', 'fatIntake=heavy', 'videoAddiction=heavy']
 # classification = dtree.classify(root_node, test_sample)
@@ -45,7 +47,13 @@ dtreeN.calculate_class_priors()
 # print(dtree.class_entropy_on_priors())
 
 # ----- entropyScannerForANumericFeature -----
-# print(dtree.entropy_scanner_for_a_numeric_feature('fatIntake'))
+# dtree.entropy_scanner_for_a_numeric_feature('"exercising"')
+# dtree.entropy_scanner_for_a_numeric_feature('fatIntake')
+# dtree.entropy_scanner_for_a_numeric_feature('smoking')
+# dtree.entropy_scanner_for_a_numeric_feature('videoAddiction')
+
+# ----- ClassEntropyForLessThanThresholdForFeature -----
+# print(dtree.class_entropy_for_less_than_threshold_for_feature([ "grade=2.0", "gleason=5.0" ], "gleason", 5.0))
 
 
 # NUMERIC
@@ -82,7 +90,7 @@ dtreeN.calculate_class_priors()
 #     ['"grade"=2.0', '"gleason"<5.0', '"g2">3.84'], '"g2"', '46.56'))
 
 # ----- classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds
-print("\n\nTESTS - Class Entropy For A Given Sequence Of Features And Values Or Thresholds")
+# print("\n\nTESTS - Class Entropy For A Given Sequence Of Features And Values Or Thresholds")
 # print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
 #     ['"grade"=2.0', '"gleason"=5.0', '"g2"<3.84', '"age">57.0']))
 # print(dtreeN.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
