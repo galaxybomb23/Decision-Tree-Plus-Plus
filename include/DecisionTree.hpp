@@ -34,6 +34,10 @@ class DecisionTree {
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();
     void recursiveDescent(DecisionTreeNode* node);
+    BestFeatureResult bestFeatureCalculator(
+      const std::vector<std::string>& featuresAndValuesOrThresholdsOnBranch, 
+      double existingNodeEntropy
+    );
 
     //--------------- Entropy Calculators ----------------//
     double classEntropyOnPriors();
@@ -139,6 +143,21 @@ class DecisionTree {
     map<string, map<double, double>> _probDistributionNumericFeaturesDict;
     map<string, double> _histogramDeltaDict;
     map<string, int> _numOfHistogramBinsDict;
+};
+
+/**
+ * @struct BestFeatureResult
+ * @brief A structure to hold the result of the best feature selection in a decision tree algorithm.
+ * 
+ * This structure contains information about the best feature selected during the decision tree
+ * construction process, including the feature's name, its entropy, the entropies based on its values,
+ * and the decision value.
+ */
+struct BestFeatureResult {
+  std::string bestFeatureName;
+  double bestFeatureEntropy;
+  std::pair<double, double> valBasedEntropies;
+  double decisionValue;
 };
 
 #endif // DECISION_TREE_HPP

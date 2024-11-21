@@ -573,6 +573,48 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
 
 void DecisionTree::recursiveDescent(DecisionTreeNode* node) {}
 
+BestFeatureResult DecisionTree::bestFeatureCalculator(
+    const std::vector<std::string>& featuresAndValuesOrThresholdsOnBranch, 
+    double existingNodeEntropy
+) {
+    // Define regex patterns for matching
+    const std::regex pattern1(R"((.+)=(.+))");
+    const std::regex pattern2(R"((.+)<(.+))");
+    const std::regex pattern3(R"((.+)>(.+))");
+
+    // Collect all symbolic features
+    std::vector<std::string> allSymbolicFeatures;
+    for (const auto& featureName : _featureNames) {
+        if (_probDistributionNumericFeaturesDict.find(featureName) == _probDistributionNumericFeaturesDict.end()) {
+            allSymbolicFeatures.push_back(featureName);
+        }
+    }
+
+    // Determine symbolic features already used
+    std::vector<std::string> symbolicFeaturesAlreadyUsed;
+    for (const auto& item : featuresAndValuesOrThresholdsOnBranch) {
+        std::smatch match;
+        if (std::regex_search(item, match, pattern1)) {
+            symbolicFeaturesAlreadyUsed.push_back(match[1].str());
+        }
+    }
+
+    // Compute symbolic features not yet used
+    std::vector<std::string> symbolicFeaturesNotYetUsed;
+    for (const auto& feature : allSymbolicFeatures) {
+        if (std::find(symbolicFeaturesAlreadyUsed.begin(), symbolicFeaturesAlreadyUsed.end(), feature) == symbolicFeaturesAlreadyUsed.end()) {
+            symbolicFeaturesNotYetUsed.push_back(feature);
+        }
+    }
+
+    std::string bestFeatureName = "exampleFeature";
+    double bestFeatureEntropy = 0.0;
+    std::pair<double, double> valBasedEntropies = {0.1, 0.2};
+    double decisionValue = 0.0;
+
+    return {bestFeatureName, bestFeatureEntropy, valBasedEntropies, decisionValue};
+}
+
 //--------------- Entropy Calculators ----------------//
 
 /**
