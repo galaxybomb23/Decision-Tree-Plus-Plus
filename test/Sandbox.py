@@ -14,7 +14,8 @@ dtree.calculate_class_priors()
 dtree.calculate_first_order_probabilities()
 # dtree.determine_data_condition()
 
-root_node = dtree.construct_decision_tree_classifier()
+# root_node = dtree.construct_decision_tree_classifier()
+print(dtree.best_feature_calculator([], 0.9580420222262995))
 
 # test_sample = ['exercising=never', 'smoking=heavy', 'fatIntake=heavy', 'videoAddiction=heavy']
 # classification = dtree.classify(root_node, test_sample)

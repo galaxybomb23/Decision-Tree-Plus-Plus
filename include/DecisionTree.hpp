@@ -5,6 +5,7 @@
 #include "DecisionTreeNode.hpp"
 
 #include <iostream>
+#include <optional>
 #include <map>
 #include <memory>
 #include <set>
@@ -12,6 +13,21 @@
 #include <vector>
 
 using std::string, std::vector, std::map;
+
+/**
+ * @struct BestFeatureResult
+ * @brief A structure to hold the result of the best feature selection in a decision tree algorithm.
+ * 
+ * This structure contains information about the best feature selected during the decision tree
+ * construction process, including the feature's name, its entropy, the entropies based on its values,
+ * and the decision value.
+ */
+struct BestFeatureResult {
+  std::string bestFeatureName;
+  double bestFeatureEntropy;
+  std::optional<std::pair<double, double>> valBasedEntropies;
+  std::optional<double> decisionValue;
+};
 
 class DecisionTreeNode;
 class DecisionTree {
@@ -145,19 +161,6 @@ class DecisionTree {
     map<string, int> _numOfHistogramBinsDict;
 };
 
-/**
- * @struct BestFeatureResult
- * @brief A structure to hold the result of the best feature selection in a decision tree algorithm.
- * 
- * This structure contains information about the best feature selected during the decision tree
- * construction process, including the feature's name, its entropy, the entropies based on its values,
- * and the decision value.
- */
-struct BestFeatureResult {
-  std::string bestFeatureName;
-  double bestFeatureEntropy;
-  std::pair<double, double> valBasedEntropies;
-  double decisionValue;
-};
+
 
 #endif // DECISION_TREE_HPP

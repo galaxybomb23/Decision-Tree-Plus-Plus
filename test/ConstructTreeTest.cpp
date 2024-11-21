@@ -3,40 +3,57 @@
 
 class ConstructTreeTest : public ::testing::Test
 {
-protected:
+    protected:
+    std::unique_ptr<DecisionTree> dtS; // Symbolic DecisionTree
+    std::unique_ptr<DecisionTree> dtN; // Numeric DecisionTree
     void SetUp() override
     {
-        // called before each test
+        map<string, string> kwargsS = {
+            // Symbolic kwargs
+            {       "training_datafile", "../test/resources/training_symbolic.csv"},
+            {  "csv_class_column_index",                                       "1"},
+            {"csv_columns_for_features",                              {2, 3, 4, 5}},
+            {       "max_depth_desired",                                       "5"},
+            {       "entropy_threshold",                                     "0.1"}
+        };
+
+        map<string, string> kwargsN = {
+            // Numeric kwargs
+            {       "training_datafile", "../test/resources/stage3cancer.csv"},
+            {  "csv_class_column_index",                                  "2"},
+            {"csv_columns_for_features",                   {3, 4, 5, 6, 7, 8}},
+            {       "max_depth_desired",                                  "8"},
+            {       "entropy_threshold",                               "0.01"}
+        };
+
+        dtS = std::make_unique<DecisionTree>(kwargsS); // Initialize the DecisionTree
+        dtS->getTrainingData();
+        dtS->calculateFirstOrderProbabilities();
+        dtS->calculateClassPriors();
+
+        dtN = std::make_unique<DecisionTree>(kwargsN); // Initialize the DecisionTree
+        dtN->getTrainingData();
+        dtN->calculateFirstOrderProbabilities();
+        dtN->calculateClassPriors();
     }
 
     void TearDown() override
     {
-        // called after each test ends
+        dtS.reset(); // Reset the DecisionTree
     }
-
-    // Class members to be used in tests
-    std::map<std::string, std::string> kwargs = {
-        {"training_datafile", "../test/resources/stage3cancer.csv"},
-        {"entropy_threshold", "0.1"},
-        {"max_depth_desired", "20"},
-        {"csv_class_column_index", "1"},
-        {"symbolic_to_numeric_cardinality_threshold", "20"},
-        {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
-        {"number_of_histogram_bins", "10"},
-        {"csv_cleanup_needed", "1"},
-        {"debug1", "0"},
-        {"debug2", "0"},
-        {"debug3", "0"}};
-    DecisionTree dt = DecisionTree(kwargs);
-    DecisionTreeNode node = DecisionTreeNode("feature", 0.0, {0.0}, {"branch"}, dt, true);
 };
 
 TEST_F(ConstructTreeTest, CheckdtExists)
 {
-    ASSERT_NE(&dt, nullptr);
+    ASSERT_NE(&dtS, nullptr);
 }
 
-TEST_F(ConstructTreeTest, ConstructorInitializesNode)
+TEST_F(ConstructTreeTest, bestFeatureCalculatorSymbolic)
 {
-    ASSERT_NE(&node, nullptr);
+    BestFeatureResult bfr = dtS->bestFeatureCalculator({}, 0.9580420222262995);
+    ASSERT_EQ(bfr.bestFeatureName, "fatIntake");
+    ASSERT_NEAR(bfr.bestFeatureEntropy, 0.539, 0.001);
+    ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+    ASSERT_EQ(bfr.decisionValue, nullopt);
+
 }
