@@ -1591,7 +1591,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)
 {
     for (const auto &featureAndValue : featuresAndValues) {
-        std::regex pattern(R"(\S+)\s*=\s*(\S+)");
+        std::regex pattern(R"((\S+)=([\S]+))");
         std::smatch match;
         std::regex_search(featureAndValue, match, pattern);
 

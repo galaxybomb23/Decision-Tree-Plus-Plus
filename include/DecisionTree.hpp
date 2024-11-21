@@ -70,6 +70,7 @@ class DecisionTree {
     double getEntropyThreshold() const;
     int getMaxDepthDesired() const;
     int getNumberOfHistogramBins() const;
+    vector<string> getClassNames() const;
     int getCsvClassColumnIndex() const;
     vector<int> getCsvColumnsForFeatures() const;
     int getSymbolicToNumericCardinalityThreshold() const;
@@ -80,6 +81,10 @@ class DecisionTree {
     int getHowManyTotalTrainingSamples() const;
     vector<string> getFeatureNames() const;
     map<string, vector<string>> getFeaturesAndValuesDict() const;
+    map<int, string> getSamplesClassLabelDict() const;
+    map<string, std::set<string>> getFeaturesAndUniqueValuesDict() const;
+    map<string, vector<double>> getNumericFeaturesValueRangeDict() const;
+
     map<int, vector<string>> getTrainingDataDict() const;
 
     //---------------- Setters ----------------//
@@ -97,7 +102,7 @@ class DecisionTree {
     void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
     void setRootNode(std::unique_ptr<DecisionTreeNode> rootNode);
 
-  private:
+  protected:
     string _trainingDatafile;
     double _entropyThreshold;
     int _maxDepthDesired;

@@ -7,6 +7,7 @@
 #include <numeric>
 #include <optional>
 #include <regex>
+#include <set>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -18,7 +19,7 @@ template <typename T> std::vector<T> deepCopy(const std::vector<T> &vec)
 {
     // The purpose of this function is to create a deep copy of a vector.
     std::vector<T> copy;
-    for (T const &elem : vec) {
+    for (const T &elem : vec) {
         copy.push_back(elem);
     }
     return copy;
@@ -39,7 +40,7 @@ template <typename T> std::pair<T, size_t> minimum(const std::vector<T> &vec)
 
 double convert(const std::string &str);
 
-template <typename T> double ClosestSamplingPoint(const std::vector<T> &vec, T const &val)
+template <typename T> double ClosestSamplingPoint(const std::vector<T> &vec, const T &val)
 {
     // check if val is NAN
     if (std::isnan(val)) {
@@ -69,21 +70,17 @@ std::string removeTrailingZeros(const std::string &str);
 std::string formatDouble(double value);
 
 // for vector output
-template <typename T>
-std::ostream &operator<<(std::ostream &os, const std::vector<T> &vec)
+template <typename T> std::ostream &operator<<(std::ostream &os, const std::vector<T> &vec)
 {
-    for (const auto &elem : vec)
-    {
+    for (const auto &elem : vec) {
         os << elem << " ";
     }
     return os;
 }
 
-template <typename T>
-std::ostream &operator<<(std::ostream &os, const std::set<T> &set)
+template <typename T> std::ostream &operator<<(std::ostream &os, const std::set<T> &set)
 {
-    for (const auto &elem : set)
-    {
+    for (const auto &elem : set) {
         os << elem << " ";
     }
     return os;
