@@ -217,19 +217,26 @@ void EvalTrainingData::printDebugInformation(DecisionTree &trainingDT, const std
     //         sorted(_numeric_features_valuerange_dict.items()):
     //             print(item[0]  + "  =>  "  + str(item[1]))
 
-    // std::cout << "\n\nPrinting samples in the testing set: " << testing_samples << "\n";
-    // std::cout << "\n\nPrinting features and their values in the training set:\n";
-    // for (const auto &item : _featuresAndValuesDict) {
-    //     std::cout << item.first << "  =>  " << item.second << "\n";
-    // }
-    // std::cout << "\n\nPrinting unique values for features:\n";
-    // for (const auto &item : _featuresAndUniqueValuesDict) {
-    //     std::cout << item.first << "  =>  " << item.second << "\n";
-    // }
-    // std::cout << "\n\nPrinting unique value ranges for features:\n";
-    // for (const auto &item : _numericFeaturesValueRangeDict) {
-    //     std::cout << item.first << "  =>  " << item.second << "\n";
-    // }
+    std::cout << "\n\nPrinting samples in the testing set:";
+    for (const auto &sample : testing_samples) {
+        std::cout << sample << "\n";
+    }
+    std::cout << "\n\nPrinting features and their values in the training set:\n";
+    for (const auto &item : _featuresAndValuesDict) {
+        for (const auto &value : item.second) {
+            std::cout << item.first << "  =>  " << value << "\n";
+        }
+    }
+    std::cout << "\n\nPrinting unique values for features:\n";
+    for (const auto &item : _featuresAndUniqueValuesDict) {
+        for (const auto &value : item.second) {
+            std::cout << item.first << "  =>  " << value << "\n";
+        }
+    }
+    std::cout << "\n\nPrinting unique value ranges for features:\n";
+    for (const auto &item : _numericFeaturesValueRangeDict) {
+        std::cout << item.first << "  =>  " << item.second[0] << " - " << item.second[1] << "\n";
+    }
 }
 
 void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &which_classes,
@@ -258,49 +265,48 @@ void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &w
     std::cout << "\nSolution path in the decision tree: " << classification.at("solution_path") << "\n";
     std::cout << "\nNumber of nodes created: " << root_node->HowManyNodes() << "\n";
 }
-// void EvalTrainingData::displayConfusionMatrix(const std::map<int, std::map<std::string, int>> &confusion_matrix)
-// {
-//     //   print("\n\n       DISPLAYING THE CONFUSION MATRIX FOR THE 10-FOLD
-//     //   CROSS-VALIDATION TEST:\n")
-//     // matrix_header = " " * 30
-//     // for class_name in self._class_names:
-//     //     matrix_header += '{:^30}'.format(class_name)
-//     // print("\n" + matrix_header + "\n")
-//     // for row_class_name in sorted(confusion_matrix.keys()):
-//     //     row_display = str.rjust(row_class_name, 30)
-//     //     for col_class_name in
-//     //     sorted(confusion_matrix[row_class_name].keys()):
-//     //         row_display +=
-//     //         '{:^30}'.format(str(confusion_matrix[row_class_name][col_class_name])
-//     //         )
-//     //     print(row_display + "\n")
-//     // diagonal_sum, off_diagonal_sum = 0,0
-//     // for row_class_name in sorted(confusion_matrix.keys()):
-//     //     for col_class_name in
-//     //     sorted(confusion_matrix[row_class_name].keys()):
-//     //         if row_class_name == col_class_name:
-//     //             diagonal_sum +=
-//     //             confusion_matrix[row_class_name][col_class_name]
-//     //         else:
-//     //             off_diagonal_sum +=
-//     //             confusion_matrix[row_class_name][col_class_name]
-//     std::cout << "\n\n       DISPLAYING THE CONFUSION MATRIX FOR THE 10-FOLD "
-//                  "CROSS-VALIDATION TEST:\n";
-//     std::string matrix_header = std::string(30, ' ');
-//     for (const auto &class_name : _classNames) {
-//         matrix_header += class_name;
-//     }
-//     std::cout << "\n" << matrix_header << "\n";
-//     for (const auto &row_class_name : _classNames) {
-//         std::string row_display = std::string(30, ' ');
-//         row_display += row_class_name;
-//         for (const auto &col_class_name : _classNames) {
-//             row_display += std::to_string(confusion_matrix.at(row_class_name).at(col_class_name));
-//         }
-//         std::cout << row_display << "\n";
-//     }
-//}
-;
+void EvalTrainingData::displayConfusionMatrix(const std::map<int, std::map<std::string, int>> &confusion_matrix)
+{
+    //   print("\n\n       DISPLAYING THE CONFUSION MATRIX FOR THE 10-FOLD
+    //   CROSS-VALIDATION TEST:\n")
+    // matrix_header = " " * 30
+    // for class_name in self._class_names:
+    //     matrix_header += '{:^30}'.format(class_name)
+    // print("\n" + matrix_header + "\n")
+    // for row_class_name in sorted(confusion_matrix.keys()):
+    //     row_display = str.rjust(row_class_name, 30)
+    //     for col_class_name in
+    //     sorted(confusion_matrix[row_class_name].keys()):
+    //         row_display +=
+    //         '{:^30}'.format(str(confusion_matrix[row_class_name][col_class_name])
+    //         )
+    //     print(row_display + "\n")
+    // diagonal_sum, off_diagonal_sum = 0,0
+    // for row_class_name in sorted(confusion_matrix.keys()):
+    //     for col_class_name in
+    //     sorted(confusion_matrix[row_class_name].keys()):
+    //         if row_class_name == col_class_name:
+    //             diagonal_sum +=
+    //             confusion_matrix[row_class_name][col_class_name]
+    //         else:
+    //             off_diagonal_sum +=
+    //             confusion_matrix[row_class_name][col_class_name]
+    std::cout << "\n\n       DISPLAYING THE CONFUSION MATRIX FOR THE 10-FOLD "
+                 "CROSS-VALIDATION TEST:\n";
+    std::string matrix_header = std::string(30, ' ');
+    for (const auto &class_name : _classNames) {
+        matrix_header += class_name;
+    }
+    std::cout << "\n" << matrix_header << "\n";
+    for (const auto &row_class_name : _classNames) {
+        std::string row_display = std::string(30, ' ');
+        row_display += row_class_name;
+        for (const auto &col_class_name : _classNames) {
+            row_display += std::to_string(confusion_matrix.at(std::stoi(row_class_name)).at(col_class_name));
+        }
+        std::cout << row_display << "\n";
+    }
+}
 double
 EvalTrainingData::calculateDataQualityIndex(const std::map<std::string, std::map<std::string, int>> &confusion_matrix)
 {
