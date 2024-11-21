@@ -46,6 +46,7 @@ class ConstructTreeTest : public ::testing::Test
 TEST_F(ConstructTreeTest, CheckdtExists)
 {
     ASSERT_NE(&dtS, nullptr);
+    ASSERT_NE(&dtN, nullptr);
 }
 
 TEST_F(ConstructTreeTest, bestFeatureCalculatorSymbolic)
