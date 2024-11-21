@@ -19,7 +19,7 @@ protected:
         {"training_datafile", "../test/resources/stage3cancer.csv"},
         {"entropy_threshold", "0.1"},
         {"max_depth_desired", "20"},
-        {"csv_class_column_index", "1"},
+        {"csv_class_column_index", "8"},
         {"symbolic_to_numeric_cardinality_threshold", "20"},
         {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
         {"number_of_histogram_bins", "10"},
