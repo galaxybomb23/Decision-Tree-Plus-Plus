@@ -39,20 +39,18 @@ template <typename T> std::pair<T, size_t> minimum(const std::vector<T> &vec)
 
 double convert(const std::string &str);
 
-template <typename T> double ClosestSamplingPoint(const std::vector<T> &vec, T const &val)
+inline double ClosestSamplingPoint(const std::vector<double> &vec, double const &val)
 {
-    // check if val is NAN
+    // Check if val is NAN
     if (std::isnan(val)) {
         return val;
     }
-    // try to cast the val to a floating point number
-    double value = static_cast<double>(val);
 
     // find the closest sampling point
-    double min_diff = std::abs(value - vec[0]);
+    double min_diff = std::abs(val - vec[0]);
     size_t index    = 0;
     for (size_t i = 1; i < vec.size(); ++i) {
-        double diff = std::abs(value - vec[i]);
+        double diff = std::abs(val - vec[i]);
         if (diff < min_diff) {
             min_diff = diff;
             index    = i;
