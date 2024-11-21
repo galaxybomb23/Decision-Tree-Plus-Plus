@@ -5,8 +5,6 @@ EvalTrainingData::EvalTrainingData(std::map<std::string, std::string> kwargs) : 
 {
     this->getTrainingData();
     _csvClassColumnIndex = std::stoi(kwargs["csv_class_column_index"]);
-    std::cout << "Training data dict size: " << _trainingDataDict.size() << "\n";
-    std::cout << "Feature names: " << this->getFeatureNames() << "\n";
 }
 EvalTrainingData::~EvalTrainingData()
 {
@@ -219,19 +217,19 @@ void EvalTrainingData::printDebugInformation(DecisionTree &trainingDT, const std
     //         sorted(_numeric_features_valuerange_dict.items()):
     //             print(item[0]  + "  =>  "  + str(item[1]))
 
-    std::cout << "\n\nPrinting samples in the testing set: " << testing_samples << "\n";
-    std::cout << "\n\nPrinting features and their values in the training set:\n";
-    for (const auto &item : _featuresAndValuesDict) {
-        std::cout << item.first << "  =>  " << item.second << "\n";
-    }
-    std::cout << "\n\nPrinting unique values for features:\n";
-    for (const auto &item : _featuresAndUniqueValuesDict) {
-        std::cout << item.first << "  =>  " << item.second << "\n";
-    }
-    std::cout << "\n\nPrinting unique value ranges for features:\n";
-    for (const auto &item : _numericFeaturesValueRangeDict) {
-        std::cout << item.first << "  =>  " << item.second << "\n";
-    }
+    // std::cout << "\n\nPrinting samples in the testing set: " << testing_samples << "\n";
+    // std::cout << "\n\nPrinting features and their values in the training set:\n";
+    // for (const auto &item : _featuresAndValuesDict) {
+    //     std::cout << item.first << "  =>  " << item.second << "\n";
+    // }
+    // std::cout << "\n\nPrinting unique values for features:\n";
+    // for (const auto &item : _featuresAndUniqueValuesDict) {
+    //     std::cout << item.first << "  =>  " << item.second << "\n";
+    // }
+    // std::cout << "\n\nPrinting unique value ranges for features:\n";
+    // for (const auto &item : _numericFeaturesValueRangeDict) {
+    //     std::cout << item.first << "  =>  " << item.second << "\n";
+    // }
 }
 
 void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &which_classes,

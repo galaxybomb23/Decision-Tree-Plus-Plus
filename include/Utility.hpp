@@ -7,7 +7,6 @@
 #include <numeric>
 #include <optional>
 #include <regex>
-#include <set>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -40,10 +39,7 @@ template <typename T> std::pair<T, size_t> minimum(const std::vector<T> &vec)
 
 double convert(const std::string &str);
 
-template <typename T>
-double ClosestSamplingPoint(const std::vector<T> &vec,
-                            const T &val) inline double ClosestSamplingPoint(const std::vector<double> &vec,
-                                                                             const double &val)
+inline double ClosestSamplingPoint(const std::vector<double> &vec, const double &val)
 {
     // Check if val is NAN
     if (std::isnan(val)) {
@@ -69,22 +65,5 @@ std::string CleanupCsvString(const std::string &str);
 
 std::string removeTrailingZeros(const std::string &str);
 std::string formatDouble(double value);
-
-// for vector output
-template <typename T> std::ostream &operator<<(std::ostream &os, const std::vector<T> &vec)
-{
-    for (const auto &elem : vec) {
-        os << elem << " ";
-    }
-    return os;
-}
-
-template <typename T> std::ostream &operator<<(std::ostream &os, const std::set<T> &set)
-{
-    for (const auto &elem : set) {
-        os << elem << " ";
-    }
-    return os;
-}
 
 #endif // UTILITY_HPP
