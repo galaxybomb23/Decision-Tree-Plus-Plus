@@ -51,10 +51,19 @@ TEST_F(ConstructTreeTest, CheckdtExists)
 
 TEST_F(ConstructTreeTest, bestFeatureCalculatorSymbolic)
 {
-    BestFeatureResult bfr = dtS->bestFeatureCalculator({}, 0.9580420222262995);
-    ASSERT_EQ(bfr.bestFeatureName, "fatIntake");
-    ASSERT_NEAR(bfr.bestFeatureEntropy, 0.539, 0.001);
-    ASSERT_EQ(bfr.valBasedEntropies, nullopt);
-    ASSERT_EQ(bfr.decisionValue, nullopt);
-
+    BestFeatureResult bfr;
+    {
+        bfr = dtS->bestFeatureCalculator({}, 0.9580420222262995);
+        ASSERT_EQ(bfr.bestFeatureName, "fatIntake");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.539, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
+    }
+    // {
+    //     bfr = dtS->bestFeatureCalculator({"fatIntake=heavy"}, 0.7732266742876344);
+    //     ASSERT_EQ(bfr.bestFeatureName, "smoking");
+    //     ASSERT_NEAR(bfr.bestFeatureEntropy, 0.271, 0.001);
+    //     ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+    //     ASSERT_EQ(bfr.decisionValue, nullopt);
+    // }
 }

@@ -599,15 +599,6 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
         }
     }
 
-    // MARK: Not used in the original implementation, maybe remove
-    // Compute symbolic features not yet used
-    vector<string> symbolicFeaturesNotYetUsed;
-    for (const auto& feature : allSymbolicFeatures) {
-        if (std::find(symbolicFeaturesAlreadyUsed.begin(), symbolicFeaturesAlreadyUsed.end(), feature) == symbolicFeaturesAlreadyUsed.end()) {
-            symbolicFeaturesNotYetUsed.push_back(feature);
-        }
-    }
-
     vector<string> trueNumericTypes;
     vector<string> symbolicTypes;
     vector<string> trueNumericTypesFeatureNames;
@@ -635,8 +626,8 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
     vector<vector<string>>boundedIntervalsNumericTypes = findBoundedIntervalsForNumericFeatures(trueNumericTypesFeatureNames);
 
     // Upper and lower bounds for the best feature
-    std::map<string, double> lowerBound;
-    std::map<string, double> upperBound;
+    map<string, double> lowerBound;
+    map<string, double> upperBound;
 
     for (const auto& item : boundedIntervalsNumericTypes) {
         lowerBound[item[0]] = std::numeric_limits<double>::max();
@@ -653,66 +644,123 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
         }
     }
 
-    map<string, double> entropyValuesForFeatures;
-    std::map<std::string, std::optional<double>> partitioningThreshold;
-    std::map<std::string, std::pair<double, double>> childEntropiesForFeature;
+    map<string, double> entropyValuesForDifferentFeatures; // Stores entropy values for features
+    map<string, map<double, std::pair<double, double>>> partitioningPointChildEntropiesDict; // Child entropies for numeric thresholds
+    map<string, std::optional<double>> partitioningPointThreshold; // Thresholds for numeric features
+    map<string, vector<double>> entropiesForDifferentValuesOfSymbolicFeature; // Entropies for symbolic feature values
 
+    // Initialize maps for all features
     for (const auto& feature : _featureNames) {
-        partitioningThreshold[feature] = std::nullopt;
+        partitioningPointChildEntropiesDict[feature] = {};
+        partitioningPointThreshold[feature] = std::nullopt;
+        entropiesForDifferentValuesOfSymbolicFeature[feature] = {};
+    }
 
-        if (std::find(symbolicFeaturesAlreadyUsed.begin(), symbolicFeaturesAlreadyUsed.end(), feature) != symbolicFeaturesAlreadyUsed.end()) {
+    // Loop through all features to calculate entropies
+    for (const auto& featureName : _featureNames) {
+        if (_debug3) {
+            std::cout << "\n\nBFC1    FEATURE BEING CONSIDERED: " << featureName << std::endl;
+        }
+
+        // Skip symbolic features that are already used
+        if (std::find(symbolicFeaturesAlreadyUsed.begin(), symbolicFeaturesAlreadyUsed.end(), featureName) != symbolicFeaturesAlreadyUsed.end()) {
             continue;
         }
 
-        if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
-            // Handle numeric feature entropies
-            auto values = _samplingPointsForNumericFeatureDict[feature];
-            for (const auto& value : values) {
-                if (value > lowerBound[feature] && value <= upperBound[feature]) {
-                    double entropy1 = classEntropyForLessThanThresholdForFeature(featuresAndValuesOrThresholdsOnBranch, feature, value);
-                    double entropy2 = classEntropyForGreaterThanThresholdForFeature(featuresAndValuesOrThresholdsOnBranch, feature, value);
+        // Check if the feature is numeric and exceeds the symbolic-to-numeric cardinality threshold
+        if (_numericFeaturesValueRangeDict.find(featureName) != _numericFeaturesValueRangeDict.end() &&
+            _featureValuesHowManyUniquesDict[featureName] > _symbolicToNumericCardinalityThreshold) {
 
-                    double partitioningEntropy = entropy1 * probabilityOfFeatureLessThanThreshold(feature, std::to_string(value)) +
-                                                 entropy2 * (1.0 - probabilityOfFeatureLessThanThreshold(feature, std::to_string(value)));
-                    if (partitioningEntropy < existingNodeEntropy) {
-                        entropyValuesForFeatures[feature] = partitioningEntropy;
-                        partitioningThreshold[feature] = value;
-                        childEntropiesForFeature[feature] = {entropy1, entropy2};
+            // Get the sampling points for the numeric feature
+            const auto& values = _samplingPointsForNumericFeatureDict[featureName];
+            if (_debug3) {
+                std::cout << "\nBFC2 values for " << featureName << " are [";
+                for (const auto& val : values) std::cout << val << ", ";
+                std::cout << "]\n";
+            }
+
+            std::vector<double> newValues;
+
+            // Check if the feature is in true numeric types and filter values within bounds
+            if (std::find(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end(), featureName) != trueNumericTypesFeatureNames.end()) {
+                if (upperBound[featureName] && lowerBound[featureName] && lowerBound[featureName] >= upperBound[featureName]) {
+                    // Skip if bounds are invalid
+                    continue;
+                } 
+                else if (upperBound[featureName] && lowerBound[featureName] && lowerBound[featureName] < upperBound[featureName]) {
+                    // Filter values within valid bounds
+                    for (const auto& value : values) {
+                        if (lowerBound[featureName] < value && value <= upperBound[featureName]) {
+                            newValues.push_back(value);
+                        }
                     }
+                } 
+                else if (upperBound[featureName]) {
+                    // Filter values below upper bound
+                    for (const auto& value : values) {
+                        if (value <= upperBound[featureName]) {
+                            newValues.push_back(value);
+                        }
+                    }
+                } 
+                else if (lowerBound[featureName]) {
+                    // Filter values above lower bound
+                    for (const auto& value : values) {
+                        if (value > lowerBound[featureName]) {
+                            newValues.push_back(value);
+                        }
+                    }
+                } 
+                else {
+                    throw std::runtime_error("Error in bound specifications in best feature calculator");
                 }
             }
-        } else {
-            // Handle symbolic features
+            else {
+                // If not in true numeric types, use all values
+                newValues = values;
+            }
+
+            if (newValues.empty()) {
+                // Skip if no valid values are found
+                continue;
+            }
+        }
+        else {
+            if (_debug3) {
+                std::cout << "\nBFC3 Best feature calculator: Entering section reserved for symbolic features";
+                cout << "\nBFC4 Feature name: " << featureName;
+            }
+
+            set<string> valuesSet = _featuresAndUniqueValuesDict[featureName];
+            vector<string> values(valuesSet.begin(), valuesSet.end());
+            // Sort the values
+            std::sort(values.begin(), values.end());
+
+            if (_debug3) {
+                cout << "\nBFC5 Values for feature " << featureName << " are: " << values;
+            }
+
             double entropy = 0.0;
-            for (const auto& value : _featuresAndUniqueValuesDict[feature]) {
-                if (value == "NA") continue;
 
-                double prob = probabilityOfFeatureValue(feature, value);
-                entropy += prob * classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds({feature + "=" + value});
+            for (const auto& value : values) {
+                string featureValueString;
+                double valueAsDouble = convert(value);
+                if (std::isnan(valueAsDouble)) {
+                    featureValueString = featureName + "=" + value;
+                }
+                else {
+                    featureValueString = featureName + "=" + formatDouble(valueAsDouble);
+                }
+
+                // MARK: Correct up to here
             }
-            if (entropy < existingNodeEntropy) {
-                entropyValuesForFeatures[feature] = entropy;
-            }
+
         }
     }
 
-    std::string bestFeatureName;
-    double minEntropy = std::numeric_limits<double>::infinity();
-    for (const auto& [feature, entropy] : entropyValuesForFeatures) {
-        if (entropy < minEntropy) {
-            bestFeatureName = feature;
-            minEntropy = entropy;
-        }
-    }
 
-    std::optional<double> threshold = partitioningThreshold[bestFeatureName];
-    std::optional<std::pair<double, double>> valBasedEntropies = std::nullopt;
 
-    if (childEntropiesForFeature.find(bestFeatureName) != childEntropiesForFeature.end()) {
-        valBasedEntropies = childEntropiesForFeature[bestFeatureName];
-    }
-
-    return {bestFeatureName, minEntropy, valBasedEntropies, threshold};
+    return {"bestFeatureName", 0.0, {}, 0};
 }
 
 //--------------- Entropy Calculators ----------------//
@@ -1662,8 +1710,8 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
     // threshold for each of the numeric features that are in play at the current node:
 
     // Populate bounds with feature names
-    std::map<string, double> lowerBound;
-    std::map<string, double> upperBound;
+    map<string, double> lowerBound;
+    map<string, double> upperBound;
     for (const auto &feature : trueNumericTypesFeatureNames) {
         lowerBound[feature] = std::numeric_limits<double>::max();
         upperBound[feature] = std::numeric_limits<double>::min();
@@ -1815,8 +1863,8 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
 
     // Calculate the upper and the lower bounds to be used when searching for the best
     // threshold for each of the numeric features that are in play at the current node:
-    std::map<string, double> lowerBound;
-    std::map<string, double> upperBound;
+    map<string, double> lowerBound;
+    map<string, double> upperBound;
     for (const auto &feature : trueNumericTypesFeatureNames) {
         lowerBound[feature] = std::numeric_limits<double>::max();
         upperBound[feature] = std::numeric_limits<double>::min();
