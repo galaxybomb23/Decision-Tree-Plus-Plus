@@ -752,12 +752,38 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
                     featureValueString = featureName + "=" + formatDouble(valueAsDouble);
                 }
 
-                // MARK: Correct up to here
+                if (_debug3) {
+                    cout << "\nBFC6 Feature value string: " << featureValueString;
+                }
+
+                vector<string> extendedAttributes = deepCopy(featuresAndValuesOrThresholdsOnBranch);
+
+                if (!featuresAndValuesOrThresholdsOnBranch.empty()) {
+                    extendedAttributes.push_back(featureValueString);
+                }
+                else {
+                    extendedAttributes = {featureValueString};
+                }
+                
+                entropy += classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(extendedAttributes) * probabilityOfASequenceOfFeaturesAndValuesOrThresholds(extendedAttributes);
+
+                if (_debug3) {
+                    cout << "\nBFC7 Entropy calculated for symbolic feature value choice (" << featureName << ", " << value << ") is " << entropy;
+                }
+
+                entropiesForDifferentValuesOfSymbolicFeature[featureName].push_back(entropy);
             }
 
+            if (entropy < existingNodeEntropy) {
+                entropyValuesForDifferentFeatures[featureName] = entropy;
+            }
         }
     }
 
+    double minEntropyForBestFeature = std::numeric_limits<double>::max();
+    string bestFeatureName;
+
+    // MARK: Correct up to here for symbolic
 
 
     return {"bestFeatureName", 0.0, {}, 0};
