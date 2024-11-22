@@ -655,6 +655,8 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
 
     map<string, double> entropyValuesForFeatures;
     std::map<std::string, std::optional<double>> partitioningThreshold;
+    std::map<std::string, std::pair<double, double>> childEntropiesForFeature;
+
     for (const auto& feature : _featureNames) {
         partitioningThreshold[feature] = std::nullopt;
 
@@ -675,6 +677,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
                     if (partitioningEntropy < existingNodeEntropy) {
                         entropyValuesForFeatures[feature] = partitioningEntropy;
                         partitioningThreshold[feature] = value;
+                        childEntropiesForFeature[feature] = {entropy1, entropy2};
                     }
                 }
             }
@@ -703,9 +706,13 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
     }
 
     std::optional<double> threshold = partitioningThreshold[bestFeatureName];
+    std::optional<std::pair<double, double>> valBasedEntropies = std::nullopt;
 
+    if (childEntropiesForFeature.find(bestFeatureName) != childEntropiesForFeature.end()) {
+        valBasedEntropies = childEntropiesForFeature[bestFeatureName];
+    }
 
-    return {bestFeatureName, minEntropy, {}, threshold};
+    return {bestFeatureName, minEntropy, valBasedEntropies, threshold};
 }
 
 //--------------- Entropy Calculators ----------------//
