@@ -574,7 +574,7 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
 void DecisionTree::recursiveDescent(DecisionTreeNode* node) {}
 
 BestFeatureResult DecisionTree::bestFeatureCalculator(
-    const std::vector<std::string>& featuresAndValuesOrThresholdsOnBranch, 
+    const vector<string>& featuresAndValuesOrThresholdsOnBranch, 
     double existingNodeEntropy
 ) {
     // Define regex patterns for matching
@@ -583,7 +583,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
     const std::regex pattern3(R"((.+)>(.+))");
 
     // Collect all symbolic features
-    std::vector<std::string> allSymbolicFeatures;
+    vector<string> allSymbolicFeatures;
     for (const auto& featureName : _featureNames) {
         if (_probDistributionNumericFeaturesDict.find(featureName) == _probDistributionNumericFeaturesDict.end()) {
             allSymbolicFeatures.push_back(featureName);
@@ -591,7 +591,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
     }
 
     // Determine symbolic features already used
-    std::vector<std::string> symbolicFeaturesAlreadyUsed;
+    vector<string> symbolicFeaturesAlreadyUsed;
     for (const auto& item : featuresAndValuesOrThresholdsOnBranch) {
         std::smatch match;
         if (std::regex_search(item, match, pattern1)) {
@@ -599,20 +599,113 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
         }
     }
 
+    // MARK: Not used in the original implementation, maybe remove
     // Compute symbolic features not yet used
-    std::vector<std::string> symbolicFeaturesNotYetUsed;
+    vector<string> symbolicFeaturesNotYetUsed;
     for (const auto& feature : allSymbolicFeatures) {
         if (std::find(symbolicFeaturesAlreadyUsed.begin(), symbolicFeaturesAlreadyUsed.end(), feature) == symbolicFeaturesAlreadyUsed.end()) {
             symbolicFeaturesNotYetUsed.push_back(feature);
         }
     }
 
-    std::string bestFeatureName = "exampleFeature";
-    double bestFeatureEntropy = 0.0;
-    std::pair<double, double> valBasedEntropies = {0.1, 0.2};
-    double decisionValue = 0.0;
+    vector<string> trueNumericTypes;
+    vector<string> symbolicTypes;
+    vector<string> trueNumericTypesFeatureNames;
+    vector<string> symbolicTypesFeatureNames;
 
-    return {bestFeatureName, bestFeatureEntropy, valBasedEntropies, decisionValue};
+    // MARK: Not tested in first test case, come back to it
+    for (const auto& item : featuresAndValuesOrThresholdsOnBranch) {
+        std::smatch match;
+        if (std::regex_search(item, match, pattern2)) {
+            trueNumericTypes.push_back(match[1].str()); // Might not be right
+            trueNumericTypesFeatureNames.push_back(match[1].str());
+        }
+        else if (std::regex_search(item, match, pattern3)) {
+            trueNumericTypes.push_back(match[1].str()); // Might not be right
+            trueNumericTypesFeatureNames.push_back(match[1].str());
+        }
+        else {
+            symbolicTypes.push_back(match[1].str());
+            symbolicTypesFeatureNames.push_back(match[1].str());
+        }
+    }
+
+    trueNumericTypesFeatureNames.erase(std::unique(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end()), trueNumericTypesFeatureNames.end());
+    symbolicTypesFeatureNames.erase(std::unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()), symbolicTypesFeatureNames.end());
+    vector<vector<string>>boundedIntervalsNumericTypes = findBoundedIntervalsForNumericFeatures(trueNumericTypesFeatureNames);
+
+    // Upper and lower bounds for the best feature
+    std::map<string, double> lowerBound;
+    std::map<string, double> upperBound;
+
+    for (const auto& item : boundedIntervalsNumericTypes) {
+        lowerBound[item[0]] = std::numeric_limits<double>::max();
+        upperBound[item[0]] = std::numeric_limits<double>::min();
+    }
+
+    // Fill in the lower and upper bounds
+    for (const auto& item : boundedIntervalsNumericTypes) {
+        if (item[1] == ">") {
+            lowerBound[item[0]] = std::stod(item[2]);
+        }
+        else {
+            upperBound[item[0]] = std::stod(item[2]);
+        }
+    }
+
+    map<string, double> entropyValuesForFeatures;
+    std::map<std::string, std::optional<double>> partitioningThreshold;
+    for (const auto& feature : _featureNames) {
+        partitioningThreshold[feature] = std::nullopt;
+
+        if (std::find(symbolicFeaturesAlreadyUsed.begin(), symbolicFeaturesAlreadyUsed.end(), feature) != symbolicFeaturesAlreadyUsed.end()) {
+            continue;
+        }
+
+        if (_numericFeaturesValueRangeDict.find(feature) != _numericFeaturesValueRangeDict.end()) {
+            // Handle numeric feature entropies
+            auto values = _samplingPointsForNumericFeatureDict[feature];
+            for (const auto& value : values) {
+                if (value > lowerBound[feature] && value <= upperBound[feature]) {
+                    double entropy1 = classEntropyForLessThanThresholdForFeature(featuresAndValuesOrThresholdsOnBranch, feature, value);
+                    double entropy2 = classEntropyForGreaterThanThresholdForFeature(featuresAndValuesOrThresholdsOnBranch, feature, value);
+
+                    double partitioningEntropy = entropy1 * probabilityOfFeatureLessThanThreshold(feature, std::to_string(value)) +
+                                                 entropy2 * (1.0 - probabilityOfFeatureLessThanThreshold(feature, std::to_string(value)));
+                    if (partitioningEntropy < existingNodeEntropy) {
+                        entropyValuesForFeatures[feature] = partitioningEntropy;
+                        partitioningThreshold[feature] = value;
+                    }
+                }
+            }
+        } else {
+            // Handle symbolic features
+            double entropy = 0.0;
+            for (const auto& value : _featuresAndUniqueValuesDict[feature]) {
+                if (value == "NA") continue;
+
+                double prob = probabilityOfFeatureValue(feature, value);
+                entropy += prob * classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds({feature + "=" + value});
+            }
+            if (entropy < existingNodeEntropy) {
+                entropyValuesForFeatures[feature] = entropy;
+            }
+        }
+    }
+
+    std::string bestFeatureName;
+    double minEntropy = std::numeric_limits<double>::infinity();
+    for (const auto& [feature, entropy] : entropyValuesForFeatures) {
+        if (entropy < minEntropy) {
+            bestFeatureName = feature;
+            minEntropy = entropy;
+        }
+    }
+
+    std::optional<double> threshold = partitioningThreshold[bestFeatureName];
+
+
+    return {bestFeatureName, minEntropy, {}, threshold};
 }
 
 //--------------- Entropy Calculators ----------------//
@@ -674,12 +767,12 @@ double DecisionTree::classEntropyOnPriors()
  *
  * @param feature The name of the numeric feature to scan.
  */
-void DecisionTree::entropyScannerForANumericFeature(const std::string &feature)
+void DecisionTree::entropyScannerForANumericFeature(const string &feature)
 {
     // Retrieve all sampling points for the feature
-    std::vector<double> allSamplingPoints = _samplingPointsForNumericFeatureDict[feature];
-    std::vector<double> entropiesForLessThanThresholds;
-    std::vector<double> entropiesForGreaterThanThresholds;
+    vector<double> allSamplingPoints = _samplingPointsForNumericFeatureDict[feature];
+    vector<double> entropiesForLessThanThresholds;
+    vector<double> entropiesForGreaterThanThresholds;
 
     // Iterate over all sampling points and calculate entropies
     for (double point : allSamplingPoints) {
@@ -716,8 +809,8 @@ void DecisionTree::entropyScannerForANumericFeature(const std::string &feature)
  * @param comparison The comparison operator (e.g., "<", ">", "<=", ">=") used with the threshold.
  * @return The calculated entropy for the given feature and threshold combination.
  */
-double DecisionTree::EntropyForThresholdForFeature(const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds,
-                                                   const std::string &feature,
+double DecisionTree::EntropyForThresholdForFeature(const vector<string> &arrayOfFeaturesAndValuesOrThresholds,
+                                                   const string &feature,
                                                    const double &threshold,
                                                    const string &comparison)
 {
@@ -810,10 +903,10 @@ double DecisionTree::classEntropyForGreaterThanThresholdForFeature(
  * @return The calculated entropy for the given sequence.
  */
 double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
-    const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds)
+    const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
     // Join the array of features and values or thresholds into a sequence string
-    std::string sequence;
+    string sequence;
     for (const auto &featureValue : arrayOfFeaturesAndValuesOrThresholds) {
         if (!sequence.empty()) {
             sequence += ":";
@@ -1298,25 +1391,25 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
         }
         else {
             // Extract unique values for the feature from _featuresAndValuesDict
-            std::set<std::string> uniqueValues(_featuresAndValuesDict[feature].begin(),
+            std::set<string> uniqueValues(_featuresAndValuesDict[feature].begin(),
                                                _featuresAndValuesDict[feature].end());
 
             // Remove "NA" values
             uniqueValues.erase("NA");
 
             // Format values as "feature=value"
-            std::vector<std::string> valuesForFeature;
+            vector<string> valuesForFeature;
             for (const auto &value : uniqueValues) {
-                std::string formattedValue = feature + "=" + value;
+                string formattedValue = feature + "=" + value;
                 valuesForFeature.push_back(formattedValue);
             }
 
             // Initialize counts for each value
-            std::vector<int> valueCounts(valuesForFeature.size(), 0);
+            vector<int> valueCounts(valuesForFeature.size(), 0);
 
             // Count occurrences of feature values within samples for the class
             for (const auto &sample : samplesForClass) {
-                std::vector<std::string> featuresAndValues;
+                vector<string> featuresAndValues;
                 for (size_t j = 0; j < _featureNames.size(); ++j) {
                     featuresAndValues.push_back(_featureNames[j] + "=" + _trainingDataDict[sample][j]);
                 }
@@ -1341,13 +1434,13 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 
             // Normalize and cache probabilities
             for (size_t i = 0; i < valuesForFeature.size(); ++i) {
-                std::string featureAndValueAndClass = valuesForFeature[i] + "::" + className;
+                string featureAndValueAndClass = valuesForFeature[i] + "::" + className;
                 _probabilityCache[featureAndValueAndClass] =
                     static_cast<double>(valueCounts[i]) / static_cast<double>(totalCount);
             }
 
             // Check for cached value
-            std::string featureValueClass = feature + "=" + adjustedValue + "::" + className;
+            string featureValueClass = feature + "=" + adjustedValue + "::" + className;
 
             for (const auto &entry : _probabilityCache) {
                 if (entry.first == featureValueClass) {

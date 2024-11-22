@@ -4,6 +4,7 @@
 #include <iostream>
 #include <regex>
 #include <sstream>
+#include <vector>
 
 int sampleIndex(std::string sample_name)
 {
