@@ -59,11 +59,53 @@ TEST_F(ConstructTreeTest, bestFeatureCalculatorSymbolic)
         ASSERT_EQ(bfr.valBasedEntropies, nullopt);
         ASSERT_EQ(bfr.decisionValue, nullopt);
     }
-    // {
-    //     bfr = dtS->bestFeatureCalculator({"fatIntake=heavy"}, 0.7732266742876344);
-    //     ASSERT_EQ(bfr.bestFeatureName, "smoking");
-    //     ASSERT_NEAR(bfr.bestFeatureEntropy, 0.271, 0.001);
-    //     ASSERT_EQ(bfr.valBasedEntropies, nullopt);
-    //     ASSERT_EQ(bfr.decisionValue, nullopt);
-    // }
+    {
+        bfr = dtS->bestFeatureCalculator({"fatIntake=heavy"}, 0.7732266742876344);
+        ASSERT_EQ(bfr.bestFeatureName, "smoking");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.271, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
+    }
+    {
+        bfr = dtS->bestFeatureCalculator({"fatIntake=heavy", "smoking=heavy"}, 0.28788102213037137);
+        ASSERT_EQ(bfr.bestFeatureName, "videoAddiction");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.058, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
+    }
+    {
+        bfr = dtS->bestFeatureCalculator({"fatIntake=heavy", "smoking=heavy", "videoAddiction=heavy"}, 0.16223190039782087);
+        ASSERT_EQ(bfr.bestFeatureName, "exercising");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.014, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
+    }
+    {
+        bfr = dtS->bestFeatureCalculator({"fatIntake=low"}, 0.5032583347756457);
+        ASSERT_EQ(bfr.bestFeatureName, "smoking");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.133, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
+    }
+    {
+        bfr = dtS->bestFeatureCalculator({"fatIntake=low", "smoking=light"}, 0.13609257142369133);
+        ASSERT_EQ(bfr.bestFeatureName, "videoAddiction");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.009, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
+    }
+    {
+        bfr = dtS->bestFeatureCalculator({"fatIntake=low", "smoking=never"}, 0.10265923626304851);
+        ASSERT_EQ(bfr.bestFeatureName, "videoAddiction");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.005, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
+    }
+    {
+        bfr = dtS->bestFeatureCalculator({"fatIntake=medium"}, 0.21639693245126473);
+        ASSERT_EQ(bfr.bestFeatureName, "videoAddiction");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.065, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
+    }
 }

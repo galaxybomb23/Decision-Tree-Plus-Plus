@@ -674,20 +674,18 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
             // Get the sampling points for the numeric feature
             const auto& values = _samplingPointsForNumericFeatureDict[featureName];
             if (_debug3) {
-                std::cout << "\nBFC2 values for " << featureName << " are [";
-                for (const auto& val : values) std::cout << val << ", ";
-                std::cout << "]\n";
+                cout << "\nBFC2 values for " << featureName << " are " << values;
             }
 
-            std::vector<double> newValues;
+            vector<double> newValues;
 
             // Check if the feature is in true numeric types and filter values within bounds
             if (std::find(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end(), featureName) != trueNumericTypesFeatureNames.end()) {
-                if (upperBound[featureName] && lowerBound[featureName] && lowerBound[featureName] >= upperBound[featureName]) {
+                if (upperBound[featureName] != std::numeric_limits<double>::min() && lowerBound[featureName] != std::numeric_limits<double>::max() && lowerBound[featureName] >= upperBound[featureName]) {
                     // Skip if bounds are invalid
                     continue;
                 } 
-                else if (upperBound[featureName] && lowerBound[featureName] && lowerBound[featureName] < upperBound[featureName]) {
+                else if (upperBound[featureName] != std::numeric_limits<double>::min() && lowerBound[featureName] != std::numeric_limits<double>::max() && lowerBound[featureName] < upperBound[featureName]) {
                     // Filter values within valid bounds
                     for (const auto& value : values) {
                         if (lowerBound[featureName] < value && value <= upperBound[featureName]) {
@@ -695,7 +693,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
                         }
                     }
                 } 
-                else if (upperBound[featureName]) {
+                else if (upperBound[featureName] != std::numeric_limits<double>::min()) {
                     // Filter values below upper bound
                     for (const auto& value : values) {
                         if (value <= upperBound[featureName]) {
@@ -703,7 +701,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
                         }
                     }
                 } 
-                else if (lowerBound[featureName]) {
+                else if (lowerBound[featureName] != std::numeric_limits<double>::max()) {
                     // Filter values above lower bound
                     for (const auto& value : values) {
                         if (value > lowerBound[featureName]) {
@@ -724,6 +722,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
                 // Skip if no valid values are found
                 continue;
             }
+            // MARK
         }
         else {
             if (_debug3) {
@@ -783,10 +782,70 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
     double minEntropyForBestFeature = std::numeric_limits<double>::max();
     string bestFeatureName;
 
-    // MARK: Correct up to here for symbolic
+    for (const auto& featureNom : entropyValuesForDifferentFeatures) {
+        if (featureNom.second < minEntropyForBestFeature) {
+            minEntropyForBestFeature = featureNom.second;
+            bestFeatureName = featureNom.first;
+        }
+    }
 
+    std::optional<double> thresholdForBestFeature;
+    // If best feature name is in partioning point threshold, return the threshold
+    if (partitioningPointThreshold.find(bestFeatureName) != partitioningPointThreshold.end()) {
+        if (partitioningPointThreshold[bestFeatureName].has_value()) {
+            thresholdForBestFeature = partitioningPointThreshold[bestFeatureName].value();
+        }
+        else {
+            thresholdForBestFeature = nullopt;
+        }
+    }
+    else {
+        thresholdForBestFeature = nullopt;
+    }
 
-    return {"bestFeatureName", 0.0, {}, 0};
+    double bestFeatureEntropy = minEntropyForBestFeature;
+    std::optional<pair<double, double>> valBasedEntropiesToBeReturned;
+    std::optional<double> decisionValToBeReturned;
+
+    if (_numericFeaturesValueRangeDict.find(bestFeatureName) != _numericFeaturesValueRangeDict.end() &&
+        _featureValuesHowManyUniquesDict[bestFeatureName] > _symbolicToNumericCardinalityThreshold) {
+        if (thresholdForBestFeature.has_value()) {
+            valBasedEntropiesToBeReturned = partitioningPointChildEntropiesDict[bestFeatureName][thresholdForBestFeature.value()];
+            decisionValToBeReturned = thresholdForBestFeature;
+        }
+        else {
+            valBasedEntropiesToBeReturned = nullopt;
+        }
+
+        decisionValToBeReturned = thresholdForBestFeature;
+    }
+    else {
+        valBasedEntropiesToBeReturned = nullopt;
+    }
+
+    if (partitioningPointThreshold.find(bestFeatureName) != partitioningPointThreshold.end()) {
+        if (partitioningPointThreshold[bestFeatureName].has_value()) {
+            decisionValToBeReturned = partitioningPointThreshold[bestFeatureName].value();
+        }
+        else {
+            decisionValToBeReturned = nullopt;
+        }
+    }
+    else {
+        decisionValToBeReturned = nullopt;
+    }
+
+    if (_debug3) {
+        cout << "\nBFC8 Val based entropies to be returned for feature " << bestFeatureName << "are ";
+        if (valBasedEntropiesToBeReturned.has_value()) {
+            cout << valBasedEntropiesToBeReturned.value().first << " and " << valBasedEntropiesToBeReturned.value().second;
+        }
+        else {
+            cout << "None";
+        }
+    }
+
+    return {bestFeatureName, bestFeatureEntropy, valBasedEntropiesToBeReturned, decisionValToBeReturned};
 }
 
 //--------------- Entropy Calculators ----------------//
