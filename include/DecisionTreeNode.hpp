@@ -40,6 +40,7 @@ class DecisionTreeNode {
 
     // Setters
     void SetClassNames(const vector<string> classNames);
+    void SetFeature(const string &feature) { _feature = feature; };
     void SetNodeCreationEntropy(const double entropy);
     void AddChildLink(shared_ptr<DecisionTreeNode> newNode);
 
