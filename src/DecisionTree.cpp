@@ -598,32 +598,30 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
             symbolicFeaturesAlreadyUsed.push_back(match[1].str());
         }
     }
-
     vector<string> trueNumericTypes;
     vector<string> symbolicTypes;
     vector<string> trueNumericTypesFeatureNames;
     vector<string> symbolicTypesFeatureNames;
 
-    // MARK: Not tested in first test case, come back to it
     for (const auto& item : featuresAndValuesOrThresholdsOnBranch) {
         std::smatch match;
         if (std::regex_search(item, match, pattern2)) {
-            trueNumericTypes.push_back(match[1].str()); // Might not be right
+            trueNumericTypes.push_back(item);
             trueNumericTypesFeatureNames.push_back(match[1].str());
         }
         else if (std::regex_search(item, match, pattern3)) {
-            trueNumericTypes.push_back(match[1].str()); // Might not be right
+            trueNumericTypes.push_back(item);
             trueNumericTypesFeatureNames.push_back(match[1].str());
         }
-        else {
-            symbolicTypes.push_back(match[1].str());
+        else if (std::regex_search(item, match, pattern1)) {
+            symbolicTypes.push_back(item);
             symbolicTypesFeatureNames.push_back(match[1].str());
         }
     }
 
     trueNumericTypesFeatureNames.erase(std::unique(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end()), trueNumericTypesFeatureNames.end());
     symbolicTypesFeatureNames.erase(std::unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()), symbolicTypesFeatureNames.end());
-    vector<vector<string>>boundedIntervalsNumericTypes = findBoundedIntervalsForNumericFeatures(trueNumericTypesFeatureNames);
+    vector<vector<string>>boundedIntervalsNumericTypes = findBoundedIntervalsForNumericFeatures(trueNumericTypes);
 
     // Upper and lower bounds for the best feature
     map<string, double> lowerBound;
@@ -664,13 +662,14 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
 
         // Skip symbolic features that are already used
         if (std::find(symbolicFeaturesAlreadyUsed.begin(), symbolicFeaturesAlreadyUsed.end(), featureName) != symbolicFeaturesAlreadyUsed.end()) {
+            cout << "here1" << endl;
             continue;
         }
 
         // Check if the feature is numeric and exceeds the symbolic-to-numeric cardinality threshold
         if (_numericFeaturesValueRangeDict.find(featureName) != _numericFeaturesValueRangeDict.end() &&
             _featureValuesHowManyUniquesDict[featureName] > _symbolicToNumericCardinalityThreshold) {
-
+            cout << "here2" << endl;
             // Get the sampling points for the numeric feature
             const auto& values = _samplingPointsForNumericFeatureDict[featureName];
             if (_debug3) {
@@ -722,9 +721,47 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
                 // Skip if no valid values are found
                 continue;
             }
-            // MARK
+
+            vector<double> partitioningEntropies;
+
+            for (const auto& value : newValues) {
+                string featureAndLessThanValueString = featureName + "<" + formatDouble(value);
+                string featureAndGreaterThanValueString = featureName + ">" + formatDouble(value);
+                vector<string> forLeftChild;
+                vector<string> forRightChild;
+                if (!featuresAndValuesOrThresholdsOnBranch.empty()) {
+                    forLeftChild = deepCopy(featuresAndValuesOrThresholdsOnBranch);
+                    forLeftChild.push_back(featureAndLessThanValueString);
+                    forRightChild = deepCopy(featuresAndValuesOrThresholdsOnBranch);
+                    forRightChild.push_back(featureAndGreaterThanValueString);
+                }
+                else {
+                    forLeftChild = {featureAndLessThanValueString};
+                    forRightChild = {featureAndGreaterThanValueString};
+                }
+                
+                // MARK: Entropies are different, cant figure out why
+                double entropy1 = classEntropyForLessThanThresholdForFeature(featuresAndValuesOrThresholdsOnBranch, featureName, value);
+                cout << "entropy1: " << entropy1 << endl;
+                double entropy2 = classEntropyForGreaterThanThresholdForFeature(featuresAndValuesOrThresholdsOnBranch, featureName, value);
+                cout << "entropy2: " << entropy2 << endl;
+                double partitioningEntropy = entropy1 * probabilityOfASequenceOfFeaturesAndValuesOrThresholds(forLeftChild) + entropy2 * probabilityOfASequenceOfFeaturesAndValuesOrThresholds(forRightChild);
+
+                partitioningEntropies.push_back(partitioningEntropy);
+                partitioningPointChildEntropiesDict[featureName][value] = {entropy1, entropy2};
+            }
+
+            double minEntropy = *std::min_element(partitioningEntropies.begin(), partitioningEntropies.end());
+            int bestPartitioningPointIndex = std::distance(partitioningEntropies.begin(), std::min_element(partitioningEntropies.begin(), partitioningEntropies.end()));
+
+            if (minEntropy < existingNodeEntropy) {
+                cout << minEntropy << " < " << existingNodeEntropy << endl;
+                entropyValuesForDifferentFeatures[featureName] = minEntropy;
+                partitioningPointThreshold[featureName] = newValues[bestPartitioningPointIndex];
+            }
         }
         else {
+            cout << "here3" << endl;
             if (_debug3) {
                 std::cout << "\nBFC3 Best feature calculator: Entering section reserved for symbolic features";
                 cout << "\nBFC4 Feature name: " << featureName;
@@ -774,6 +811,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
             }
 
             if (entropy < existingNodeEntropy) {
+                cout << entropy << " < " << existingNodeEntropy << endl;
                 entropyValuesForDifferentFeatures[featureName] = entropy;
             }
         }
@@ -783,7 +821,15 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(
     string bestFeatureName;
 
     for (const auto& featureNom : entropyValuesForDifferentFeatures) {
-        if (featureNom.second < minEntropyForBestFeature) {
+        cout << featureNom.first << ": " << featureNom.second << endl;
+    }
+
+    for (const auto& featureNom : entropyValuesForDifferentFeatures) {
+        // cout << featureNom.first << ": " << featureNom.second << " < " << minEntropyForBestFeature << ": " << (featureNom.second < minEntropyForBestFeature ? "true" : "false") << endl;
+        if (bestFeatureName == "" || featureNom.second < minEntropyForBestFeature) {
+            // cout << "bestFeatureName: " << bestFeatureName << endl;
+            // cout << "featureNom.second: " << featureNom.second << endl;
+            // cout << "minEntropyForBestFeature: " << minEntropyForBestFeature << endl;
             minEntropyForBestFeature = featureNom.second;
             bestFeatureName = featureNom.first;
         }
@@ -971,7 +1017,7 @@ double DecisionTree::EntropyForThresholdForFeature(const vector<string> &arrayOf
     }
 
     // make a copy of the array of features and values or thresholds
-    vector<string> arrayOfFeaturesAndValuesOrThresholdsCopy = arrayOfFeaturesAndValuesOrThresholds;
+    vector<string> arrayOfFeaturesAndValuesOrThresholdsCopy = deepCopy(arrayOfFeaturesAndValuesOrThresholds);
     arrayOfFeaturesAndValuesOrThresholdsCopy.push_back(featureThresholdCombo);
 
     // Calculate the entropy for the sequence
@@ -982,12 +1028,18 @@ double DecisionTree::EntropyForThresholdForFeature(const vector<string> &arrayOf
         double logProb = 0.0;
         double prob    = probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
             className, arrayOfFeaturesAndValuesOrThresholdsCopy);
-        if (prob >= .0001 && prob <= .999) {
+        if (prob >= 0.0001 && prob <= 0.999) {
             logProb = std::log2(prob);
         }
-        else {
+        else if (prob < 0.0001 || prob > 0.999) {
             logProb = 0.0;
         }
+        
+        if (entropy == 0.0) {
+            entropy = -1.0 * prob * logProb;
+            continue;
+        }
+
         entropy += -1.0 * prob * logProb;
     }
 
