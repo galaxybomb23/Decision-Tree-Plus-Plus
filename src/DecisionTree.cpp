@@ -650,6 +650,143 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     if (_debug3) {
         cout << "\nRD11 Expected entropy gain: " << entropyGain << endl;
     }
+
+    if (entropyGain > _entropyThreshold) {
+        if (_numericFeaturesValueRangeDict.find(bestFeature) != _numericFeaturesValueRangeDict.end() &&
+            _featureValuesHowManyUniquesDict[bestFeature] > _symbolicToNumericCardinalityThreshold) {
+            auto bestThreshold         = decisionVal.value();
+            auto bestEntropyForLess    = bestFeatureValEntropies.value().first;
+            auto bestEntropyForGreater = bestFeatureValEntropies.value().second;
+            auto extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild =
+                featuresAndValuesOrThresholdsOnBranch; // deep copy?
+            auto extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild =
+                featuresAndValuesOrThresholdsOnBranch; // deep copy?
+            auto featureThresholdComboForLessThanChild    = bestFeature + "<" + formatDouble(bestThreshold);
+            auto featureThresholdComboForGreaterThanChild = bestFeature + ">" + formatDouble(bestThreshold);
+            extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild.push_back(
+                featureThresholdComboForLessThanChild);
+            extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild.push_back(
+                featureThresholdComboForGreaterThanChild);
+
+            if (_debug3) {
+                cout << "\nRD12 extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild: "
+                     << extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild << endl;
+                cout << "\nRD13 extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild: "
+                     << extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild << endl;
+            }
+
+            // list(map(lambda x: self.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds(x,
+            // extended_branch_features_and_values_or_thresholds_for_lessthan_child), self._class_names))
+            vector<double> classProbabilitiesForLessThanChildNode;
+            for (const auto &className : _classNames) {
+                classProbabilitiesForLessThanChildNode.push_back(
+                    probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+                        className, extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild));
+            }
+
+            vector<double> classProbabilitiesForGreaterThanChildNode;
+            for (const auto &className : _classNames) {
+                classProbabilitiesForGreaterThanChildNode.push_back(
+                    probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+                        className, extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild));
+            }
+            if (_debug3) {
+                cout << "\nRD14 class entropy for going down lessthan child: " << bestEntropyForLess << endl;
+                cout << "\nRD15 class entropy for going down greaterthan child: " << bestEntropyForGreater << endl;
+            }
+
+            if (bestEntropyForLess < existingNodeEntropy - _entropyThreshold) {
+                auto leftChildNode                            = &DecisionTreeNode("",
+                                                       bestEntropyForLess,
+                                                       classProbabilitiesForLessThanChildNode,
+                                                       extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild,
+                                                       *this,
+                                                       false);
+                shared_ptr<DecisionTreeNode> leftChildNodePtr = std::make_shared<DecisionTreeNode>(leftChildNode);
+                node->AddChildLink(leftChildNodePtr);
+                recursiveDescent(leftChildNode);
+            }
+
+            if (bestEntropyForGreater < existingNodeEntropy - _entropyThreshold) {
+                auto rightChildNode =
+                    &DecisionTreeNode("",
+                                      bestEntropyForGreater,
+                                      classProbabilitiesForGreaterThanChildNode,
+                                      extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild,
+                                      *this,
+                                      false);
+                shared_ptr<DecisionTreeNode> rightChildNodePtr = std::make_shared<DecisionTreeNode>(rightChildNode);
+                node->AddChildLink(rightChildNodePtr);
+                recursiveDescent(rightChildNode);
+            }
+        }
+        else {
+            if (_debug3) {
+                cout << "\nRD16 RECURSIVE DESCENT: In section for Symbolic features for creating children" << endl;
+            }
+            auto valuesForFeature = _featuresAndUniqueValuesDict[bestFeature];
+            if (_debug3) {
+                cout << "\nRD17 Values for feature " << bestFeature << " are: {";
+                for (const auto &value : valuesForFeature) {
+                    cout << value << ", ";
+                }
+                cout << "}" << endl;
+            }
+            // map(lambda x
+            //     : "".join([ best_feature, "=", x ]), map(str, map(convert, values_for_feature)))
+
+            vector<string> featureValueCombos;
+            for (const auto &value : valuesForFeature) {
+                featureValueCombos.push_back(bestFeature + "=" + formatDouble(convert(value)));
+            }
+            std::sort(featureValueCombos.begin(), featureValueCombos.end());
+            // auto classEntropiesForChildresn = {};
+            for (int featureValueIndex = 0; featureValueIndex < featureValueCombos.size(); featureValueIndex++) {
+                if (_debug3) {
+                    cout << "\nRD18 Creating a child node for: " << featureValueCombos[featureValueIndex] << endl;
+                }
+                vector<string> extendedBranchFeaturesAndValeusOrThresholds;
+                if (featuresAndValuesOrThresholdsOnBranch.empty()) {
+                    extendedBranchFeaturesAndValeusOrThresholds = {featureValueCombos[featureValueIndex]};
+                }
+                else {
+                    extendedBranchFeaturesAndValeusOrThresholds = featuresAndValuesOrThresholdsOnBranch; // deep copy?
+                    extendedBranchFeaturesAndValeusOrThresholds.push_back(featureValueCombos[featureValueIndex]);
+                }
+                auto classProbabilities = vector<double>();
+                for (const auto &className : _classNames) {
+                    classProbabilities.push_back(probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
+                        className, extendedBranchFeaturesAndValeusOrThresholds));
+                }
+                auto classEntropyForChild = classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
+                    extendedBranchFeaturesAndValeusOrThresholds);
+
+                if (_debug3) {
+                    cout << "\nRD19 branch attributes: " << extendedBranchFeaturesAndValeusOrThresholds << endl;
+                    cout << "\nRD20 class entropy for child: " << classEntropyForChild << endl;
+                }
+                if (existingNodeEntropy - classEntropyForChild > _entropyThreshold) {
+                    auto childNode                            = &DecisionTreeNode("",
+                                                       classEntropyForChild,
+                                                       classProbabilities,
+                                                       extendedBranchFeaturesAndValeusOrThresholds,
+                                                       *this,
+                                                       false);
+                    shared_ptr<DecisionTreeNode> childNodePtr = std::make_shared<DecisionTreeNode>(childNode);
+                    node->AddChildLink(childNodePtr);
+                    recursiveDescent(childNode);
+                }
+                else if (_debug3) {
+                    cout << "\nRD21 This child will NOT result in a node" << endl;
+                }
+            }
+        }
+    }
+    else {
+        if (_debug3) {
+            cout << "\nRD22 REACHED LEAF NODE NATURALLY for: " << featuresAndValuesOrThresholdsOnBranch << endl;
+        }
+    }
 }
 
 BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &featuresAndValuesOrThresholdsOnBranch,
@@ -1154,11 +1291,11 @@ double DecisionTree::EntropyForThresholdForFeature(const vector<string> &arrayOf
 }
 
 /**
- * @brief Calculates the entropy of a class for a given feature when the feature's value is less than a specified
- * threshold.
+ * @brief Calculates the entropy of a class for a given feature when the feature's value is less than a
+ * specified threshold.
  *
- * @param arrayOfFeaturesAndValuesOrThresholds A vector containing the features and their corresponding values or
- * thresholds.
+ * @param arrayOfFeaturesAndValuesOrThresholds A vector containing the features and their corresponding values
+ * or thresholds.
  * @param feature The feature for which the entropy is to be calculated.
  * @param threshold The threshold value to compare the feature's value against.
  * @return The entropy of the class for the given feature when its value is less than the specified threshold.
@@ -1170,18 +1307,19 @@ double DecisionTree::classEntropyForLessThanThresholdForFeature(
 }
 
 /**
- * @brief Calculates the entropy of a class for a given feature when the feature's value is greater than a specified
- * threshold.
+ * @brief Calculates the entropy of a class for a given feature when the feature's value is greater than a
+ * specified threshold.
  *
- * This function computes the entropy for a specific feature in the dataset when the feature's value is greater than
- * the provided threshold. It utilizes the EntropyForThresholdForFeature function with the ">" operator to determine
- * the entropy.
+ * This function computes the entropy for a specific feature in the dataset when the feature's value is greater
+ * than the provided threshold. It utilizes the EntropyForThresholdForFeature function with the ">" operator to
+ * determine the entropy.
  *
- * @param arrayOfFeaturesAndValuesOrThresholds A vector of strings representing the features and their corresponding
- * values or thresholds.
+ * @param arrayOfFeaturesAndValuesOrThresholds A vector of strings representing the features and their
+ * corresponding values or thresholds.
  * @param feature The feature for which the entropy is to be calculated.
  * @param threshold The threshold value for the feature.
- * @return The entropy of the class for the given feature when the feature's value is greater than the threshold.
+ * @return The entropy of the class for the given feature when the feature's value is greater than the
+ * threshold.
  */
 double DecisionTree::classEntropyForGreaterThanThresholdForFeature(
     const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &feature, const double &threshold)
@@ -1197,8 +1335,8 @@ double DecisionTree::classEntropyForGreaterThanThresholdForFeature(
  * if the entropy for the sequence is already cached. If cached, it returns the cached value.
  * Otherwise, it calculates the entropy for each class and caches the result.
  *
- * @param arrayOfFeaturesAndValuesOrThresholds A vector of strings representing the sequence of features and values
- * or thresholds.
+ * @param arrayOfFeaturesAndValuesOrThresholds A vector of strings representing the sequence of features and
+ * values or thresholds.
  * @return The calculated entropy for the given sequence.
  */
 double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
@@ -1725,9 +1863,9 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
             // Calculate the total count
             int totalCount = std::accumulate(valueCounts.begin(), valueCounts.end(), 0);
             if (totalCount == 0) {
-                throw std::runtime_error(
-                    "PFVC2 Something is wrong with your training file. It contains no training samples for Class " +
-                    className + " and Feature " + feature);
+                throw std::runtime_error("PFVC2 Something is wrong with your training file. It contains no "
+                                         "training samples for Class " +
+                                         className + " and Feature " + feature);
             }
 
             // Normalize and cache probabilities
@@ -2041,8 +2179,8 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
 double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
     const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &className)
 {
-    // This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array of
-    // branch features and thresholds. The symbolic types should be expressed as 'feature=value' constructs.
+    // This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array
+    // of branch features and thresholds. The symbolic types should be expressed as 'feature=value' constructs.
 
     if (arrayOfFeaturesAndValuesOrThresholds.size() == 0) {
         return std::nan("");
