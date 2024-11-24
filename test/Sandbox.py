@@ -15,7 +15,6 @@ dtree.calculate_first_order_probabilities()
 # dtree.determine_data_condition()
 
 # root_node = dtree.construct_decision_tree_classifier()
-print(dtree.best_feature_calculator([], 0.9580420222262995))
 
 # test_sample = ['exercising=never', 'smoking=heavy', 'fatIntake=heavy', 'videoAddiction=heavy']
 # classification = dtree.classify(root_node, test_sample)
@@ -37,6 +36,7 @@ dtreeN.calculate_first_order_probabilities()
 dtreeN.calculate_class_priors()
 
 # root_nodeN = dtreeN.construct_decision_tree_classifier()
+print(dtreeN.best_feature_calculator(['"grade"=2.0', '"gleason"=4.0', '"g2">3.840000000000012', '"age"<49.0', '"g2">13.440000000000092', '"g2">17.04000000000012'], 0.015275967002314993))
 
 # test_sampleN = ["pgtime=6.1","pgstat=1","age=70","eet=1","g2=11.7","grade=3","gleason=8","ploidy=diplooid"]
 # classificationN = dtreeN.classify(root_nodeN, test_sampleN)

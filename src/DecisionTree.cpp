@@ -676,7 +676,6 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
             symbolicFeaturesAlreadyUsed.push_back(match[1].str());
         }
     }
-
     vector<string> trueNumericTypes;
     vector<string> symbolicTypes;
     vector<string> trueNumericTypesFeatureNames;
@@ -686,15 +685,15 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
     for (const auto &item : featuresAndValuesOrThresholdsOnBranch) {
         std::smatch match;
         if (std::regex_search(item, match, pattern2)) {
-            trueNumericTypes.push_back(match[1].str()); // Might not be right
+            trueNumericTypes.push_back(item);
             trueNumericTypesFeatureNames.push_back(match[1].str());
         }
         else if (std::regex_search(item, match, pattern3)) {
-            trueNumericTypes.push_back(match[1].str()); // Might not be right
+            trueNumericTypes.push_back(item);
             trueNumericTypesFeatureNames.push_back(match[1].str());
         }
-        else {
-            symbolicTypes.push_back(match[1].str());
+        else if (std::regex_search(item, match, pattern1)) {
+            symbolicTypes.push_back(item);
             symbolicTypesFeatureNames.push_back(match[1].str());
         }
     }
@@ -754,7 +753,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
         // Check if the feature is numeric and exceeds the symbolic-to-numeric cardinality threshold
         if (_numericFeaturesValueRangeDict.find(featureName) != _numericFeaturesValueRangeDict.end() &&
             _featureValuesHowManyUniquesDict[featureName] > _symbolicToNumericCardinalityThreshold) {
-
+            cout << "here2" << endl;
             // Get the sampling points for the numeric feature
             const auto &values = _samplingPointsForNumericFeatureDict[featureName];
             if (_debug3) {
@@ -764,7 +763,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
                 std::cout << "]\n";
             }
 
-            std::vector<double> newValues;
+            vector<double> newValues;
 
             // Check if the feature is in true numeric types and filter values within bounds
             if (std::find(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end(), featureName) !=
@@ -812,8 +811,53 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
                 // Skip if no valid values are found
                 continue;
             }
+
+            vector<double> partitioningEntropies;
+
+            for (const auto &value : newValues) {
+                string featureAndLessThanValueString    = featureName + "<" + formatDouble(value);
+                string featureAndGreaterThanValueString = featureName + ">" + formatDouble(value);
+                vector<string> forLeftChild;
+                vector<string> forRightChild;
+                if (!featuresAndValuesOrThresholdsOnBranch.empty()) {
+                    forLeftChild = deepCopy(featuresAndValuesOrThresholdsOnBranch);
+                    forLeftChild.push_back(featureAndLessThanValueString);
+                    forRightChild = deepCopy(featuresAndValuesOrThresholdsOnBranch);
+                    forRightChild.push_back(featureAndGreaterThanValueString);
+                }
+                else {
+                    forLeftChild  = {featureAndLessThanValueString};
+                    forRightChild = {featureAndGreaterThanValueString};
+                }
+
+                // MARK: Entropies are different, cant figure out why
+                double entropy1 = classEntropyForLessThanThresholdForFeature(
+                    featuresAndValuesOrThresholdsOnBranch, featureName, value);
+                cout << "entropy1: " << entropy1 << endl;
+                double entropy2 = classEntropyForGreaterThanThresholdForFeature(
+                    featuresAndValuesOrThresholdsOnBranch, featureName, value);
+                cout << "entropy2: " << entropy2 << endl;
+                double partitioningEntropy =
+                    entropy1 * probabilityOfASequenceOfFeaturesAndValuesOrThresholds(forLeftChild) +
+                    entropy2 * probabilityOfASequenceOfFeaturesAndValuesOrThresholds(forRightChild);
+
+                partitioningEntropies.push_back(partitioningEntropy);
+                partitioningPointChildEntropiesDict[featureName][value] = {entropy1, entropy2};
+            }
+
+            double minEntropy = *std::min_element(partitioningEntropies.begin(), partitioningEntropies.end());
+            int bestPartitioningPointIndex =
+                std::distance(partitioningEntropies.begin(),
+                              std::min_element(partitioningEntropies.begin(), partitioningEntropies.end()));
+
+            if (minEntropy < existingNodeEntropy) {
+                cout << minEntropy << " < " << existingNodeEntropy << endl;
+                entropyValuesForDifferentFeatures[featureName] = minEntropy;
+                partitioningPointThreshold[featureName]        = newValues[bestPartitioningPointIndex];
+            }
         }
         else {
+            cout << "here3" << endl;
             if (_debug3) {
                 std::cout << "\nBFC3 Best feature calculator: Entering section reserved for symbolic features";
                 cout << "\nBFC4 Feature name: " << featureName;
@@ -865,6 +909,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
             }
 
             if (entropy < existingNodeEntropy) {
+                cout << entropy << " < " << existingNodeEntropy << endl;
                 entropyValuesForDifferentFeatures[featureName] = entropy;
             }
         }
@@ -873,10 +918,81 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
     double minEntropyForBestFeature = std::numeric_limits<double>::max();
     string bestFeatureName;
 
-    // MARK: Correct up to here for symbolic
+    for (const auto &featureNom : entropyValuesForDifferentFeatures) {
+        cout << featureNom.first << ": " << featureNom.second << endl;
+    }
 
+    for (const auto &featureNom : entropyValuesForDifferentFeatures) {
+        // cout << featureNom.first << ": " << featureNom.second << " < " << minEntropyForBestFeature << ": " <<
+        // (featureNom.second < minEntropyForBestFeature ? "true" : "false") << endl;
+        if (bestFeatureName == "" || featureNom.second < minEntropyForBestFeature) {
+            // cout << "bestFeatureName: " << bestFeatureName << endl;
+            // cout << "featureNom.second: " << featureNom.second << endl;
+            // cout << "minEntropyForBestFeature: " << minEntropyForBestFeature << endl;
+            minEntropyForBestFeature = featureNom.second;
+            bestFeatureName          = featureNom.first;
+        }
+    }
 
-    return {"bestFeatureName", 0.0, {}, 0};
+    std::optional<double> thresholdForBestFeature;
+    // If best feature name is in partioning point threshold, return the threshold
+    if (partitioningPointThreshold.find(bestFeatureName) != partitioningPointThreshold.end()) {
+        if (partitioningPointThreshold[bestFeatureName].has_value()) {
+            thresholdForBestFeature = partitioningPointThreshold[bestFeatureName].value();
+        }
+        else {
+            thresholdForBestFeature = nullopt;
+        }
+    }
+    else {
+        thresholdForBestFeature = nullopt;
+    }
+
+    double bestFeatureEntropy = minEntropyForBestFeature;
+    std::optional<pair<double, double>> valBasedEntropiesToBeReturned;
+    std::optional<double> decisionValToBeReturned;
+
+    if (_numericFeaturesValueRangeDict.find(bestFeatureName) != _numericFeaturesValueRangeDict.end() &&
+        _featureValuesHowManyUniquesDict[bestFeatureName] > _symbolicToNumericCardinalityThreshold) {
+        if (thresholdForBestFeature.has_value()) {
+            valBasedEntropiesToBeReturned =
+                partitioningPointChildEntropiesDict[bestFeatureName][thresholdForBestFeature.value()];
+            decisionValToBeReturned = thresholdForBestFeature;
+        }
+        else {
+            valBasedEntropiesToBeReturned = nullopt;
+        }
+
+        decisionValToBeReturned = thresholdForBestFeature;
+    }
+    else {
+        valBasedEntropiesToBeReturned = nullopt;
+    }
+
+    if (partitioningPointThreshold.find(bestFeatureName) != partitioningPointThreshold.end()) {
+        if (partitioningPointThreshold[bestFeatureName].has_value()) {
+            decisionValToBeReturned = partitioningPointThreshold[bestFeatureName].value();
+        }
+        else {
+            decisionValToBeReturned = nullopt;
+        }
+    }
+    else {
+        decisionValToBeReturned = nullopt;
+    }
+
+    if (_debug3) {
+        cout << "\nBFC8 Val based entropies to be returned for feature " << bestFeatureName << "are ";
+        if (valBasedEntropiesToBeReturned.has_value()) {
+            cout << valBasedEntropiesToBeReturned.value().first << " and "
+                 << valBasedEntropiesToBeReturned.value().second;
+        }
+        else {
+            cout << "None";
+        }
+    }
+
+    return {bestFeatureName, bestFeatureEntropy, valBasedEntropiesToBeReturned, decisionValToBeReturned};
 }
 
 //--------------- Entropy Calculators ----------------//
@@ -1002,7 +1118,7 @@ double DecisionTree::EntropyForThresholdForFeature(const vector<string> &arrayOf
     }
 
     // make a copy of the array of features and values or thresholds
-    vector<string> arrayOfFeaturesAndValuesOrThresholdsCopy = arrayOfFeaturesAndValuesOrThresholds;
+    vector<string> arrayOfFeaturesAndValuesOrThresholdsCopy = deepCopy(arrayOfFeaturesAndValuesOrThresholds);
     arrayOfFeaturesAndValuesOrThresholdsCopy.push_back(featureThresholdCombo);
 
     // Calculate the entropy for the sequence
@@ -1013,12 +1129,18 @@ double DecisionTree::EntropyForThresholdForFeature(const vector<string> &arrayOf
         double logProb = 0.0;
         double prob    = probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
             className, arrayOfFeaturesAndValuesOrThresholdsCopy);
-        if (prob >= .0001 && prob <= .999) {
+        if (prob >= 0.0001 && prob <= 0.999) {
             logProb = std::log2(prob);
         }
-        else {
+        else if (prob < 0.0001 || prob > 0.999) {
             logProb = 0.0;
         }
+
+        if (entropy == 0.0) {
+            entropy = -1.0 * prob * logProb;
+            continue;
+        }
+
         entropy += -1.0 * prob * logProb;
     }
 
