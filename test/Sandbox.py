@@ -36,7 +36,7 @@ dtreeN.calculate_first_order_probabilities()
 dtreeN.calculate_class_priors()
 
 # root_nodeN = dtreeN.construct_decision_tree_classifier()
-print(dtreeN.best_feature_calculator(['"grade"=2.0', '"gleason"=4.0', '"g2">3.840000000000012', '"age"<49.0', '"g2">13.440000000000092', '"g2">17.04000000000012'], 0.015275967002314993))
+print(dtreeN.best_feature_calculator(['"grade"=2.0', '"gleason"=4.0', '"g2"<3.840000000000012'], 0.07170446042023888))
 
 # test_sampleN = ["pgtime=6.1", "pgstat=1", "age=70", "eet=1",
 #                 "g2=11.7", "grade=3", "gleason=8", "ploidy=diplooid"]

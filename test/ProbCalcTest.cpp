@@ -321,7 +321,7 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
     ASSERT_NEAR(prob0, 0.019, 0.001);
     double prob1 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
         {"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "age>51.0"}, "0");
-    ASSERT_NEAR(prob1, 0.193, 0.001);
+    ASSERT_NEAR(prob1, 0.195, 0.001);
     double prob2 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
         {"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=aneuploid"}, "0");
     ASSERT_NEAR(prob2, 0.008, 0.001);

@@ -96,7 +96,7 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
         feature                              = "age";
         threshold                            = 57.0;
-        expected                             = 0.02443053983169013;
+        expected                             = 0.004453027563883287;
 
         // Tests
         result =
@@ -147,6 +147,19 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
         // Assert
         ASSERT_NEAR(result, expected, Tol);
     }
+    {
+        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=4.0", "g2>3.84", "age<49", "g2>13.44", "g2>17.04"};
+        feature                              = "age";
+        threshold                            = 47.0;
+        expected                             = 0.0314;
+
+        // Tests
+        result =
+            dtN->classEntropyForLessThanThresholdForFeature(arrayOfFeaturesAndValuesOrThresholds, feature, threshold);
+
+        // Assert
+        ASSERT_NEAR(result, expected, Tol);
+    }
 }
 
 TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
@@ -175,7 +188,7 @@ TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
         feature                              = "age";
         threshold                            = 57.0;
-        expected                             = 0.01606423071045408;
+        expected                             = 0.013766658849326036;
 
         // Tests
         result = dtN->classEntropyForGreaterThanThresholdForFeature(
@@ -237,7 +250,7 @@ TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresh
     {
         // Setup Test 1
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84", "age>57.0"};
-        expected                             = 0.01606423071045408;
+        expected                             = 0.013766658849326036;
 
         // Tests
         result =

@@ -963,7 +963,6 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
                     forRightChild = {featureAndGreaterThanValueString};
                 }
 
-                // MARK: Entropies are different, cant figure out why
                 double entropy1 = classEntropyForLessThanThresholdForFeature(
                     featuresAndValuesOrThresholdsOnBranch, featureName, value);
                 double entropy2 = classEntropyForGreaterThanThresholdForFeature(
@@ -971,9 +970,6 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
                 double partitioningEntropy =
                     entropy1 * probabilityOfASequenceOfFeaturesAndValuesOrThresholds(forLeftChild) +
                     entropy2 * probabilityOfASequenceOfFeaturesAndValuesOrThresholds(forRightChild);
-
-                cout << "entropy1: " << entropy1 << endl;
-                cout << "entropy2: " << entropy2 << endl;
 
                 partitioningEntropies.push_back(partitioningEntropy);
                 partitioningPointChildEntropiesDict[featureName][value] = {entropy1, entropy2};
@@ -985,7 +981,6 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
                               std::min_element(partitioningEntropies.begin(), partitioningEntropies.end()));
 
             if (minEntropy < existingNodeEntropy) {
-                cout << "minEntropy: " << minEntropy << " < existingNodeEntropy: " << existingNodeEntropy << endl;
                 entropyValuesForDifferentFeatures[featureName] = minEntropy;
                 partitioningPointThreshold[featureName]        = newValues[bestPartitioningPointIndex];
             }
@@ -1043,7 +1038,6 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
             }
 
             if (entropy < existingNodeEntropy) {
-                cout << "entropy: " << entropy << " <  existingNodeEntropy: " << existingNodeEntropy << endl;
                 entropyValuesForDifferentFeatures[featureName] = entropy;
             }
         }
@@ -1052,13 +1046,17 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
     double minEntropyForBestFeature = std::numeric_limits<double>::max();
     string bestFeatureName;
 
+    // MARK: entropyValuesForDifferentFeatures, only age is different for the uncommented test case.
+    cout << "[";
     for (const auto &featureNom : entropyValuesForDifferentFeatures) {
-        // cout << featureNom.first << ": " << featureNom.second << " < " << minEntropyForBestFeature << ": " <<
-        // (featureNom.second < minEntropyForBestFeature ? "true" : "false") << endl;
+        cout << featureNom.first << ": " << featureNom.second << ", ";
+    }
+    cout << "]" << endl;
+
+    for (const auto &featureNom : entropyValuesForDifferentFeatures) {
+        // cout << featureNom.first << ": " << featureNom.second << " < " << minEntropyForBestFeature << ": " << 
+        //     (featureNom.second < minEntropyForBestFeature ? "true" : "false") << endl;
         if (bestFeatureName == "" || featureNom.second < minEntropyForBestFeature) {
-            // cout << "bestFeatureName: " << bestFeatureName << endl;
-            // cout << "featureNom.second: " << featureNom.second << endl;
-            // cout << "minEntropyForBestFeature: " << minEntropyForBestFeature << endl;
             minEntropyForBestFeature = featureNom.second;
             bestFeatureName          = featureNom.first;
         }
@@ -1252,7 +1250,7 @@ double DecisionTree::EntropyForThresholdForFeature(const vector<string> &arrayOf
     arrayOfFeaturesAndValuesOrThresholdsCopy.push_back(featureThresholdCombo);
 
     // Calculate the entropy for the sequence
-    double entropy = 0.0;
+    std::optional<double> entropy;
 
     // Calculate the entropy for each class
     for (const auto &className : _classNames) {
@@ -1266,21 +1264,21 @@ double DecisionTree::EntropyForThresholdForFeature(const vector<string> &arrayOf
             logProb = 0.0;
         }
 
-        if (entropy == 0.0) {
+        if (!entropy.has_value()) {
             entropy = -1.0 * prob * logProb;
             continue;
         }
 
-        entropy += -1.0 * prob * logProb;
+        entropy.value() += -1.0 * prob * logProb;
     }
 
     // check floating point precision
-    if (std::abs(entropy) < 0.0000001) {
+    if (std::abs(entropy.value()) < 0.0000001) {
         entropy = 0.0;
     }
     // cache the result
-    _entropyCache[sequence] = entropy;
-    return entropy;
+    _entropyCache[sequence] = entropy.value();
+    return entropy.value();
 }
 
 /**
@@ -2228,11 +2226,15 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
         }
     }
 
-    // Remove duplicates from feature names in-place
-    trueNumericTypesFeatureNames.erase(unique(trueNumericTypesFeatureNames.begin(), trueNumericTypesFeatureNames.end()),
-                                       trueNumericTypesFeatureNames.end());
-    symbolicTypesFeatureNames.erase(unique(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end()),
-                                    symbolicTypesFeatureNames.end());
+    // Remove duplicates from feature names in-place by converting to a set and back to a vector
+    set<string> trueNumericTypesFeatureNamesSet(trueNumericTypesFeatureNames.begin(),
+                                               trueNumericTypesFeatureNames.end());
+    trueNumericTypesFeatureNames.assign(trueNumericTypesFeatureNamesSet.begin(), trueNumericTypesFeatureNamesSet.end());
+    
+    set<string> symbolicTypesFeatureNamesSet(symbolicTypesFeatureNames.begin(), symbolicTypesFeatureNames.end());
+        symbolicTypesFeatureNames.assign(symbolicTypesFeatureNamesSet.begin(), symbolicTypesFeatureNamesSet.end());
+    
+    
     vector<vector<string>> boundedIntervalsNumericTypes = findBoundedIntervalsForNumericFeatures(trueNumericTypes);
 
     // Calculate the upper and the lower bounds to be used when searching for the best
@@ -2266,42 +2268,40 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
             else {
                 if (!probability) {
                     probability = probabilityOfFeatureLessThanThresholdGivenClass(
-                                      featureName, std::to_string(upperBound[featureName]), className) -
+                                      featureName, formatDouble(upperBound[featureName]), className) -
                                   probabilityOfFeatureLessThanThresholdGivenClass(
-                                      featureName, std::to_string(lowerBound[featureName]), className);
+                                      featureName, formatDouble(lowerBound[featureName]), className);
                 }
                 else {
                     probability *= (probabilityOfFeatureLessThanThresholdGivenClass(
-                                        featureName, std::to_string(upperBound[featureName]), className) -
+                                        featureName, formatDouble(upperBound[featureName]), className) -
                                     probabilityOfFeatureLessThanThresholdGivenClass(
-                                        featureName, std::to_string(lowerBound[featureName]), className));
+                                        featureName, formatDouble(lowerBound[featureName]), className));
                 }
             }
         }
         // If the feature has only an upper bound
         else if (upperBound[featureName] != std::numeric_limits<double>::min() &&
                  lowerBound[featureName] == std::numeric_limits<double>::max()) {
-
             if (!probability) {
                 probability = probabilityOfFeatureLessThanThresholdGivenClass(
-                    featureName, std::to_string(upperBound[featureName]), className);
+                    featureName, formatDouble(upperBound[featureName]), className);
             }
             else {
                 probability *= probabilityOfFeatureLessThanThresholdGivenClass(
-                    featureName, std::to_string(upperBound[featureName]), className);
+                    featureName, formatDouble(upperBound[featureName]), className);
             }
         }
         // If the feature has only a lower bound
         else if (lowerBound[featureName] != std::numeric_limits<double>::max() &&
                  upperBound[featureName] == std::numeric_limits<double>::min()) {
-
             if (!probability) {
                 probability = 1.0 - probabilityOfFeatureLessThanThresholdGivenClass(
-                                        featureName, std::to_string(lowerBound[featureName]), className);
+                                        featureName, formatDouble(lowerBound[featureName]), className);
             }
             else {
                 probability *= (1.0 - probabilityOfFeatureLessThanThresholdGivenClass(
-                                          featureName, std::to_string(lowerBound[featureName]), className));
+                                          featureName, formatDouble(lowerBound[featureName]), className));
             }
         }
         else {
@@ -2342,6 +2342,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
             sequence += item;
         }
     }
+
     string classAndSequence = className + "::" + sequence;
 
     // Check if the probability is already cached
@@ -2352,7 +2353,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
     // Calculate the probability
     vector<double> arrayOfClassProbabilities = vector<double>(_classNames.size(), 0.0);
 
-    for (size_t i = 0; i < _classNames.size(); ++i) {
+    for (size_t i = 0; i < _classNames.size(); i++) {
         string currentClassName = _classNames[i];
         double probability      = probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
             arrayOfFeaturesAndValuesOrThresholds, currentClassName);
