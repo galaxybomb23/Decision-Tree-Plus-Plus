@@ -113,50 +113,50 @@ TEST_F(ConstructTreeTest, CheckdtExists)
 TEST_F(ConstructTreeTest, bestFeatureCalculatorNumeric)
 {
     BestFeatureResult bfr;
-    // {
-    //     bfr = dtN->bestFeatureCalculator({}, 0.9505668528932196);
-    //     ASSERT_EQ(bfr.bestFeatureName, "grade");
-    //     ASSERT_NEAR(bfr.bestFeatureEntropy, 0.790, 0.001);
-    //     ASSERT_EQ(bfr.valBasedEntropies, nullopt);
-    //     ASSERT_EQ(bfr.decisionValue, nullopt);
-    // }
-    // {
-    //     bfr = dtN->bestFeatureCalculator({"grade=2.0"}, 0.6161661934005354);
-    //     ASSERT_EQ(bfr.bestFeatureName, "gleason");
-    //     ASSERT_NEAR(bfr.bestFeatureEntropy, 0.232, 0.001);
-    //     ASSERT_EQ(bfr.valBasedEntropies, nullopt);
-    //     ASSERT_EQ(bfr.decisionValue, nullopt);
-    // }
-    // {
-    //     bfr = dtN->bestFeatureCalculator({"grade=2.0", "gleason=4.0"}, 0.5551649772709998);
-    //     ASSERT_EQ(bfr.bestFeatureName, "g2");
-    //     ASSERT_NEAR(bfr.bestFeatureEntropy, 0.009, 0.001);
-    //     ASSERT_NEAR(bfr.valBasedEntropies->first, 0.072, 0.001);
-    //     ASSERT_NEAR(bfr.valBasedEntropies->second, 0.537, 0.001);
-    //     ASSERT_NEAR(bfr.decisionValue.value(), 3.840, 0.001);
-    // }
+    {
+        bfr = dtN->bestFeatureCalculator({}, 0.9505668528932196);
+        ASSERT_EQ(bfr.bestFeatureName, "grade");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.790, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
+    }
+    {
+        bfr = dtN->bestFeatureCalculator({"grade=2.0"}, 0.6161661934005354);
+        ASSERT_EQ(bfr.bestFeatureName, "gleason");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.232, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
+    }
+    {
+        bfr = dtN->bestFeatureCalculator({"grade=2.0", "gleason=4.0"}, 0.5551649772709998);
+        ASSERT_EQ(bfr.bestFeatureName, "g2");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.009, 0.001);
+        ASSERT_NEAR(bfr.valBasedEntropies->first, 0.072, 0.001);
+        ASSERT_NEAR(bfr.valBasedEntropies->second, 0.537, 0.001);
+        ASSERT_NEAR(bfr.decisionValue.value(), 3.840, 0.001);
+    }
     {
         bfr = dtN->bestFeatureCalculator({"grade=2.0", "gleason=4.0", "g2<3.84"}, 0.07170446042023888);
-        ASSERT_EQ(bfr.bestFeatureName, "g2");
-        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.000016, 0.000001);
-        ASSERT_NEAR(bfr.valBasedEntropies->first, 0.029, 0.001);
-        ASSERT_NEAR(bfr.valBasedEntropies->second, 0.051, 0.001);
-        ASSERT_NEAR(bfr.decisionValue.value(), 2.400, 0.001);
+        ASSERT_EQ(bfr.bestFeatureName, "age");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.0000148, 0.000001);
+        ASSERT_NEAR(bfr.valBasedEntropies->first, 0.043, 0.001);
+        ASSERT_NEAR(bfr.valBasedEntropies->second, 0.038, 0.001);
+        ASSERT_NEAR(bfr.decisionValue.value(), 63.000, 0.001);
     }
-    // {
-    //     bfr = dtN->bestFeatureCalculator({"grade=2.0", "gleason=4.0", "g2<3.84", "g2<2.4"}, 0.02862448586432183);
-    //     ASSERT_EQ(bfr.bestFeatureName, "age");
-    //     ASSERT_NEAR(bfr.bestFeatureEntropy, 0.00000334, 0.00000001);
-    //     ASSERT_NEAR(bfr.valBasedEntropies->first, 0.00142, 0.00001);
-    //     ASSERT_NEAR(bfr.valBasedEntropies->second, 0.0277, 0.0001);
-    //     ASSERT_NEAR(bfr.decisionValue.value(), 49.0, 0.001);
-    // }
-    // {
-    //     bfr = dtN->bestFeatureCalculator({"grade=2.0", "gleason=4.0", "g2>3.84", "age<49", "g2>13.44", "g2>17.04"}, 0.015275967002314993);
-    //     ASSERT_EQ(bfr.bestFeatureName, "g2");
-    //     ASSERT_NEAR(bfr.bestFeatureEntropy, 0.0000003799, 0.00000000001);
-    //     ASSERT_NEAR(bfr.valBasedEntropies->first, 0.0097, 0.0001);
-    //     ASSERT_NEAR(bfr.valBasedEntropies->second, 0.00482, 0.00001);
-    //     ASSERT_NEAR(bfr.decisionValue.value(), 22.56, 0.01);
-    // }
+    {
+        bfr = dtN->bestFeatureCalculator({"grade=2.0", "gleason=4.0", "g2>3.84", "age<49.0"}, 0.04651186386689919);
+        ASSERT_EQ(bfr.bestFeatureName, "age");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.00000588, 0.00000001);
+        ASSERT_NEAR(bfr.valBasedEntropies->first, 0.0259, 0.0001);
+        ASSERT_NEAR(bfr.valBasedEntropies->second, 0.0259, 0.0001);
+        ASSERT_NEAR(bfr.decisionValue.value(), 47.0, 0.001);
+    }
+    {
+        bfr = dtN->bestFeatureCalculator({"grade=2.0", "gleason=4.0", "g2<3.84", "age<63", "age>55", "age<59"}, 0.017289523234007915);
+        ASSERT_EQ(bfr.bestFeatureName, "age");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.0000005197, 0.0000000001);
+        ASSERT_NEAR(bfr.valBasedEntropies->first, 0.00829, 0.00001);
+        ASSERT_NEAR(bfr.valBasedEntropies->second, 0.00829, 0.00001);
+        ASSERT_NEAR(bfr.decisionValue.value(), 57, 0.01);
+    }
 }

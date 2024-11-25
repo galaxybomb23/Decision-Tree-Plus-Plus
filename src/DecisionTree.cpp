@@ -890,7 +890,6 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
         // Check if the feature is numeric and exceeds the symbolic-to-numeric cardinality threshold
         else if (_numericFeaturesValueRangeDict.find(featureName) != _numericFeaturesValueRangeDict.end() &&
             _featureValuesHowManyUniquesDict[featureName] > _symbolicToNumericCardinalityThreshold) {
-            cout << "here2" << endl;
             // Get the sampling points for the numeric feature
             vector<double> values = _samplingPointsForNumericFeatureDict[featureName];
             if (_debug3) {
@@ -986,7 +985,6 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
             }
         }
         else {
-            cout << "here3" << endl;
             if (_debug3) {
                 std::cout << "\nBFC3 Best feature calculator: Entering section reserved for symbolic features";
                 cout << "\nBFC4 Feature name: " << featureName;
@@ -1046,16 +1044,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
     double minEntropyForBestFeature = std::numeric_limits<double>::max();
     string bestFeatureName;
 
-    // MARK: entropyValuesForDifferentFeatures, only age is different for the uncommented test case.
-    cout << "[";
     for (const auto &featureNom : entropyValuesForDifferentFeatures) {
-        cout << featureNom.first << ": " << featureNom.second << ", ";
-    }
-    cout << "]" << endl;
-
-    for (const auto &featureNom : entropyValuesForDifferentFeatures) {
-        // cout << featureNom.first << ": " << featureNom.second << " < " << minEntropyForBestFeature << ": " << 
-        //     (featureNom.second < minEntropyForBestFeature ? "true" : "false") << endl;
         if (bestFeatureName == "" || featureNom.second < minEntropyForBestFeature) {
             minEntropyForBestFeature = featureNom.second;
             bestFeatureName          = featureNom.first;
