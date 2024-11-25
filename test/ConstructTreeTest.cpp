@@ -1,9 +1,9 @@
-#include <gtest/gtest.h>
 #include "DecisionTree.hpp"
 
-class ConstructTreeTest : public ::testing::Test
-{
-    protected:
+#include <gtest/gtest.h>
+
+class ConstructTreeTest : public ::testing::Test {
+  protected:
     std::unique_ptr<DecisionTree> dtS; // Symbolic DecisionTree
     std::unique_ptr<DecisionTree> dtN; // Numeric DecisionTree
     void SetUp() override
@@ -74,11 +74,9 @@ TEST_F(ConstructTreeTest, CheckdtExists)
 //         ASSERT_EQ(bfr.decisionValue, nullopt);
 //     }
 //     {
-//         bfr = dtS->bestFeatureCalculator({"fatIntake=heavy", "smoking=heavy", "videoAddiction=heavy"}, 0.16223190039782087);
-//         ASSERT_EQ(bfr.bestFeatureName, "exercising");
-//         ASSERT_NEAR(bfr.bestFeatureEntropy, 0.014, 0.001);
-//         ASSERT_EQ(bfr.valBasedEntropies, nullopt);
-//         ASSERT_EQ(bfr.decisionValue, nullopt);
+//         bfr = dtS->bestFeatureCalculator({"fatIntake=heavy", "smoking=heavy", "videoAddiction=heavy"},
+//         0.16223190039782087); ASSERT_EQ(bfr.bestFeatureName, "exercising"); ASSERT_NEAR(bfr.bestFeatureEntropy,
+//         0.014, 0.001); ASSERT_EQ(bfr.valBasedEntropies, nullopt); ASSERT_EQ(bfr.decisionValue, nullopt);
 //     }
 //     {
 //         bfr = dtS->bestFeatureCalculator({"fatIntake=low"}, 0.5032583347756457);
@@ -152,11 +150,28 @@ TEST_F(ConstructTreeTest, bestFeatureCalculatorNumeric)
         ASSERT_NEAR(bfr.decisionValue.value(), 47.0, 0.001);
     }
     {
-        bfr = dtN->bestFeatureCalculator({"grade=2.0", "gleason=4.0", "g2<3.84", "age<63", "age>55", "age<59"}, 0.017289523234007915);
+        bfr = dtN->bestFeatureCalculator({"grade=2.0", "gleason=4.0", "g2<3.84", "age<63", "age>55", "age<59"},
+                                         0.017289523234007915);
         ASSERT_EQ(bfr.bestFeatureName, "age");
         ASSERT_NEAR(bfr.bestFeatureEntropy, 0.0000005197, 0.0000000001);
         ASSERT_NEAR(bfr.valBasedEntropies->first, 0.00829, 0.00001);
         ASSERT_NEAR(bfr.valBasedEntropies->second, 0.00829, 0.00001);
         ASSERT_NEAR(bfr.decisionValue.value(), 57, 0.01);
     }
+}
+
+TEST_F(ConstructTreeTest, constructDecisionTreeClassifier)
+{
+    // construst Trees
+    DecisionTreeNode* rootS = dtS->constructDecisionTreeClassifier();
+    DecisionTreeNode* rootN = dtN->constructDecisionTreeClassifier();
+
+
+    // display Trees
+    rootS->DisplayDecisionTree(" ");
+    rootN->DisplayDecisionTree(" ");
+
+    // check if root is not null
+    ASSERT_NE(rootS, nullptr);
+    ASSERT_NE(rootN, nullptr);
 }

@@ -10,17 +10,23 @@ dtree = dt.DecisionTree(training_datafile="test/resources/training_symbolic.csv"
                         )
 
 dtree.get_training_data()
-# dtree.calculate_class_priors()
-# dtree.calculate_first_order_probabilities()
+dtree.calculate_class_priors()
+dtree.calculate_first_order_probabilities()
 # dtree.determine_data_condition()
 
-# root_node = dtree.construct_decision_tree_classifier()
+root_node = dtree.construct_decision_tree_classifier()
+# /***************************/ Recusrive Descent /***************************/
+# SYMBOLIC
+# dtree._debug3 = True  # needed for recursive_descent bc void function
+# dtree.recursive_descent(root_node)
+# print(f"SYMBOLIC TREE: {dtree.rc}")  # 20
 
 # test_sample = ['exercising=never', 'smoking=heavy', 'fatIntake=heavy', 'videoAddiction=heavy']
 # classification = dtree.classify(root_node, test_sample)
 # print("Classification: " + str(classification))
 
 # NUMERIC TREE #
+print(f"NUMERIC TREE")
 dtreeN = dt.DecisionTree(
     training_datafile="test/resources/stage3cancer.csv",
     csv_class_column_index=2,
@@ -37,6 +43,16 @@ dtreeN.calculate_class_priors()
 
 root_nodeN = dtreeN.construct_decision_tree_classifier()
 
+# /***************************/ Recusrive Descent /***************************/
+# NUMERIC
+root_nodeN.display_decision_tree("   ")
+# dtreeN._debug3 = True  # needed for recursive_descent bc void function
+dtreeN.recursive_descent(root_nodeN)
+input("Press Enter to continue...")
+root_nodeN.display_decision_tree("   ")
+print(f"NUMERIC TREE: {dtreeN.rc}")  # 56
+
+# /***************************/ CLASSIFY /***************************/
 # test_sampleN = ["pgtime=6.1", "pgstat=1", "age=70", "eet=1",
 #                 "g2=11.7", "grade=3", "gleason=8", "ploidy=diplooid"]
 # classificationN = dtreeN.classify(root_nodeN, test_sampleN)

@@ -16,13 +16,15 @@ using namespace std;
 
 class DecisionTreeNode {
   public:
-    DecisionTreeNode(DecisionTree &dt); // Constructor
+    // MARK: figure out whats going on with Node ptrs
+    DecisionTreeNode(DecisionTree* dt); // Constructor
 
+    // MARK: figure out whats going on with Node ptrs
     DecisionTreeNode(const std::string &feature,
                      double entropy,
                      const std::vector<double> &class_probabilities,
                      const std::vector<string> &branch_features_and_values_or_thresholds,
-                     DecisionTree &dt,
+                     DecisionTree* dt,
                      const bool isRoot);
     ~DecisionTreeNode(); // Destructor
 
@@ -52,7 +54,8 @@ class DecisionTreeNode {
 
   private:
     // Private members
-    DecisionTree &_dt; // by reference may be a problem later
+    // MARK: figure out whats going on with Node ptrs
+    DecisionTree* _dt;
     int _serialNumber;
     string _feature;
     double _nodeCreationEntropy;

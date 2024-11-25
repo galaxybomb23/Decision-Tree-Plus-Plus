@@ -5,9 +5,9 @@
 #include "DecisionTreeNode.hpp"
 
 #include <iostream>
-#include <optional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -17,16 +17,16 @@ using std::string, std::vector, std::map;
 /**
  * @struct BestFeatureResult
  * @brief A structure to hold the result of the best feature selection in a decision tree algorithm.
- * 
+ *
  * This structure contains information about the best feature selected during the decision tree
  * construction process, including the feature's name, its entropy, the entropies based on its values,
  * and the decision value.
  */
 struct BestFeatureResult {
-  std::string bestFeatureName;
-  double bestFeatureEntropy;
-  std::optional<std::pair<double, double>> valBasedEntropies;
-  std::optional<double> decisionValue;
+    std::string bestFeatureName;
+    double bestFeatureEntropy;
+    std::optional<std::pair<double, double>> valBasedEntropies;
+    std::optional<double> decisionValue;
 };
 
 class DecisionTreeNode;
@@ -49,11 +49,10 @@ class DecisionTree {
 
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();
+    // MARK: figure out whats going on with Node ptrs
     void recursiveDescent(DecisionTreeNode* node);
-    BestFeatureResult bestFeatureCalculator(
-      const std::vector<std::string>& featuresAndValuesOrThresholdsOnBranch, 
-      double existingNodeEntropy
-    );
+    BestFeatureResult bestFeatureCalculator(const std::vector<std::string> &featuresAndValuesOrThresholdsOnBranch,
+                                            double existingNodeEntropy);
 
     //--------------- Entropy Calculators ----------------//
     double classEntropyOnPriors();
@@ -160,7 +159,6 @@ class DecisionTree {
     map<string, double> _histogramDeltaDict;
     map<string, int> _numOfHistogramBinsDict;
 };
-
 
 
 #endif // DECISION_TREE_HPP
