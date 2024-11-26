@@ -130,6 +130,7 @@ class DecisionTree {
     void setDebug3(int debug3);
     void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
     void setRootNode(std::unique_ptr<DecisionTreeNode> rootNode);
+    void setClassNames(const vector<string> &classNames);
 
   private:
     string _trainingDatafile;

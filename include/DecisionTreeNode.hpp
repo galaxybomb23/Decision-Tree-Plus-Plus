@@ -28,7 +28,10 @@ class DecisionTreeNode {
                      const bool isRoot);
     ~DecisionTreeNode(); // Destructor
 
-    int HowManyNodes();
+    // Copy constructor
+    DecisionTreeNode(const DecisionTreeNode &other);
+
+    int HowManyNodes() const;
 
     // Getters
     vector<string> GetClassNames() const;

@@ -39,10 +39,33 @@ DecisionTreeNode::DecisionTreeNode(DecisionTree* dt) : _dt(dt)
     _serialNumber                        = GetNextSerialNum();
 }
 
+DecisionTreeNode::DecisionTreeNode(const DecisionTreeNode& other)
+    : _feature(other._feature),
+      _nodeCreationEntropy(other._nodeCreationEntropy),
+      _classProbabilities(other._classProbabilities),
+      _branchFeaturesAndValuesOrThresholds(other._branchFeaturesAndValuesOrThresholds),
+      _dt(other._dt),
+      _serialNumber(other._serialNumber) {
+    // Copy children
+    for (const auto &child : other._linkedTo) {
+        shared_ptr<DecisionTreeNode> newChild = make_shared<DecisionTreeNode>(*child);
+        _linkedTo.push_back(newChild);
+    }
+
+    // Copy class names
+    _dt->setClassNames(other.GetClassNames());
+
+    // Update the number of nodes created
+    _dt->_nodesCreated = other.HowManyNodes();
+
+    // Update the serial number
+    _serialNumber = GetNextSerialNum();
+}
+
 DecisionTreeNode::~DecisionTreeNode() {}
 
 // Other functions below
-int DecisionTreeNode::HowManyNodes()
+int DecisionTreeNode::HowManyNodes() const
 {
     return _dt->_nodesCreated + 1; // placeholder
 }
