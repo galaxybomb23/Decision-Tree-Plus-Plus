@@ -30,8 +30,9 @@ struct BestFeatureResult {
 };
 
 class DecisionTreeNode;
-class DecisionTree {
+class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
   public:
+    std::shared_ptr<DecisionTree> getShared() { return shared_from_this(); }
     //--------------- Constructors and Destructors ----------------//
     DecisionTree(map<string, string> kwargs); // constructor
     ~DecisionTree();                          // destructor

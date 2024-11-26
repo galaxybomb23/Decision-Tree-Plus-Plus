@@ -14,8 +14,8 @@ std::ostream &operator<<(std::ostream &os, const std::vector<std::string> &vec)
 DecisionTreeNode::DecisionTreeNode(const std::string &feature,
                                    double entropy,
                                    const std::vector<double> &class_probabilities,
-                                   const std::vector<string> &branch_features_and_values_or_thresholds,
-                                   DecisionTree* dt,
+                                   const std::vector<std::string> &branch_features_and_values_or_thresholds,
+                                   std::shared_ptr<DecisionTree> dt,
                                    const bool isRoot)
     : _dt(dt),
       _feature(feature),
@@ -23,14 +23,22 @@ DecisionTreeNode::DecisionTreeNode(const std::string &feature,
       _classProbabilities(class_probabilities),
       _branchFeaturesAndValuesOrThresholds(branch_features_and_values_or_thresholds)
 {
-    if (isRoot) {
-        _dt->_nodesCreated = -1;
-        _dt->_classNames.clear();
+    // Lock the weak pointer once and store the shared pointer
+    auto tree = _dt.lock();
+    if (!tree) {
+        throw std::runtime_error("DecisionTree pointer is invalid");
     }
+
+    if (isRoot) {
+        tree->_nodesCreated = -1;
+        tree->_classNames.clear();
+    }
+
     _serialNumber = GetNextSerialNum();
 }
 
-DecisionTreeNode::DecisionTreeNode(DecisionTree* dt) : _dt(dt)
+
+DecisionTreeNode::DecisionTreeNode(std::shared_ptr<DecisionTree> dt) : _dt((dt))
 {
     _feature                             = "";
     _nodeCreationEntropy                 = 0;
@@ -39,46 +47,75 @@ DecisionTreeNode::DecisionTreeNode(DecisionTree* dt) : _dt(dt)
     _serialNumber                        = GetNextSerialNum();
 }
 
-DecisionTreeNode::DecisionTreeNode(const DecisionTreeNode& other)
+DecisionTreeNode::DecisionTreeNode(const DecisionTreeNode &other)
     : _feature(other._feature),
       _nodeCreationEntropy(other._nodeCreationEntropy),
       _classProbabilities(other._classProbabilities),
       _branchFeaturesAndValuesOrThresholds(other._branchFeaturesAndValuesOrThresholds),
       _dt(other._dt),
-      _serialNumber(other._serialNumber) {
-    // Copy children
+      _serialNumber(other._serialNumber)
+{
+    // Deep copy of children
     for (const auto &child : other._linkedTo) {
-        shared_ptr<DecisionTreeNode> newChild = make_shared<DecisionTreeNode>(*child);
-        _linkedTo.push_back(newChild);
+        _linkedTo.push_back(std::make_unique<DecisionTreeNode>(*child));
     }
-
+    auto tree = _dt.lock();
     // Copy class names
-    _dt->setClassNames(other.GetClassNames());
+    tree->_classNames = other.GetClassNames();
 
     // Update the number of nodes created
-    _dt->_nodesCreated = other.HowManyNodes();
+    tree->_nodesCreated = other.HowManyNodes();
 
     // Update the serial number
     _serialNumber = GetNextSerialNum();
 }
+DecisionTreeNode &DecisionTreeNode::operator=(const DecisionTreeNode &other)
+{
+    if (this == &other) {
+        return *this; // Handle self-assignment
+    }
+
+    // Copy all member variables from the other object
+    _dt                                  = other._dt; // Copy the weak_ptr (safe to copy)
+    _feature                             = other._feature;
+    _nodeCreationEntropy                 = other._nodeCreationEntropy;
+    _classProbabilities                  = other._classProbabilities;
+    _branchFeaturesAndValuesOrThresholds = other._branchFeaturesAndValuesOrThresholds;
+    _serialNumber                        = other._serialNumber;
+
+    // If _linkedTo needs to be copied, ensure deep copy
+    _linkedTo.clear();
+    for (const auto &child : other._linkedTo) {
+        if (child) {
+            _linkedTo.push_back(std::make_unique<DecisionTreeNode>(*child));
+        }
+        else {
+            _linkedTo.push_back(nullptr);
+        }
+    }
+
+    return *this;
+}
+
 
 DecisionTreeNode::~DecisionTreeNode() {}
 
 // Other functions below
 int DecisionTreeNode::HowManyNodes() const
 {
-    return _dt->_nodesCreated + 1; // placeholder
+    return _dt.lock()->_nodesCreated + 1; // placeholder
 }
 
 vector<string> DecisionTreeNode::GetClassNames() const
 {
-    return _dt->_classNames;
+    return _dt.lock()->_classNames;
 }
 
 int DecisionTreeNode::GetNextSerialNum() const
 {
-    _dt->_nodesCreated++;
-    return _dt->_nodesCreated;
+    auto tree = _dt.lock();
+    tree->_nodesCreated++;
+    return tree->_nodesCreated;
 }
 
 string DecisionTreeNode::GetFeature() const
@@ -101,7 +138,7 @@ vector<string> DecisionTreeNode::GetBranchFeaturesAndValuesOrThresholds() const
     return _branchFeaturesAndValuesOrThresholds;
 }
 
-vector<shared_ptr<DecisionTreeNode>> DecisionTreeNode::GetChildren() const
+const std::vector<std::unique_ptr<DecisionTreeNode>> &DecisionTreeNode::GetChildren() const
 {
     return _linkedTo;
 }
@@ -113,7 +150,7 @@ int DecisionTreeNode::GetSerialNum() const
 
 void DecisionTreeNode::SetClassNames(const vector<string> classNames)
 {
-    _dt->setClassNames(classNames);
+    _dt.lock()->setClassNames(classNames);
 }
 
 void DecisionTreeNode::SetNodeCreationEntropy(const double entropy)
@@ -121,9 +158,9 @@ void DecisionTreeNode::SetNodeCreationEntropy(const double entropy)
     _nodeCreationEntropy = entropy;
 }
 
-void DecisionTreeNode::AddChildLink(shared_ptr<DecisionTreeNode> newNode)
+void DecisionTreeNode::AddChildLink(std::unique_ptr<DecisionTreeNode> newNode)
 {
-    _linkedTo.emplace_back(newNode);
+    _linkedTo.emplace_back(std::move(newNode));
 }
 
 void DecisionTreeNode::DeleteAllLinks()

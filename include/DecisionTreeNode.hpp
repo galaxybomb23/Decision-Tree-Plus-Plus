@@ -17,19 +17,22 @@ using namespace std;
 class DecisionTreeNode {
   public:
     // MARK: figure out whats going on with Node ptrs
-    DecisionTreeNode(DecisionTree* dt); // Constructor
+
+    explicit DecisionTreeNode(std::shared_ptr<DecisionTree> dt); // Constructor
 
     // MARK: figure out whats going on with Node ptrs
     DecisionTreeNode(const std::string &feature,
                      double entropy,
                      const std::vector<double> &class_probabilities,
-                     const std::vector<string> &branch_features_and_values_or_thresholds,
-                     DecisionTree* dt,
-                     const bool isRoot);
+                     const std::vector<std::string> &branch_features_and_values_or_thresholds,
+                     std::shared_ptr<DecisionTree> dt,
+                     bool isRoot);
+
     ~DecisionTreeNode(); // Destructor
 
     // Copy constructor
     DecisionTreeNode(const DecisionTreeNode &other);
+    DecisionTreeNode &operator=(const DecisionTreeNode &other);
 
     int HowManyNodes() const;
 
@@ -40,14 +43,14 @@ class DecisionTreeNode {
     double GetNodeEntropy() const;
     vector<double> GetClassProbabilities() const;
     vector<string> GetBranchFeaturesAndValuesOrThresholds() const;
-    vector<shared_ptr<DecisionTreeNode>> GetChildren() const;
+    const std::vector<std::unique_ptr<DecisionTreeNode>> &GetChildren() const;
     int GetSerialNum() const;
 
     // Setters
     void SetClassNames(const vector<string> classNames);
     void SetFeature(const string &feature) { _feature = feature; };
     void SetNodeCreationEntropy(const double entropy);
-    void AddChildLink(shared_ptr<DecisionTreeNode> newNode);
+    void AddChildLink(std::unique_ptr<DecisionTreeNode> newNode);
 
     void DeleteAllLinks();
 
@@ -58,13 +61,13 @@ class DecisionTreeNode {
   private:
     // Private members
     // MARK: figure out whats going on with Node ptrs
-    DecisionTree* _dt;
+    std::weak_ptr<DecisionTree> _dt;
     int _serialNumber;
     string _feature;
     double _nodeCreationEntropy;
     vector<double> _classProbabilities;
     vector<string> _branchFeaturesAndValuesOrThresholds;
-    vector<shared_ptr<DecisionTreeNode>> _linkedTo; // maybe change to weak if cyclic referencing
+    vector<std::unique_ptr<DecisionTreeNode>> _linkedTo; // maybe change to weak if cyclic referencing
 };
 
 #endif // DECISION_TREE_NODE_HPP

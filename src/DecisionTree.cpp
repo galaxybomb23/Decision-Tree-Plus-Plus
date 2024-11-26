@@ -382,7 +382,7 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
                                                                     const vector<string> &featureAndValues,
                                                                     map<string, vector<double>> &answer)
 {
-    vector<shared_ptr<DecisionTreeNode>> children = node->GetChildren();
+    const auto &children = node->GetChildren();
 
     if (children.empty()) {
         // If leaf node, assign class probabilities
@@ -560,13 +560,14 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
 
     // MARK: figure out whats going on with Node ptrs
     // Create the root node
-    DecisionTreeNode* rootNode = new DecisionTreeNode("", entropy, classProbabilities, vector<string>{}, this, true);
+    auto rootNode = std::make_unique<DecisionTreeNode>(
+        string(""), entropy, classProbabilities, vector<string>{}, shared_from_this(), true);
     rootNode->SetClassNames(_classNames);
-    _rootNode = unique_ptr<DecisionTreeNode>(rootNode);
+    setRootNode(std::move(rootNode));
     // Start recursive descent
-    recursiveDescent(rootNode);
+    recursiveDescent(_rootNode.get());
 
-    return rootNode;
+    return _rootNode.get();
 }
 
 // MARK: figure out whats going on with Node ptrs (header)
@@ -598,12 +599,12 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     }
 
     // get the best feature info
-    vector<string> copyOfPathAttributes    = featuresAndValuesOrThresholdsOnBranch; // deep copy?
-    BestFeatureResult bestFeatureResults      = bestFeatureCalculator(copyOfPathAttributes, existingNodeEntropy);
-    string bestFeature             = bestFeatureResults.bestFeatureName;
-    double bestFeatureEntropy      = bestFeatureResults.bestFeatureEntropy;
+    vector<string> copyOfPathAttributes  = featuresAndValuesOrThresholdsOnBranch; // deep copy?
+    BestFeatureResult bestFeatureResults = bestFeatureCalculator(copyOfPathAttributes, existingNodeEntropy);
+    string bestFeature                   = bestFeatureResults.bestFeatureName;
+    double bestFeatureEntropy            = bestFeatureResults.bestFeatureEntropy;
     std::optional<pair<double, double>> bestFeatureValEntropies = bestFeatureResults.valBasedEntropies;
-    std::optional<double> decisionVal             = bestFeatureResults.decisionValue;
+    std::optional<double> decisionVal                           = bestFeatureResults.decisionValue;
 
     // set the best feature and its entropy
     node->SetFeature(bestFeature);
@@ -696,30 +697,28 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
 
             if (bestEntropyForLess < existingNodeEntropy - _entropyThreshold) {
                 // MARK: figure out whats going on with Node ptrs
-                DecisionTreeNode* leftChildNode =
-                    new DecisionTreeNode("",
-                                         bestEntropyForLess,
-                                         classProbabilitiesForLessThanChildNode,
-                                         extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild,
-                                         this,
-                                         false);
-                shared_ptr<DecisionTreeNode> leftChildNodePtr = std::make_shared<DecisionTreeNode>(*leftChildNode);
-                node->AddChildLink(leftChildNodePtr);
-                recursiveDescent(leftChildNode);
+                auto leftChildNode =
+                    std::make_unique<DecisionTreeNode>(string(""),
+                                                       bestEntropyForLess,
+                                                       classProbabilitiesForLessThanChildNode,
+                                                       extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild,
+                                                       shared_from_this(),
+                                                       false);
+                node->AddChildLink(std::move(leftChildNode));
+                recursiveDescent(leftChildNode.get());
             }
 
             if (bestEntropyForGreater < existingNodeEntropy - _entropyThreshold) {
                 // MARK: figure out whats going on with Node ptrs
-                DecisionTreeNode* rightChildNode =
-                    new DecisionTreeNode("",
-                                         bestEntropyForGreater,
-                                         classProbabilitiesForGreaterThanChildNode,
-                                         extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild,
-                                         this,
-                                         false);
-                shared_ptr<DecisionTreeNode> rightChildNodePtr = std::make_shared<DecisionTreeNode>(*rightChildNode);
-                node->AddChildLink(rightChildNodePtr);
-                recursiveDescent(rightChildNode);
+                auto rightChildNode = std::make_unique<DecisionTreeNode>(
+                    string(""),
+                    bestEntropyForGreater,
+                    classProbabilitiesForGreaterThanChildNode,
+                    extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild,
+                    shared_from_this(),
+                    false);
+                node->AddChildLink(std::move(rightChildNode));
+                recursiveDescent(rightChildNode.get());
             }
         }
         else {
@@ -769,15 +768,15 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
                 }
                 if (existingNodeEntropy - classEntropyForChild > _entropyThreshold) {
                     // MARK: figure out whats going on with Node ptrs
-                    auto childNode                            = new DecisionTreeNode("",
-                                                          classEntropyForChild,
-                                                          classProbabilities,
-                                                          extendedBranchFeaturesAndValeusOrThresholds,
-                                                          this,
-                                                          false);
-                    shared_ptr<DecisionTreeNode> childNodePtr = std::make_shared<DecisionTreeNode>(childNode);
-                    node->AddChildLink(childNodePtr);
-                    recursiveDescent(childNode);
+
+                    auto childNode = std::make_unique<DecisionTreeNode>(string(""),
+                                                                        classEntropyForChild,
+                                                                        classProbabilities,
+                                                                        extendedBranchFeaturesAndValeusOrThresholds,
+                                                                        shared_from_this(),
+                                                                        false);
+                    node->AddChildLink(std::move(childNode));
+                    recursiveDescent(childNode.get());
                 }
                 else if (_debug3) {
                     cout << "\nRD21 This child will NOT result in a node" << endl;
