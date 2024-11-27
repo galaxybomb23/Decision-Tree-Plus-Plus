@@ -15,7 +15,7 @@ template <typename T> vector<T> deepCopy(const vector<T> &vec)
 {
     // The purpose of this function is to create a deep copy of a vector.
     vector<T> copy;
-    for (T const &elem : vec) {
+    for (const T &elem : vec) {
         copy.push_back(elem);
     }
     return copy;
@@ -36,7 +36,7 @@ template <typename T> pair<T, size_t> minimum(const vector<T> &vec)
 
 double convert(const string &str);
 
-inline double ClosestSamplingPoint(const vector<double> &vec, double const &val)
+inline double ClosestSamplingPoint(const vector<double> &vec, const double &val)
 {
     // Check if val is NAN
     if (std::isnan(val)) {
@@ -72,7 +72,7 @@ template <typename T> std::ostream &operator<<(std::ostream &os, const vector<T>
         if (i != v.size() - 1)
             os << ", ";
     }
-    os << "]\n";
+    os << "]";
     return os;
 }
 
