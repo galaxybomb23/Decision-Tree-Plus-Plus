@@ -580,14 +580,12 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     create the rest of the tree.
     */
 
-    // WARNING to debuggers: this function abuses auto
-    // TODO: Refactor to use explicit types
     if (_debug3) {
         cout << "\n==================== ENTERING RECURSIVE DESCENT ==========================" << endl;
     }
-    auto nodeSerialNumber                      = node->GetSerialNum();
-    auto featuresAndValuesOrThresholdsOnBranch = node->GetBranchFeaturesAndValuesOrThresholds();
-    auto existingNodeEntropy                   = node->GetNodeEntropy();
+    int nodeSerialNumber                      = node->GetSerialNum();
+    vector<string> featuresAndValuesOrThresholdsOnBranch = node->GetBranchFeaturesAndValuesOrThresholds();
+    double existingNodeEntropy                   = node->GetNodeEntropy();
 
     // debug info
     if (_debug3) {
@@ -698,13 +696,14 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
                     probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
                         className, extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild));
             }
+
             if (_debug3) {
                 cout << "\nRD14 class entropy for going down lessthan child: " << bestEntropyForLess << endl;
                 cout << "\nRD15 class entropy for going down greaterthan child: " << bestEntropyForGreater << endl;
             }
 
             if (bestEntropyForLess < existingNodeEntropy - _entropyThreshold) {
-                auto leftChildNode =
+                unique_ptr<DecisionTreeNode> leftChildNode =
                     make_unique<DecisionTreeNode>(string(""),
                                                        bestEntropyForLess,
                                                        classProbabilitiesForLessThanChildNode,
@@ -716,8 +715,8 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
             }
 
             if (bestEntropyForGreater < existingNodeEntropy - _entropyThreshold) {
-                auto rightChildNode = make_unique<DecisionTreeNode>(
-                    string(""),
+                unique_ptr<DecisionTreeNode> rightChildNode = make_unique<DecisionTreeNode>(
+                    "",
                     bestEntropyForGreater,
                     classProbabilitiesForGreaterThanChildNode,
                     extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild,
@@ -731,7 +730,9 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
             if (_debug3) {
                 cout << "\nRD16 RECURSIVE DESCENT: In section for Symbolic features for creating children" << endl;
             }
-            auto valuesForFeature = _featuresAndUniqueValuesDict[bestFeature];
+
+            set<string> valuesForFeature = _featuresAndUniqueValuesDict[bestFeature];
+            
             if (_debug3) {
                 cout << "\nRD17 Values for feature " << bestFeature << " are: {";
                 for (const auto &value : valuesForFeature) {
@@ -746,13 +747,16 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
             for (const auto &value : valuesForFeature) {
                 featureValueCombos.push_back(bestFeature + "=" + formatDouble(convert(value)));
             }
+
             std::sort(featureValueCombos.begin(), featureValueCombos.end());
+            
             // auto classEntropiesForChildresn = {};
             for (int featureValueIndex = 0; featureValueIndex < featureValueCombos.size(); featureValueIndex++) {
                 if (_debug3) {
                     cout << "\nRD18 Creating a child node for: " << featureValueCombos[featureValueIndex] << endl;
                 }
                 vector<string> extendedBranchFeaturesAndValeusOrThresholds;
+                
                 if (featuresAndValuesOrThresholdsOnBranch.empty()) {
                     extendedBranchFeaturesAndValeusOrThresholds = {featureValueCombos[featureValueIndex]};
                 }
@@ -760,21 +764,24 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
                     extendedBranchFeaturesAndValeusOrThresholds = featuresAndValuesOrThresholdsOnBranch; // deep copy?
                     extendedBranchFeaturesAndValeusOrThresholds.push_back(featureValueCombos[featureValueIndex]);
                 }
-                auto classProbabilities = vector<double>();
+                
+                vector<double> classProbabilities;
                 for (const auto &className : _classNames) {
                     classProbabilities.push_back(probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
                         className, extendedBranchFeaturesAndValeusOrThresholds));
                 }
-                auto classEntropyForChild = classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
+                
+                double classEntropyForChild = classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
                     extendedBranchFeaturesAndValeusOrThresholds);
 
                 if (_debug3) {
                     cout << "\nRD19 branch attributes: " << extendedBranchFeaturesAndValeusOrThresholds << endl;
                     cout << "\nRD20 class entropy for child: " << classEntropyForChild << endl;
                 }
-                if (existingNodeEntropy - classEntropyForChild > _entropyThreshold) {
 
-                    auto childNode = make_unique<DecisionTreeNode>(string(""),
+                if (existingNodeEntropy - classEntropyForChild > _entropyThreshold) {
+                    unique_ptr<DecisionTreeNode> childNode = make_unique<DecisionTreeNode>(
+                                                                        "",
                                                                         classEntropyForChild,
                                                                         classProbabilities,
                                                                         extendedBranchFeaturesAndValeusOrThresholds,
