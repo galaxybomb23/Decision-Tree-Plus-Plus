@@ -199,8 +199,8 @@ void DecisionTreeNode::DisplayNode(const string &offset) const
 
     // Build and display the node information
     std::ostringstream nodeDisplay;
-    nodeDisplay << offset << "NODE " << _serialNumber << ":" << endl
-                << offset << "  Branch features and values to this node: " << branchFeaturesAndValuesStr << endl
+    nodeDisplay << offset << "\n\nNODE " << _serialNumber << ":" << endl
+                << offset << "  Branch features and values to this node: [" << branchFeaturesAndValuesStr << "]" << endl
                 << offset << "  Class probabilities at current node: [";
 
     for (size_t i = 0; i < classProbsForDisplay.size(); ++i) {

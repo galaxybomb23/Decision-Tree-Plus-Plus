@@ -203,7 +203,7 @@ void DecisionTree::getTrainingData()
 
     // Get the features and their values
     for (int i = 0; i < _featureNames.size(); i++) {
-        vector<string> allValues;      // All values for the feature
+        vector<string> allValues; // All values for the feature
         set<string> uniqueValues; // Unique values for the feature
         for (const auto &kv : _trainingDataDict) {
             allValues.push_back(kv.second[i]); // Insert the value into the vector
@@ -564,6 +564,9 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
     rootNode->SetClassNames(_classNames);
     setRootNode(std::move(rootNode));
     // Start recursive descent
+    if (!_rootNode) {
+        throw std::runtime_error("Error: Root node is null");
+    }
     recursiveDescent(_rootNode.get());
 
     return _rootNode.get();
@@ -576,7 +579,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     find  at that node the feature that yields the greatest reduction in class entropy
     from the entropy based on just the class priors. The logic for finding this
     feature is different for symbolic features and for numeric features (that logic is
-    built into the best feature calculator). We then invoke this method recursively to 
+    built into the best feature calculator). We then invoke this method recursively to
     create the rest of the tree.
     */
 
@@ -590,9 +593,9 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     }
 
 
-    int nodeSerialNumber                      = node->GetSerialNum();
+    int nodeSerialNumber                                 = node->GetSerialNum();
     vector<string> featuresAndValuesOrThresholdsOnBranch = node->GetBranchFeaturesAndValuesOrThresholds();
-    double existingNodeEntropy                   = node->GetNodeEntropy();
+    double existingNodeEntropy                           = node->GetNodeEntropy();
 
     if (_debug3) {
         cout << "\nRD1 Node serial number: " << nodeSerialNumber << endl;
@@ -626,7 +629,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     }
 
     // -1 represents "None"
-    if (_maxDepthDesired != -1 && featuresAndValuesOrThresholdsOnBranch.size() >= _maxDepthDesired) {
+    if (_maxDepthDesired != -1 && (featuresAndValuesOrThresholdsOnBranch.size() >= _maxDepthDesired)) {
         if (_debug3) {
             cout << "\nRD6 REACHED LEAF NODE AT MAX DEPTH ALLOWED" << endl;
         }
@@ -710,27 +713,41 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
             }
 
             if (bestEntropyForLess < existingNodeEntropy - _entropyThreshold) {
+                // create a new child node
                 unique_ptr<DecisionTreeNode> leftChildNode =
                     make_unique<DecisionTreeNode>(string(""),
-                                                       bestEntropyForLess,
-                                                       classProbabilitiesForLessThanChildNode,
-                                                       extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild,
-                                                       shared_from_this(),
-                                                       false);
+                                                  bestEntropyForLess,
+                                                  classProbabilitiesForLessThanChildNode,
+                                                  extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild,
+                                                  shared_from_this(),
+                                                  false);
+                // Get the raw pointer before moving the unique_ptr
+                DecisionTreeNode* leftChildNodePtr = leftChildNode.get();
+
+                // Move the unique_ptr to AddChildLink
                 node->AddChildLink(std::move(leftChildNode));
-                recursiveDescent(leftChildNode.get());
+
+                // Traverse the node using the raw pointer
+                recursiveDescent(leftChildNodePtr);
             }
 
             if (bestEntropyForGreater < existingNodeEntropy - _entropyThreshold) {
-                unique_ptr<DecisionTreeNode> rightChildNode = make_unique<DecisionTreeNode>(
-                    "",
-                    bestEntropyForGreater,
-                    classProbabilitiesForGreaterThanChildNode,
-                    extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild,
-                    shared_from_this(),
-                    false);
+                // create a new child node
+                unique_ptr<DecisionTreeNode> rightChildNode =
+                    make_unique<DecisionTreeNode>("",
+                                                  bestEntropyForGreater,
+                                                  classProbabilitiesForGreaterThanChildNode,
+                                                  extendedBranchFeaturesAndValuesOrThresholdsOnBranchGreaterThanChild,
+                                                  shared_from_this(),
+                                                  false);
+                // Get the raw pointer before moving the unique_ptr
+                DecisionTreeNode* rightChildNodePtr = rightChildNode.get();
+
+                // Move the unique_ptr to AddChildLink
                 node->AddChildLink(std::move(rightChildNode));
-                recursiveDescent(rightChildNode.get());
+
+                // Traverse the node using the raw pointer
+                recursiveDescent(rightChildNodePtr);
             }
         }
         else {
@@ -739,7 +756,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
             }
 
             set<string> valuesForFeature = _featuresAndUniqueValuesDict[bestFeature];
-            
+
             if (_debug3) {
                 cout << "\nRD17 Values for feature " << bestFeature << " are: {";
                 for (const auto &value : valuesForFeature) {
@@ -752,18 +769,18 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
 
             vector<string> featureValueCombos;
             for (const auto &value : valuesForFeature) {
-                featureValueCombos.push_back(bestFeature + "=" + formatDouble(convert(value)));
+                featureValueCombos.push_back(bestFeature + "=" + (value)); // this should only be with symbolic data
             }
 
             std::sort(featureValueCombos.begin(), featureValueCombos.end());
-            
+
             // auto classEntropiesForChildresn = {};
             for (int featureValueIndex = 0; featureValueIndex < featureValueCombos.size(); featureValueIndex++) {
                 if (_debug3) {
                     cout << "\nRD18 Creating a child node for: " << featureValueCombos[featureValueIndex] << endl;
                 }
                 vector<string> extendedBranchFeaturesAndValeusOrThresholds;
-                
+
                 if (featuresAndValuesOrThresholdsOnBranch.empty()) {
                     extendedBranchFeaturesAndValeusOrThresholds = {featureValueCombos[featureValueIndex]};
                 }
@@ -771,13 +788,13 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
                     extendedBranchFeaturesAndValeusOrThresholds = featuresAndValuesOrThresholdsOnBranch; // deep copy?
                     extendedBranchFeaturesAndValeusOrThresholds.push_back(featureValueCombos[featureValueIndex]);
                 }
-                
+
                 vector<double> classProbabilities;
                 for (const auto &className : _classNames) {
                     classProbabilities.push_back(probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
                         className, extendedBranchFeaturesAndValeusOrThresholds));
                 }
-                
+
                 double classEntropyForChild = classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
                     extendedBranchFeaturesAndValeusOrThresholds);
 
@@ -787,15 +804,22 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
                 }
 
                 if (existingNodeEntropy - classEntropyForChild > _entropyThreshold) {
-                    unique_ptr<DecisionTreeNode> childNode = make_unique<DecisionTreeNode>(
-                                                                        "",
-                                                                        classEntropyForChild,
-                                                                        classProbabilities,
-                                                                        extendedBranchFeaturesAndValeusOrThresholds,
-                                                                        shared_from_this(),
-                                                                        false);
+                    // create a new child node
+                    unique_ptr<DecisionTreeNode> childNode =
+                        make_unique<DecisionTreeNode>("",
+                                                      classEntropyForChild,
+                                                      classProbabilities,
+                                                      extendedBranchFeaturesAndValeusOrThresholds,
+                                                      shared_from_this(),
+                                                      false);
+                    // Get the raw pointer before moving the unique_ptr
+                    DecisionTreeNode* childNodePtr = childNode.get();
+
+                    // Move the unique_ptr to AddChildLink
                     node->AddChildLink(std::move(childNode));
-                    recursiveDescent(childNode.get());
+
+                    // Traverse the node using the raw pointer
+                    recursiveDescent(childNodePtr);
                 }
                 else if (_debug3) {
                     cout << "\nRD21 This child will NOT result in a node" << endl;
@@ -885,7 +909,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
     map<string, double> entropyValuesForDifferentFeatures; // Stores entropy values for features
     map<string, map<double, pair<double, double>>>
         partitioningPointChildEntropiesDict;                                  // Child entropies for numeric thresholds
-    map<string, optional<double>> partitioningPointThreshold;            // Thresholds for numeric features
+    map<string, optional<double>> partitioningPointThreshold;                 // Thresholds for numeric features
     map<string, vector<double>> entropiesForDifferentValuesOfSymbolicFeature; // Entropies for symbolic feature values
 
     // Initialize maps for all features
@@ -1830,8 +1854,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
         }
         else {
             // Extract unique values for the feature from _featuresAndValuesDict
-            set<string> uniqueValues(_featuresAndValuesDict[feature].begin(),
-                                          _featuresAndValuesDict[feature].end());
+            set<string> uniqueValues(_featuresAndValuesDict[feature].begin(), _featuresAndValuesDict[feature].end());
 
             // Remove "NA" values
             uniqueValues.erase("NA");

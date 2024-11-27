@@ -4,7 +4,6 @@
 
 class ConstructTreeTest : public ::testing::Test {
   protected:
-  
     shared_ptr<DecisionTree> dtS; // Symbolic DecisionTree
     shared_ptr<DecisionTree> dtN; // Numeric DecisionTree
     map<string, string> kwargsS;
@@ -18,7 +17,8 @@ class ConstructTreeTest : public ::testing::Test {
             {  "csv_class_column_index",                                       "1"},
             {"csv_columns_for_features",                              {2, 3, 4, 5}},
             {       "max_depth_desired",                                       "5"},
-            {       "entropy_threshold",                                     "0.1"}
+            {       "entropy_threshold",                                     "0.1"},
+            {                  "debug3",                                       "1"}
         };
 
         kwargsN = {
@@ -27,7 +27,8 @@ class ConstructTreeTest : public ::testing::Test {
             {  "csv_class_column_index",                                  "2"},
             {"csv_columns_for_features",                   {3, 4, 5, 6, 7, 8}},
             {       "max_depth_desired",                                  "8"},
-            {       "entropy_threshold",                               "0.01"}
+            {       "entropy_threshold",                               "0.01"},
+            {                  "debug3",                                  "1"}
         };
 
         dtS = make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
@@ -79,8 +80,11 @@ TEST_F(ConstructTreeTest, bestFeatureCalculatorSymbolic)
     }
     {
         bfr = dtS->bestFeatureCalculator({"fatIntake=heavy", "smoking=heavy", "videoAddiction=heavy"},
-        0.16223190039782087); ASSERT_EQ(bfr.bestFeatureName, "exercising"); ASSERT_NEAR(bfr.bestFeatureEntropy,
-        0.014, 0.001); ASSERT_EQ(bfr.valBasedEntropies, nullopt); ASSERT_EQ(bfr.decisionValue, nullopt);
+                                         0.16223190039782087);
+        ASSERT_EQ(bfr.bestFeatureName, "exercising");
+        ASSERT_NEAR(bfr.bestFeatureEntropy, 0.014, 0.001);
+        ASSERT_EQ(bfr.valBasedEntropies, nullopt);
+        ASSERT_EQ(bfr.decisionValue, nullopt);
     }
     {
         bfr = dtS->bestFeatureCalculator({"fatIntake=low"}, 0.5032583347756457);
@@ -173,10 +177,13 @@ TEST_F(ConstructTreeTest, constructDecisionTreeClassifier)
 
 
     // // display Trees
-    // rootS->DisplayDecisionTree(" ");
+    rootS->DisplayDecisionTree(" ");
     // rootN->DisplayDecisionTree(" ");
 
     // // check if root is not null
-    // ASSERT_NE(rootS, nullptr);
+    ASSERT_NE(rootS, nullptr);
     // ASSERT_NE(rootN, nullptr);
+
+    // fail assert to see the tree
+    ASSERT_EQ(1, 0);
 }
