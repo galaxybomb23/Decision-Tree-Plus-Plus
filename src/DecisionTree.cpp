@@ -579,8 +579,9 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     built into the best feature calculator). We then invoke this method recursively to 
     create the rest of the tree.
     */
-   
-    // WARNING to debuggers: this funciton abuses auto
+
+    // WARNING to debuggers: this function abuses auto
+    // TODO: Refactor to use explicit types
     if (_debug3) {
         cout << "\n==================== ENTERING RECURSIVE DESCENT ==========================" << endl;
     }
