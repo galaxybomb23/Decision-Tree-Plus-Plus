@@ -571,6 +571,15 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
 
 void DecisionTree::recursiveDescent(DecisionTreeNode* node)
 {
+    /*
+    After the root node of the decision tree is constructed by the previous method, we
+    find  at that node the feature that yields the greatest reduction in class entropy
+    from the entropy based on just the class priors. The logic for finding this
+    feature is different for symbolic features and for numeric features (that logic is
+    built into the best feature calculator). We then invoke this method recursively to 
+    create the rest of the tree.
+    */
+   
     // WARNING to debuggers: this funciton abuses auto
     if (_debug3) {
         cout << "\n==================== ENTERING RECURSIVE DESCENT ==========================" << endl;
