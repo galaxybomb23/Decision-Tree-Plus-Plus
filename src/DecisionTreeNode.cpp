@@ -204,6 +204,7 @@ void DecisionTreeNode::DisplayNode(const string &offset) const
                 << offset << "  Class probabilities at current node: [";
 
     for (size_t i = 0; i < classProbsForDisplay.size(); ++i) {
+        nodeDisplay << _dt.lock()->_classNames[i] << ": ";
         nodeDisplay << classProbsForDisplay[i];
         if (i < classProbsForDisplay.size() - 1) {
             nodeDisplay << ", ";
