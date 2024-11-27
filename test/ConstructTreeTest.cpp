@@ -167,8 +167,8 @@ TEST_F(ConstructTreeTest, bestFeatureCalculatorNumeric)
 // MARK: Commented out for now cause it was causing a segfault
 TEST_F(ConstructTreeTest, constructDecisionTreeClassifier)
 {
-    // construst Trees
-    // DecisionTreeNode* rootS = dtS->constructDecisionTreeClassifier();
+    // Construct Trees
+    DecisionTreeNode* rootS = dtS->constructDecisionTreeClassifier();
     // DecisionTreeNode* rootN = dtN->constructDecisionTreeClassifier();
 
 

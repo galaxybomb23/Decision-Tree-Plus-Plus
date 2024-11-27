@@ -44,7 +44,6 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
 
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();
-    // MARK: figure out whats going on with Node ptrs
     void recursiveDescent(DecisionTreeNode* node);
     BestFeatureResult bestFeatureCalculator(const vector<string> &featuresAndValuesOrThresholdsOnBranch,
                                             double existingNodeEntropy);

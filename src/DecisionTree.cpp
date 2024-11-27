@@ -558,7 +558,6 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
         cout << endl << "Entropy on priors: " << entropy << endl;
     }
 
-    // MARK: figure out whats going on with Node ptrs
     // Create the root node
     auto rootNode = make_unique<DecisionTreeNode>(
         string(""), entropy, classProbabilities, vector<string>{}, shared_from_this(), true);
@@ -570,7 +569,6 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
     return _rootNode.get();
 }
 
-// MARK: figure out whats going on with Node ptrs (header)
 void DecisionTree::recursiveDescent(DecisionTreeNode* node)
 {
     // WARNING to debuggers: this funciton abuses auto
@@ -696,7 +694,6 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
             }
 
             if (bestEntropyForLess < existingNodeEntropy - _entropyThreshold) {
-                // MARK: figure out whats going on with Node ptrs
                 auto leftChildNode =
                     make_unique<DecisionTreeNode>(string(""),
                                                        bestEntropyForLess,
@@ -709,7 +706,6 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
             }
 
             if (bestEntropyForGreater < existingNodeEntropy - _entropyThreshold) {
-                // MARK: figure out whats going on with Node ptrs
                 auto rightChildNode = make_unique<DecisionTreeNode>(
                     string(""),
                     bestEntropyForGreater,
@@ -767,7 +763,6 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
                     cout << "\nRD20 class entropy for child: " << classEntropyForChild << endl;
                 }
                 if (existingNodeEntropy - classEntropyForChild > _entropyThreshold) {
-                    // MARK: figure out whats going on with Node ptrs
 
                     auto childNode = make_unique<DecisionTreeNode>(string(""),
                                                                         classEntropyForChild,

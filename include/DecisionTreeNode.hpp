@@ -17,11 +17,8 @@ using namespace std;
 
 class DecisionTreeNode {
   public:
-    // MARK: figure out whats going on with Node ptrs
-
     explicit DecisionTreeNode(shared_ptr<DecisionTree> dt); // Constructor
 
-    // MARK: figure out whats going on with Node ptrs
     DecisionTreeNode(const string &feature,
                      double entropy,
                      const vector<double> &class_probabilities,
@@ -61,7 +58,6 @@ class DecisionTreeNode {
 
   private:
     // Private members
-    // MARK: figure out whats going on with Node ptrs
     std::weak_ptr<DecisionTree> _dt;
     int _serialNumber;
     string _feature;
