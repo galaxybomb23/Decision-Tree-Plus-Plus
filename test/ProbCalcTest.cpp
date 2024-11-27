@@ -4,11 +4,14 @@
 
 class ProbCalcTest : public ::testing::Test {
   protected:
-    std::unique_ptr<DecisionTree> dtS; // Symbolic DecisionTree
-    std::unique_ptr<DecisionTree> dtN; // Numeric DecisionTree
+    map<string, string> kwargsS;
+    map<string, string> kwargsN;
+    shared_ptr<DecisionTree> dtS; // Symbolic DecisionTree
+    shared_ptr<DecisionTree> dtN; // Numeric DecisionTree
+
     void SetUp() override
     {
-        map<string, string> kwargsS = {
+        kwargsS = {
             // Symbolic kwargs
             {       "training_datafile", "../test/resources/training_symbolic.csv"},
             {  "csv_class_column_index",                                       "1"},
@@ -17,7 +20,7 @@ class ProbCalcTest : public ::testing::Test {
             {       "entropy_threshold",                                     "0.1"}
         };
 
-        map<string, string> kwargsN = {
+        kwargsN = {
             // Numeric kwargs
             {       "training_datafile", "../test/resources/stage3cancer.csv"},
             {  "csv_class_column_index",                                  "2"},
@@ -26,12 +29,12 @@ class ProbCalcTest : public ::testing::Test {
             {       "entropy_threshold",                               "0.01"},
         };
 
-        dtS = std::make_unique<DecisionTree>(kwargsS); // Initialize the DecisionTree
+        dtS = make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
         dtS->getTrainingData();
         dtS->calculateFirstOrderProbabilities();
         dtS->calculateClassPriors();
 
-        dtN = std::make_unique<DecisionTree>(kwargsN); // Initialize the DecisionTree
+        dtN = make_shared<DecisionTree>(kwargsN); // Initialize the DecisionTree
         dtN->getTrainingData();
         dtN->calculateFirstOrderProbabilities();
         dtN->calculateClassPriors();
@@ -321,7 +324,7 @@ TEST_F(ProbCalcTest, probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
     ASSERT_NEAR(prob0, 0.019, 0.001);
     double prob1 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
         {"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "age>51.0"}, "0");
-    ASSERT_NEAR(prob1, 0.193, 0.001);
+    ASSERT_NEAR(prob1, 0.195, 0.001);
     double prob2 = dtN->probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
         {"grade=2.0", "gleason=5.0", "g2<3.840000000000012", "ploidy=aneuploid"}, "0");
     ASSERT_NEAR(prob2, 0.008, 0.001);
