@@ -4,8 +4,9 @@
 
 class EntropyCalcTest : public ::testing::Test {
   protected:
-    std::unique_ptr<DecisionTree> dtS; // Symbolic DecisionTree
-    std::unique_ptr<DecisionTree> dtN; // Numeric DecisionTree
+    shared_ptr<DecisionTree> dtS; // Symbolic DecisionTree
+    shared_ptr<DecisionTree> dtN; // Numeric DecisionTree
+
     void SetUp() override
     {
         map<string, string> kwargsS = {
@@ -26,12 +27,12 @@ class EntropyCalcTest : public ::testing::Test {
             {       "entropy_threshold",                               "0.01"}
         };
 
-        dtS = std::make_unique<DecisionTree>(kwargsS); // Initialize the DecisionTree
+        dtS = make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
         dtS->getTrainingData();
         dtS->calculateFirstOrderProbabilities();
         dtS->calculateClassPriors();
 
-        dtN = std::make_unique<DecisionTree>(kwargsN); // Initialize the DecisionTree
+        dtN = make_shared<DecisionTree>(kwargsN); // Initialize the DecisionTree
         dtN->getTrainingData();
         dtN->calculateFirstOrderProbabilities();
         dtN->calculateClassPriors();

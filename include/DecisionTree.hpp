@@ -2,17 +2,11 @@
 #define DECISION_TREE_HPP
 
 // Include
+#include "Common.hpp"
 #include "DecisionTreeNode.hpp"
 
 #include <iostream>
-#include <map>
 #include <memory>
-#include <optional>
-#include <set>
-#include <string>
-#include <vector>
-
-using std::string, std::vector, std::map;
 
 /**
  * @struct BestFeatureResult
@@ -23,16 +17,16 @@ using std::string, std::vector, std::map;
  * and the decision value.
  */
 struct BestFeatureResult {
-    std::string bestFeatureName;
+    string bestFeatureName;
     double bestFeatureEntropy;
-    std::optional<std::pair<double, double>> valBasedEntropies;
-    std::optional<double> decisionValue;
+    optional<pair<double, double>> valBasedEntropies;
+    optional<double> decisionValue;
 };
 
 class DecisionTreeNode;
 class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
   public:
-    std::shared_ptr<DecisionTree> getShared() { return shared_from_this(); }
+    shared_ptr<DecisionTree> getShared() { return shared_from_this(); }
     //--------------- Constructors and Destructors ----------------//
     DecisionTree(map<string, string> kwargs); // constructor
     ~DecisionTree();                          // destructor
@@ -52,14 +46,14 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     DecisionTreeNode* constructDecisionTreeClassifier();
     // MARK: figure out whats going on with Node ptrs
     void recursiveDescent(DecisionTreeNode* node);
-    BestFeatureResult bestFeatureCalculator(const std::vector<std::string> &featuresAndValuesOrThresholdsOnBranch,
+    BestFeatureResult bestFeatureCalculator(const vector<string> &featuresAndValuesOrThresholdsOnBranch,
                                             double existingNodeEntropy);
 
     //--------------- Entropy Calculators ----------------//
     double classEntropyOnPriors();
-    void entropyScannerForANumericFeature(const std::string &feature);
-    double EntropyForThresholdForFeature(const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds,
-                                         const std::string &feature,
+    void entropyScannerForANumericFeature(const string &feature);
+    double EntropyForThresholdForFeature(const vector<string> &arrayOfFeaturesAndValuesOrThresholds,
+                                         const string &feature,
                                          const double &threshold,
                                          const string &comparison);
     double classEntropyForLessThanThresholdForFeature(const vector<string> &arrayOfFeaturesAndValuesOrThresholds,
@@ -71,7 +65,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
                                                          const double &threshold);
 
     double classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
-        const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds);
+        const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 
     //--------------- Probability Calculators ----------------//
     double priorProbabilityForClass(const string &className);
@@ -130,7 +124,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     void setDebug2(int debug2);
     void setDebug3(int debug3);
     void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
-    void setRootNode(std::unique_ptr<DecisionTreeNode> rootNode);
+    void setRootNode(unique_ptr<DecisionTreeNode> rootNode);
     void setClassNames(const vector<string> &classNames);
 
   private:
@@ -144,13 +138,13 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     int _debug1, _debug2, _debug3;
     int _howManyTotalTrainingSamples;
 
-    std::unique_ptr<DecisionTreeNode> _rootNode;
+    unique_ptr<DecisionTreeNode> _rootNode;
     vector<int> _csvColumnsForFeatures;
     map<string, double> _probabilityCache;
     map<string, double> _entropyCache;
     map<int, vector<string>> _trainingDataDict;
     map<string, vector<string>> _featuresAndValuesDict;
-    map<string, std::set<string>> _featuresAndUniqueValuesDict;
+    map<string, set<string>> _featuresAndUniqueValuesDict;
     map<int, string> _samplesClassLabelDict;
     map<string, double> _classPriorsDict;
     vector<string> _featureNames;

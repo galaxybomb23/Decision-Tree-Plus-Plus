@@ -2,6 +2,7 @@
 #define DECISION_TREE_NODE_HPP
 
 #include "DecisionTree.hpp"
+#include "Common.hpp"
 
 #include <iomanip>
 #include <iostream>
@@ -18,14 +19,14 @@ class DecisionTreeNode {
   public:
     // MARK: figure out whats going on with Node ptrs
 
-    explicit DecisionTreeNode(std::shared_ptr<DecisionTree> dt); // Constructor
+    explicit DecisionTreeNode(shared_ptr<DecisionTree> dt); // Constructor
 
     // MARK: figure out whats going on with Node ptrs
-    DecisionTreeNode(const std::string &feature,
+    DecisionTreeNode(const string &feature,
                      double entropy,
-                     const std::vector<double> &class_probabilities,
-                     const std::vector<std::string> &branch_features_and_values_or_thresholds,
-                     std::shared_ptr<DecisionTree> dt,
+                     const vector<double> &class_probabilities,
+                     const vector<string> &branch_features_and_values_or_thresholds,
+                     shared_ptr<DecisionTree> dt,
                      bool isRoot);
 
     ~DecisionTreeNode(); // Destructor
@@ -43,20 +44,20 @@ class DecisionTreeNode {
     double GetNodeEntropy() const;
     vector<double> GetClassProbabilities() const;
     vector<string> GetBranchFeaturesAndValuesOrThresholds() const;
-    const std::vector<std::unique_ptr<DecisionTreeNode>> &GetChildren() const;
+    const vector<unique_ptr<DecisionTreeNode>> &GetChildren() const;
     int GetSerialNum() const;
 
     // Setters
     void SetClassNames(const vector<string> classNames);
     void SetFeature(const string &feature) { _feature = feature; };
     void SetNodeCreationEntropy(const double entropy);
-    void AddChildLink(std::unique_ptr<DecisionTreeNode> newNode);
+    void AddChildLink(unique_ptr<DecisionTreeNode> newNode);
 
     void DeleteAllLinks();
 
     // Displays
-    void DisplayNode(const std::string &offset) const;
-    void DisplayDecisionTree(const std::string &offset) const;
+    void DisplayNode(const string &offset) const;
+    void DisplayDecisionTree(const string &offset) const;
 
   private:
     // Private members
@@ -67,7 +68,7 @@ class DecisionTreeNode {
     double _nodeCreationEntropy;
     vector<double> _classProbabilities;
     vector<string> _branchFeaturesAndValuesOrThresholds;
-    vector<std::unique_ptr<DecisionTreeNode>> _linkedTo; // maybe change to weak if cyclic referencing
+    vector<unique_ptr<DecisionTreeNode>> _linkedTo; // maybe change to weak if cyclic referencing
 };
 
 #endif // DECISION_TREE_NODE_HPP

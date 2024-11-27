@@ -1,6 +1,7 @@
 #include "DecisionTree.hpp"
 
 #include <gtest/gtest.h>
+
 bool areVectorsAlmostEqual(const vector<vector<string>> &a, const vector<vector<string>> &b);
 const double TOLERANCE = 1e-9;
 
@@ -24,45 +25,47 @@ void assertVectorsAlmostEqual(const vector<vector<string>> &actual,
     }
 }
 
-
 class DecisionTreeTest : public ::testing::Test {
-  protected:
+protected:
+    // Class members to be used in tests
+    map<string, string> kwargsS;
+    shared_ptr<DecisionTree> dtS; // Symbolic DecisionTree
+    unique_ptr<DecisionTreeNode> nodeS;
+    
     void SetUp() override
     {
-        // called before each test
+        kwargsS = {
+            {"training_datafile", "../test/resources/stage3cancer.csv"},
+            {"entropy_threshold", "0.1"},
+            {"max_depth_desired", "20"},
+            {"csv_class_column_index", "8"},
+            {"symbolic_to_numeric_cardinality_threshold", "20"},
+            {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+            {"number_of_histogram_bins", "10"},
+            {"csv_cleanup_needed", "1"},
+            {"debug1", "1"},
+            {"debug2", "2"},
+            {"debug3", "0"}
+        };
+        dtS = make_shared<DecisionTree>(kwargsS);
+        nodeS = make_unique<DecisionTreeNode>(
+            "feature", 0.1, vector<double>{0.2}, vector<string>{"branch"}, dtS, true);
     }
 
     void TearDown() override
     {
-        // called after each test ends
+        dtS.reset();
     }
-
-    // Class members to be used in tests
-    map<string, string> kwargs = {
-        {       "training_datafile", "../test/resources/training_symbolic.csv"},
-        {  "csv_class_column_index",                                       "1"},
-        {"csv_columns_for_features",                              {2, 3, 4, 5}},
-        {       "max_depth_desired",                                       "5"},
-        {       "entropy_threshold",                                     "0.1"}
-        //   ,{"symbolic_to_numeric_cardinality_threshold", "20"},
-        //   {"number_of_histogram_bins", "10"},
-        //   {"csv_cleanup_needed", "1"},
-        //   {"debug1", "1"},
-        //   {"debug2", "2"},
-        //   {"debug3", "3"}
-    };
-    DecisionTree dt       = DecisionTree(kwargs);
-    DecisionTreeNode node = DecisionTreeNode("feature", 0.0, {0.0}, {"branch"}, dt.getShared(), true);
 };
 
 TEST_F(DecisionTreeTest, CheckdtExists)
 {
-    ASSERT_NE(&dt, nullptr);
+    ASSERT_NE(&dtS, nullptr);
 }
 
 TEST_F(DecisionTreeTest, ConstructorInitializesNode)
 {
-    ASSERT_NE(&node, nullptr);
+    ASSERT_NE(&nodeS, nullptr);
 }
 
 TEST_F(DecisionTreeTest, CheckParamsDt)
@@ -169,7 +172,7 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
         vector<vector<string>> expected = {
             {"g2", ">", "51.360000000000404"}
         };
-        auto output = dt.findBoundedIntervalsForNumericFeatures(input);
+        auto output = dtS->findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 1 ");
     }
 
@@ -179,7 +182,7 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
         vector<vector<string>> expected = {
             {"g2", "<", "2.4"}
         };
-        auto output = dt.findBoundedIntervalsForNumericFeatures(input);
+        auto output = dtS->findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 2 ");
     }
 
@@ -192,7 +195,7 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
             { "g2", "<", "3.840000000000012"},
             { "g2", ">",               "1.5"}
         };
-        auto output = dt.findBoundedIntervalsForNumericFeatures(input);
+        auto output = dtS->findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 3 ");
     }
 
@@ -203,7 +206,7 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
             {"height", "<", "180.0"},
             {"height", ">", "150.0"}
         };
-        auto output = dt.findBoundedIntervalsForNumericFeatures(input);
+        auto output = dtS->findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 4 ");
     }
 
@@ -211,7 +214,7 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
     {
         vector<string> input            = {};
         vector<vector<string>> expected = {};
-        auto output                     = dt.findBoundedIntervalsForNumericFeatures(input);
+        auto output                     = dtS->findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 5 ");
     }
 
@@ -221,14 +224,14 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
         vector<vector<string>> expected = {
             {"age", ">", "18.0"}
         };
-        auto output = dt.findBoundedIntervalsForNumericFeatures(input);
+        auto output = dtS->findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 6a ");
 
         input    = {"age<63.0"};
         expected = {
             {"age", "<", "63.0"}
         };
-        output = dt.findBoundedIntervalsForNumericFeatures(input);
+        output = dtS->findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 6b ");
     }
 
@@ -239,7 +242,7 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
             {"weight", "<", "90.0"},
             {"weight", ">", "60.0"}
         };
-        auto output = dt.findBoundedIntervalsForNumericFeatures(input);
+        auto output = dtS->findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 7 ");
     }
 
@@ -250,7 +253,7 @@ TEST_F(DecisionTreeTest, findBoundedIntervalsForNumericFeatures)
             {"g2", "<",    "2.4000000000001"},
             {"g2", ">", "51.360000000000404"}
         };
-        auto output = dt.findBoundedIntervalsForNumericFeatures(input);
+        auto output = dtS->findBoundedIntervalsForNumericFeatures(input);
         assertVectorsAlmostEqual(output, expected, "Test case 8 ");
     }
 }

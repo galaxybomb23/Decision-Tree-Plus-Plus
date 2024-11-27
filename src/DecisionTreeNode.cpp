@@ -3,7 +3,7 @@
 #include "DecisionTree.hpp"
 
 // for vector output
-std::ostream &operator<<(std::ostream &os, const std::vector<std::string> &vec)
+std::ostream &operator<<(std::ostream &os, const vector<string> &vec)
 {
     for (const auto &str : vec) {
         os << str << " ";
@@ -11,11 +11,11 @@ std::ostream &operator<<(std::ostream &os, const std::vector<std::string> &vec)
     return os;
 }
 
-DecisionTreeNode::DecisionTreeNode(const std::string &feature,
+DecisionTreeNode::DecisionTreeNode(const string &feature,
                                    double entropy,
-                                   const std::vector<double> &class_probabilities,
-                                   const std::vector<std::string> &branch_features_and_values_or_thresholds,
-                                   std::shared_ptr<DecisionTree> dt,
+                                   const vector<double> &class_probabilities,
+                                   const vector<string> &branch_features_and_values_or_thresholds,
+                                   shared_ptr<DecisionTree> dt,
                                    const bool isRoot)
     : _dt(dt),
       _feature(feature),
@@ -38,7 +38,7 @@ DecisionTreeNode::DecisionTreeNode(const std::string &feature,
 }
 
 
-DecisionTreeNode::DecisionTreeNode(std::shared_ptr<DecisionTree> dt) : _dt((dt))
+DecisionTreeNode::DecisionTreeNode(shared_ptr<DecisionTree> dt) : _dt((dt))
 {
     _feature                             = "";
     _nodeCreationEntropy                 = 0;
@@ -57,7 +57,7 @@ DecisionTreeNode::DecisionTreeNode(const DecisionTreeNode &other)
 {
     // Deep copy of children
     for (const auto &child : other._linkedTo) {
-        _linkedTo.push_back(std::make_unique<DecisionTreeNode>(*child));
+        _linkedTo.push_back(make_unique<DecisionTreeNode>(*child));
     }
     auto tree = _dt.lock();
     // Copy class names
@@ -69,6 +69,7 @@ DecisionTreeNode::DecisionTreeNode(const DecisionTreeNode &other)
     // Update the serial number
     _serialNumber = GetNextSerialNum();
 }
+
 DecisionTreeNode &DecisionTreeNode::operator=(const DecisionTreeNode &other)
 {
     if (this == &other) {
@@ -87,7 +88,7 @@ DecisionTreeNode &DecisionTreeNode::operator=(const DecisionTreeNode &other)
     _linkedTo.clear();
     for (const auto &child : other._linkedTo) {
         if (child) {
-            _linkedTo.push_back(std::make_unique<DecisionTreeNode>(*child));
+            _linkedTo.push_back(make_unique<DecisionTreeNode>(*child));
         }
         else {
             _linkedTo.push_back(nullptr);
@@ -138,7 +139,7 @@ vector<string> DecisionTreeNode::GetBranchFeaturesAndValuesOrThresholds() const
     return _branchFeaturesAndValuesOrThresholds;
 }
 
-const std::vector<std::unique_ptr<DecisionTreeNode>> &DecisionTreeNode::GetChildren() const
+const vector<unique_ptr<DecisionTreeNode>> &DecisionTreeNode::GetChildren() const
 {
     return _linkedTo;
 }
@@ -158,7 +159,7 @@ void DecisionTreeNode::SetNodeCreationEntropy(const double entropy)
     _nodeCreationEntropy = entropy;
 }
 
-void DecisionTreeNode::AddChildLink(std::unique_ptr<DecisionTreeNode> newNode)
+void DecisionTreeNode::AddChildLink(unique_ptr<DecisionTreeNode> newNode)
 {
     _linkedTo.emplace_back(std::move(newNode));
 }
@@ -168,18 +169,18 @@ void DecisionTreeNode::DeleteAllLinks()
     _linkedTo.clear();
 }
 
-void DecisionTreeNode::DisplayNode(const std::string &offset) const
+void DecisionTreeNode::DisplayNode(const string &offset) const
 {
     // Handle feature at node
-    std::string featureAtNode = _feature.empty() ? " " : _feature;
+    string featureAtNode = _feature.empty() ? " " : _feature;
 
     // Format entropy value
     std::ostringstream entropyStream;
     entropyStream << std::fixed << std::setprecision(3) << _nodeCreationEntropy;
-    std::string printNodeCreationEntropyAtNode = entropyStream.str();
+    string printNodeCreationEntropyAtNode = entropyStream.str();
 
     // Format class probabilities
-    std::vector<std::string> classProbsForDisplay;
+    vector<string> classProbsForDisplay;
     for (double prob : _classProbabilities) {
         std::ostringstream probStream;
         probStream << std::fixed << std::setprecision(3) << prob;
@@ -194,7 +195,7 @@ void DecisionTreeNode::DisplayNode(const std::string &offset) const
             branch_features_stream << ", ";
         }
     }
-    std::string branchFeaturesAndValuesStr = branch_features_stream.str();
+    string branchFeaturesAndValuesStr = branch_features_stream.str();
 
     // Build and display the node information
     std::ostringstream nodeDisplay;
@@ -214,16 +215,16 @@ void DecisionTreeNode::DisplayNode(const std::string &offset) const
                 << offset << "  Best feature test at current node: " << featureAtNode << endl
                 << endl;
 
-    std::cout << nodeDisplay.str();
+    cout << nodeDisplay.str();
 }
 
-void DecisionTreeNode::DisplayDecisionTree(const std::string &offset) const
+void DecisionTreeNode::DisplayDecisionTree(const string &offset) const
 {
     // Display the current node
     this->DisplayNode(offset);
 
     // Recursively display child nodes with an increased offset
-    std::string newOffset = offset + "    ";
+    string newOffset = offset + "    ";
     for (const auto &child : this->GetChildren()) {
         child->DisplayDecisionTree(newOffset);
     }

@@ -1,30 +1,27 @@
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
-#include <algorithm>
+// Include
+#include "Common.hpp"
+
 #include <cmath>
-#include <iostream>
 #include <numeric>
-#include <optional>
 #include <regex>
-#include <string>
-#include <tuple>
 #include <utility>
-#include <vector>
 
-int sampleIndex(std::string sample_name);
+int sampleIndex(string sample_name);
 
-template <typename T> std::vector<T> deepCopy(const std::vector<T> &vec)
+template <typename T> vector<T> deepCopy(const vector<T> &vec)
 {
     // The purpose of this function is to create a deep copy of a vector.
-    std::vector<T> copy;
+    vector<T> copy;
     for (T const &elem : vec) {
         copy.push_back(elem);
     }
     return copy;
 } // may be unnecessary
 
-template <typename T> std::pair<T, size_t> minimum(const std::vector<T> &vec)
+template <typename T> pair<T, size_t> minimum(const vector<T> &vec)
 {
     T min        = vec[0];
     size_t index = 0;
@@ -37,9 +34,9 @@ template <typename T> std::pair<T, size_t> minimum(const std::vector<T> &vec)
     return std::make_pair(min, index);
 }
 
-double convert(const std::string &str);
+double convert(const string &str);
 
-inline double ClosestSamplingPoint(const std::vector<double> &vec, double const &val)
+inline double ClosestSamplingPoint(const vector<double> &vec, double const &val)
 {
     // Check if val is NAN
     if (std::isnan(val)) {
@@ -61,13 +58,13 @@ inline double ClosestSamplingPoint(const std::vector<double> &vec, double const 
     return vec[index];
 };
 
-std::string CleanupCsvString(const std::string &str);
+string CleanupCsvString(const string &str);
 
-std::string removeTrailingZeros(const std::string &str);
-std::string formatDouble(double value);
+string removeTrailingZeros(const string &str);
+string formatDouble(double value);
 
 // Overload the << operator for vectors
-template <typename T> std::ostream &operator<<(std::ostream &os, const std::vector<T> &v)
+template <typename T> std::ostream &operator<<(std::ostream &os, const vector<T> &v)
 {
     os << "[";
     for (int i = 0; i < v.size(); ++i) {

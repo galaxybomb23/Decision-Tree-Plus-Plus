@@ -204,7 +204,7 @@ void DecisionTree::getTrainingData()
     // Get the features and their values
     for (int i = 0; i < _featureNames.size(); i++) {
         vector<string> allValues;      // All values for the feature
-        std::set<string> uniqueValues; // Unique values for the feature
+        set<string> uniqueValues; // Unique values for the feature
         for (const auto &kv : _trainingDataDict) {
             allValues.push_back(kv.second[i]); // Insert the value into the vector
             uniqueValues.insert(kv.second[i]); // Insert the value into the set
@@ -267,7 +267,7 @@ void DecisionTree::calculateFirstOrderProbabilities()
                     string samplingPoint = std::to_string(it->first);
 
                     double prob = probabilityOfFeatureValue(feature, samplingPoint);
-                    cout << feature << "::" << samplingPoint << " = " << std::setprecision(5) << prob << "\n";
+                    cout << feature << "::" << samplingPoint << " = " << setprecision(5) << prob << "\n";
                 }
             }
             else {
@@ -277,7 +277,7 @@ void DecisionTree::calculateFirstOrderProbabilities()
                 const auto &values_for_feature = _featuresAndUniqueValuesDict[feature];
                 for (const auto &value : values_for_feature) {
                     double prob = probabilityOfFeatureValue(feature, value);
-                    cout << feature << "::" << value << " = " << std::setprecision(5) << prob << "\n";
+                    cout << feature << "::" << value << " = " << setprecision(5) << prob << "\n";
                 }
             }
         }
@@ -361,7 +361,7 @@ map<string, string> DecisionTree::classify(DecisionTreeNode* rootNode, const vec
     for (const auto &kv : classification) {
         if (std::isfinite(kv.second)) {
             std::ostringstream oss;
-            oss << std::fixed << std::setprecision(3) << kv.second;
+            oss << std::fixed << setprecision(3) << kv.second;
             classificationForDisplay[kv.first] = oss.str();
         }
         else {
@@ -560,7 +560,7 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
 
     // MARK: figure out whats going on with Node ptrs
     // Create the root node
-    auto rootNode = std::make_unique<DecisionTreeNode>(
+    auto rootNode = make_unique<DecisionTreeNode>(
         string(""), entropy, classProbabilities, vector<string>{}, shared_from_this(), true);
     rootNode->SetClassNames(_classNames);
     setRootNode(std::move(rootNode));
@@ -603,8 +603,8 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     BestFeatureResult bestFeatureResults = bestFeatureCalculator(copyOfPathAttributes, existingNodeEntropy);
     string bestFeature                   = bestFeatureResults.bestFeatureName;
     double bestFeatureEntropy            = bestFeatureResults.bestFeatureEntropy;
-    std::optional<pair<double, double>> bestFeatureValEntropies = bestFeatureResults.valBasedEntropies;
-    std::optional<double> decisionVal                           = bestFeatureResults.decisionValue;
+    optional<pair<double, double>> bestFeatureValEntropies = bestFeatureResults.valBasedEntropies;
+    optional<double> decisionVal                           = bestFeatureResults.decisionValue;
 
     // set the best feature and its entropy
     node->SetFeature(bestFeature);
@@ -698,7 +698,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
             if (bestEntropyForLess < existingNodeEntropy - _entropyThreshold) {
                 // MARK: figure out whats going on with Node ptrs
                 auto leftChildNode =
-                    std::make_unique<DecisionTreeNode>(string(""),
+                    make_unique<DecisionTreeNode>(string(""),
                                                        bestEntropyForLess,
                                                        classProbabilitiesForLessThanChildNode,
                                                        extendedBranchFeaturesAndValuesOrThresholdsOnBranchLessThanChild,
@@ -710,7 +710,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
 
             if (bestEntropyForGreater < existingNodeEntropy - _entropyThreshold) {
                 // MARK: figure out whats going on with Node ptrs
-                auto rightChildNode = std::make_unique<DecisionTreeNode>(
+                auto rightChildNode = make_unique<DecisionTreeNode>(
                     string(""),
                     bestEntropyForGreater,
                     classProbabilitiesForGreaterThanChildNode,
@@ -769,7 +769,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
                 if (existingNodeEntropy - classEntropyForChild > _entropyThreshold) {
                     // MARK: figure out whats going on with Node ptrs
 
-                    auto childNode = std::make_unique<DecisionTreeNode>(string(""),
+                    auto childNode = make_unique<DecisionTreeNode>(string(""),
                                                                         classEntropyForChild,
                                                                         classProbabilities,
                                                                         extendedBranchFeaturesAndValeusOrThresholds,
@@ -864,9 +864,9 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
     }
 
     map<string, double> entropyValuesForDifferentFeatures; // Stores entropy values for features
-    map<string, map<double, std::pair<double, double>>>
+    map<string, map<double, pair<double, double>>>
         partitioningPointChildEntropiesDict;                                  // Child entropies for numeric thresholds
-    map<string, std::optional<double>> partitioningPointThreshold;            // Thresholds for numeric features
+    map<string, optional<double>> partitioningPointThreshold;            // Thresholds for numeric features
     map<string, vector<double>> entropiesForDifferentValuesOfSymbolicFeature; // Entropies for symbolic feature values
 
     // Initialize maps for all features
@@ -1055,7 +1055,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
         }
     }
 
-    std::optional<double> thresholdForBestFeature;
+    optional<double> thresholdForBestFeature;
     // If best feature name is in partioning point threshold, return the threshold
     if (partitioningPointThreshold.find(bestFeatureName) != partitioningPointThreshold.end()) {
         if (partitioningPointThreshold[bestFeatureName].has_value()) {
@@ -1070,8 +1070,8 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
     }
 
     double bestFeatureEntropy = minEntropyForBestFeature;
-    std::optional<pair<double, double>> valBasedEntropiesToBeReturned;
-    std::optional<double> decisionValToBeReturned;
+    optional<pair<double, double>> valBasedEntropiesToBeReturned;
+    optional<double> decisionValToBeReturned;
 
     if (_numericFeaturesValueRangeDict.find(bestFeatureName) != _numericFeaturesValueRangeDict.end() &&
         _featureValuesHowManyUniquesDict[bestFeatureName] > _symbolicToNumericCardinalityThreshold) {
@@ -1243,7 +1243,7 @@ double DecisionTree::EntropyForThresholdForFeature(const vector<string> &arrayOf
     arrayOfFeaturesAndValuesOrThresholdsCopy.push_back(featureThresholdCombo);
 
     // Calculate the entropy for the sequence
-    std::optional<double> entropy;
+    optional<double> entropy;
 
     // Calculate the entropy for each class
     for (const auto &className : _classNames) {
@@ -1490,7 +1490,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
                 diffRange  = valueRange[1] - valueRange[0];
 
                 vector<string> values = _featuresAndValuesDict[feature];
-                std::set<double> uniqueValues;
+                set<double> uniqueValues;
                 for (const auto &v : values) { // Remove NA values
                     if (v != "NA") {
                         uniqueValues.insert(convert(v));
@@ -1599,7 +1599,7 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
         }
         else {
             // This section if for those numeric features treated symbolically
-            std::set<string> uniqueValuesForFeature =
+            set<string> uniqueValuesForFeature =
                 set(_featuresAndValuesDict[feature].begin(), _featuresAndValuesDict[feature].end());
             vector<string> valuesForFeature(uniqueValuesForFeature.begin(), uniqueValuesForFeature.end());
             valuesForFeature.erase(std::remove(valuesForFeature.begin(), valuesForFeature.end(), "NA"),
@@ -1811,7 +1811,7 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
         }
         else {
             // Extract unique values for the feature from _featuresAndValuesDict
-            std::set<string> uniqueValues(_featuresAndValuesDict[feature].begin(),
+            set<string> uniqueValues(_featuresAndValuesDict[feature].begin(),
                                           _featuresAndValuesDict[feature].end());
 
             // Remove "NA" values
@@ -2037,9 +2037,9 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
     regex pattern2(R"((.+)<(.+))"); // Numeric feature pattern
     regex pattern3(R"((.+)>(.+))"); // Numeric feature pattern
     vector<string> trueNumericTypes;
-    std::set<string> trueNumericTypesFeatureNames;
+    set<string> trueNumericTypesFeatureNames;
     vector<string> symbolicTypes;
-    std::set<string> symbolicTypesFeatureNames; // unsure if this is needed
+    set<string> symbolicTypesFeatureNames; // unsure if this is needed
 
     // Cast draw the incantation
     for (const auto &item : arrayOfFeaturesAndValuesOrThresholds) {
@@ -2650,7 +2650,7 @@ void DecisionTree::setDebug3(int debug3)
     _debug3 = debug3;
 }
 
-void DecisionTree::setRootNode(std::unique_ptr<DecisionTreeNode> rootNode)
+void DecisionTree::setRootNode(unique_ptr<DecisionTreeNode> rootNode)
 {
     _rootNode = std::move(rootNode);
 }

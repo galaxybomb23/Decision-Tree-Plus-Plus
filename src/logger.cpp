@@ -1,11 +1,13 @@
 // This logger is pulled from
 // https://www.geeksforgeeks.org/logging-system-in-cpp/
 
+// Include
+#include "Common.hpp"
+
 #include <ctime>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-using namespace std;
 
 // Enum to represent log levels
 enum LogLevel { DEBUG, INFO, WARNING, ERROR, CRITICAL };
@@ -15,9 +17,9 @@ class Logger {
     // Constructor: Opens the log file in append mode
     Logger(const string &filename)
     {
-        logFile.open(filename, ios::app);
+        logFile.open(filename, std::ios::app);
         if (!logFile.is_open()) {
-            cerr << "Error opening log file." << endl;
+            std::cerr << "Error opening log file." << endl;
         }
     }
 
@@ -34,7 +36,7 @@ class Logger {
         strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", timeinfo);
 
         // Create log entry
-        ostringstream logEntry;
+        std::ostringstream logEntry;
         logEntry << "[" << timestamp << "] " << levelToString(level) << ": " << message << endl;
 
         // Output to console
@@ -48,7 +50,7 @@ class Logger {
     }
 
   private:
-    ofstream logFile; // File stream for the log file
+    std::ofstream logFile; // File stream for the log file
 
     // Converts log level to a string for output
     string levelToString(LogLevel level)

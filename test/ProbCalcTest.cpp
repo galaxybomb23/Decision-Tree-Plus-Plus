@@ -4,11 +4,14 @@
 
 class ProbCalcTest : public ::testing::Test {
   protected:
-    std::unique_ptr<DecisionTree> dtS; // Symbolic DecisionTree
-    std::unique_ptr<DecisionTree> dtN; // Numeric DecisionTree
+    map<string, string> kwargsS;
+    map<string, string> kwargsN;
+    shared_ptr<DecisionTree> dtS; // Symbolic DecisionTree
+    shared_ptr<DecisionTree> dtN; // Numeric DecisionTree
+
     void SetUp() override
     {
-        map<string, string> kwargsS = {
+        kwargsS = {
             // Symbolic kwargs
             {       "training_datafile", "../test/resources/training_symbolic.csv"},
             {  "csv_class_column_index",                                       "1"},
@@ -17,7 +20,7 @@ class ProbCalcTest : public ::testing::Test {
             {       "entropy_threshold",                                     "0.1"}
         };
 
-        map<string, string> kwargsN = {
+        kwargsN = {
             // Numeric kwargs
             {       "training_datafile", "../test/resources/stage3cancer.csv"},
             {  "csv_class_column_index",                                  "2"},
@@ -26,12 +29,12 @@ class ProbCalcTest : public ::testing::Test {
             {       "entropy_threshold",                               "0.01"},
         };
 
-        dtS = std::make_unique<DecisionTree>(kwargsS); // Initialize the DecisionTree
+        dtS = make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
         dtS->getTrainingData();
         dtS->calculateFirstOrderProbabilities();
         dtS->calculateClassPriors();
 
-        dtN = std::make_unique<DecisionTree>(kwargsN); // Initialize the DecisionTree
+        dtN = make_shared<DecisionTree>(kwargsN); // Initialize the DecisionTree
         dtN->getTrainingData();
         dtN->calculateFirstOrderProbabilities();
         dtN->calculateClassPriors();
