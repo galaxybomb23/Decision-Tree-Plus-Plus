@@ -1,8 +1,8 @@
 #ifndef DECISION_TREE_NODE_HPP
 #define DECISION_TREE_NODE_HPP
 
-#include "DecisionTree.hpp"
 #include "Common.hpp"
+#include "DecisionTree.hpp"
 
 #include <iomanip>
 #include <iostream>
@@ -41,7 +41,7 @@ class DecisionTreeNode {
     double GetNodeEntropy() const;
     vector<double> GetClassProbabilities() const;
     vector<string> GetBranchFeaturesAndValuesOrThresholds() const;
-    const vector<unique_ptr<DecisionTreeNode>> &GetChildren() const;
+    const vector<DecisionTreeNode*> GetChildren() const;
     int GetSerialNum() const;
 
     // Setters

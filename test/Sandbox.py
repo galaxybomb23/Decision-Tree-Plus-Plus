@@ -12,10 +12,11 @@ dtree = dt.DecisionTree(training_datafile="test/resources/training_symbolic.csv"
 
 dtree.get_training_data()
 dtree.calculate_class_priors()
-dtree.calculate_first_order_probabilities()
+# dtree.calculate_first_order_probabilities()
 # dtree.determine_data_condition()
 
-root_node = dtree.construct_decision_tree_classifier()
+# root_node = dtree.construct_decision_tree_classifier()
+# root_node.display_decision_tree("  ")
 # /***************************/ Recusrive Descent /***************************/
 # SYMBOLIC
 # dtree._debug3 = True  # needed for recursive_descent bc void function
@@ -66,13 +67,14 @@ root_node = dtree.construct_decision_tree_classifier()
 # print(dtree.class_entropy_on_priors())
 
 # ----- entropyScannerForANumericFeature -----
-# dtree.entropy_scanner_for_a_numeric_feature('"exercising"')
+# dtree.entropy_scanner_for_a_numeric_feature('exercising')
 # dtree.entropy_scanner_for_a_numeric_feature('fatIntake')
 # dtree.entropy_scanner_for_a_numeric_feature('smoking')
 # dtree.entropy_scanner_for_a_numeric_feature('videoAddiction')
 
-# ----- ClassEntropyForLessThanThresholdForFeature -----
-# print(dtree.class_entropy_for_less_than_threshold_for_feature([ "grade=2.0", "gleason=5.0" ], "gleason", 5.0))
+# ----- ClassEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds -----
+print(dtree.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
+    ['exercising=never']))
 
 
 # NUMERIC

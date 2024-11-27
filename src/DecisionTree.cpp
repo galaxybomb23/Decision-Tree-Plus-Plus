@@ -248,8 +248,6 @@ void DecisionTree::getTrainingData()
 // Calculate first order probabilities
 void DecisionTree::calculateFirstOrderProbabilities()
 {
-    cout << "\nEstimating probabilities...\n";
-
     for (const auto &feature : _featureNames) {
         // Calculate probability for the feature's value
         probabilityOfFeatureValue(feature, "");
@@ -443,7 +441,7 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
                 string threshold = match[2].str();
                 if (std::stod(valueForFeature) <= std::stod(threshold)) {
                     pathFound   = true;
-                    auto result = recursiveDescentForClassification(child.get(), featureAndValues, answer);
+                    auto result = recursiveDescentForClassification(child, featureAndValues, answer);
                     answer.insert(result.begin(), result.end());
                     answer["solution_path"].push_back(node->GetNextSerialNum());
                     break;
@@ -453,7 +451,7 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
                 string threshold = match[2].str();
                 if (std::stod(valueForFeature) > std::stod(threshold)) {
                     pathFound   = true;
-                    auto result = recursiveDescentForClassification(child.get(), featureAndValues, answer);
+                    auto result = recursiveDescentForClassification(child, featureAndValues, answer);
                     answer.insert(result.begin(), result.end());
                     answer["solution_path"].push_back(node->GetNextSerialNum());
                     break;
@@ -486,7 +484,7 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
             string lastFeatureAndValueOnBranch = branch_features_and_values.back();
 
             if (lastFeatureAndValueOnBranch == featureValueCombo) {
-                auto result = recursiveDescentForClassification(child.get(), featureAndValues, answer);
+                auto result = recursiveDescentForClassification(child, featureAndValues, answer);
                 answer.insert(result.begin(), result.end());
                 answer["solution_path"].push_back(node->GetNextSerialNum());
                 pathFound = true;
@@ -598,7 +596,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     double existingNodeEntropy                           = node->GetNodeEntropy();
 
     if (_debug3) {
-        cout << "\nRD1 Node serial number: " << nodeSerialNumber << endl;
+        cout << "\nRD1 NODE SERIAL NUMBER: " << nodeSerialNumber << endl;
         cout << "\nRD2 Existing Node Entropy: " << existingNodeEntropy << endl;
         cout << "\nRD3 Features and values or thresholds on branch: " << endl;
         cout << featuresAndValuesOrThresholdsOnBranch << endl;
@@ -1070,13 +1068,17 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
                 else {
                     extendedAttributes = {featureValueString};
                 }
-
-                entropy += classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(extendedAttributes) *
-                           probabilityOfASequenceOfFeaturesAndValuesOrThresholds(extendedAttributes);
+                // print inputs
+                auto entrop = classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(extendedAttributes);
+                auto probs  = probabilityOfASequenceOfFeaturesAndValuesOrThresholds(extendedAttributes);
+                entropy += entrop * probs;
 
                 if (_debug3) {
+                    cout << "\nBFC6.1 Extended Attributes: " << extendedAttributes << endl;
                     cout << "\nBFC7 Entropy calculated for symbolic feature value choice (" << featureName << ", "
                          << value << ") is " << entropy;
+                    cout << "\nBFC7.1 Class Entropy: " << entrop;
+                    cout << "\nBFC7.2 Probability: " << probs;
                 }
 
                 entropiesForDifferentValuesOfSymbolicFeature[featureName].push_back(entropy);
@@ -1459,7 +1461,6 @@ double DecisionTree::priorProbabilityForClass(const string &className)
 
 void DecisionTree::calculateClassPriors()
 {
-    cout << "\nCalculating class priors...\n";
 
     // Return if the class priors have already been calculated
     if (_classPriorsDict.size() > 1) {

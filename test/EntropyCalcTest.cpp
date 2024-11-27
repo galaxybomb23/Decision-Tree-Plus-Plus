@@ -58,6 +58,14 @@ TEST_F(EntropyCalcTest, classEntropyOnPriorsSymbolic)
     ASSERT_NEAR(classEntropy, 0.958, 0.001);
 }
 
+TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds)
+{
+    vector<string> arrayOfFeaturesAndValuesOrThresholds = {"exercising=never"};
+    double entropy1 =
+        dtS->classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(arrayOfFeaturesAndValuesOrThresholds);
+    ASSERT_NEAR(entropy1, 0.782, 0.001);
+}
+
 
 // ------ Numeric Data Tests ------
 
@@ -67,7 +75,8 @@ TEST_F(EntropyCalcTest, classEntropyOnPriorsNumeric)
     ASSERT_NEAR(classEntropy, 0.951, 0.001);
 }
 
-TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureNumeric) {
+TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureNumeric)
+{
     // dtN->entropyScannerForANumericFeature("age");
 }
 
@@ -149,10 +158,11 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
         ASSERT_NEAR(result, expected, Tol);
     }
     {
-        arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=4.0", "g2>3.84", "age<49", "g2>13.44", "g2>17.04"};
-        feature                              = "age";
-        threshold                            = 47.0;
-        expected                             = 0.0314;
+        arrayOfFeaturesAndValuesOrThresholds = {
+            "grade=2.0", "gleason=4.0", "g2>3.84", "age<49", "g2>13.44", "g2>17.04"};
+        feature   = "age";
+        threshold = 47.0;
+        expected  = 0.0314;
 
         // Tests
         result =
