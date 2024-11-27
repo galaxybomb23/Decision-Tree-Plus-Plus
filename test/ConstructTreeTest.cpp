@@ -18,7 +18,7 @@ class ConstructTreeTest : public ::testing::Test {
             {"csv_columns_for_features",                              {2, 3, 4, 5}},
             {       "max_depth_desired",                                       "5"},
             {       "entropy_threshold",                                     "0.1"},
-            {                  "debug3",                                       "1"}
+            {                  "debug3",                                       "0"}
         };
 
         kwargsN = {
@@ -28,7 +28,7 @@ class ConstructTreeTest : public ::testing::Test {
             {"csv_columns_for_features",                   {3, 4, 5, 6, 7, 8}},
             {       "max_depth_desired",                                  "8"},
             {       "entropy_threshold",                               "0.01"},
-            {                  "debug3",                                  "1"}
+            {                  "debug3",                                  "0"}
         };
 
         dtS = make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
@@ -175,12 +175,11 @@ TEST_F(ConstructTreeTest, constructDecisionTreeClassifier)
     DecisionTreeNode* rootS = dtS->constructDecisionTreeClassifier();
     // DecisionTreeNode* rootN = dtN->constructDecisionTreeClassifier();
 
-
-    // // display Trees
+    // display Trees
     rootS->DisplayDecisionTree(" ");
     // rootN->DisplayDecisionTree(" ");
 
-    // // check if root is not null
+    // check if root is not null
     ASSERT_NE(rootS, nullptr);
     // ASSERT_NE(rootN, nullptr);
 

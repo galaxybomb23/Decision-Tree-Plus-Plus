@@ -4,6 +4,7 @@
 // Include
 #include "Common.hpp"
 #include "DecisionTreeNode.hpp"
+#include "Utility.hpp"
 
 #include <iostream>
 #include <memory>
@@ -109,6 +110,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     vector<string> getFeatureNames() const;
     map<string, vector<string>> getFeaturesAndValuesDict() const;
     map<int, vector<string>> getTrainingDataDict() const;
+    vector<string> getClassNames() const;
 
     //---------------- Setters ----------------//
     void setTrainingDatafile(const string &trainingDatafile);
