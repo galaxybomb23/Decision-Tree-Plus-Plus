@@ -31,7 +31,6 @@ DecisionTreeNode::DecisionTreeNode(const string &feature,
 
     if (isRoot) {
         tree->_nodesCreated = -1;
-        tree->_classNames.clear();
     }
 
     _serialNumber = GetNextSerialNum();
