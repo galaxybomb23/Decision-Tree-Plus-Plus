@@ -583,11 +583,17 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     if (_debug3) {
         cout << "\n==================== ENTERING RECURSIVE DESCENT ==========================" << endl;
     }
+
+    if (!node) {
+        cout << "Error: Null node passed to recursiveDescent" << endl;
+        return;
+    }
+
+
     int nodeSerialNumber                      = node->GetSerialNum();
     vector<string> featuresAndValuesOrThresholdsOnBranch = node->GetBranchFeaturesAndValuesOrThresholds();
     double existingNodeEntropy                   = node->GetNodeEntropy();
 
-    // debug info
     if (_debug3) {
         cout << "\nRD1 Node serial number: " << nodeSerialNumber << endl;
         cout << "\nRD2 Existing Node Entropy: " << existingNodeEntropy << endl;
@@ -604,7 +610,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
         return;
     }
 
-    // get the best feature info
+    // Get the best feature info
     vector<string> copyOfPathAttributes  = featuresAndValuesOrThresholdsOnBranch; // deep copy?
     BestFeatureResult bestFeatureResults = bestFeatureCalculator(copyOfPathAttributes, existingNodeEntropy);
     string bestFeature                   = bestFeatureResults.bestFeatureName;
@@ -612,7 +618,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     optional<pair<double, double>> bestFeatureValEntropies = bestFeatureResults.valBasedEntropies;
     optional<double> decisionVal                           = bestFeatureResults.decisionValue;
 
-    // set the best feature and its entropy
+    // Set the best feature and its entropy
     node->SetFeature(bestFeature);
 
     if (_debug3) {
@@ -627,7 +633,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
         return;
     }
 
-    // check if best feature is none // idk why we do this here and not before
+    // Check if best feature is none // idk why we do this here and not before
     if (bestFeature == "None") {
         return;
     }
@@ -653,6 +659,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
 
     // calc entropy gain
     double entropyGain = existingNodeEntropy - bestFeatureEntropy;
+
     if (_debug3) {
         cout << "\nRD11 Expected entropy gain: " << entropyGain << endl;
     }
