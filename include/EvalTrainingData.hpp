@@ -14,6 +14,11 @@ class EvalTrainingData : public DecisionTree {
     ~EvalTrainingData();                                         // Destructor
 
     void evaluateTrainingData(); // Evaluate the training data
+    void evaluationResults(std::vector<std::string> testing_samples,
+                           std::map<int, std::vector<std::string>> allTrainingData,
+                           DecisionTreeNode* root_node,
+                           std::map<int, std::map<std::string, int>> confusion_matrix,
+                           bool evalDebug);
     double _dataQualityIndex;
     int _csvClassColumnIndex;
 

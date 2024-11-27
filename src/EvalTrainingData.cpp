@@ -14,7 +14,6 @@ EvalTrainingData::~EvalTrainingData()
 // Method to evaluate training data
 void EvalTrainingData::evaluateTrainingData()
 {
-    std::cout << "training data dict size: " << _trainingDataDict.size() << "\n";
     bool evalDebug = true;
 
     // Check if the training data file is a CSV
@@ -39,7 +38,7 @@ void EvalTrainingData::evaluateTrainingData()
     // Sort samples based on some index
     for (const auto &entry : allTrainingData) {
         auto ent = std::to_string(entry.first);
-        std::cout << "Sample name: " << ent << "\n";
+        // std::cout << "Sample name: " << ent << "\n";
         allSampleNames.push_back(ent);
     }
 
@@ -119,82 +118,187 @@ void EvalTrainingData::evaluateTrainingData()
         }
 
         // Probabilities and construction of decision tree root node
-        this->calculateFirstOrderProbabilities();
-        this->calculateClassPriors();
-        auto root_node = this->constructDecisionTreeClassifier();
 
-        for (const auto &testSampleName : testing_samples) {
-            int test_sample_key = std::stoi(testSampleName);
+        // print prob cache shape
+        std::cout << "Sprobability cache shape: " << _probabilityCache.size() << "\n";
 
-            try {
-                // Retrieve the data for the test sample safely using .at()
-                const auto &test_sample_data = allTrainingData.at(test_sample_key);
+        std::cout << "FEATSHAPE: " << _featuresAndValuesDict["g2"].size() << "\n";
 
-                // Filter out features with '=NA' values (we prepend feature name)
-                int idx = 0;
-                std::vector<std::string> filtered_data;
-                for (const auto &feature_value : test_sample_data) {
-                    std::string modified_feature_value = _featureNames[idx % 6] + "=" + feature_value;
-                    if (modified_feature_value.find("=NA") == std::string::npos) {
-                        filtered_data.push_back(modified_feature_value);
-                    }
-                    idx++;
-                }
+        // print the above
+        for (const auto &val : _featuresAndValuesDict["g2"]) {
+            std::cout << "VAL: " << val << "\n";
+        }
 
-                // print filtered data
-                // for (const auto &item : filtered_data) {
-                //     std::cout << "Filtered data: " << item << "\n";
-                // }
 
-                // Perform classification using the decision tree
-                auto classification = this->classify(root_node, filtered_data);
+        // this->calculateFirstOrderProbabilities();
+        // this->calculateClassPriors();
 
-                // Check if "solution_path" exists in classification
-                auto solution_path = classification.at("solution_path"); // Will throw if "solution_path" is not found
-                classification.erase("solution_path");
 
-                // Sort the classes based on their probabilities
-                std::vector<std::string> sorted_classes;
-                for (const auto &entry : classification) {
-                    sorted_classes.push_back(entry.first);
-                }
-                std::sort(sorted_classes.begin(),
-                          sorted_classes.end(),
-                          [&classification](const std::string &a, const std::string &b) {
-                              return classification.at(a) > classification.at(b); // Will throw if a key is missing
-                          });
+        // TODO: wait for implementation of constructDecisionTreeClassifier and re-enable the following code
+        // DecisionTreeNode* root_node = this->constructDecisionTreeClassifier();
+        // this->evaluationResults(testing_samples, allTrainingData, root_node, confusion_matrix, evalDebug);
 
-                // Get the most likely class label
-                std::string most_likely_class_label = sorted_classes.front();
 
-                // Retrieve the true class label safely using .at()
-                std::string true_class_label_for_test_sample =
-                    this->_samplesClassLabelDict.at(test_sample_key); // Will throw if key is not found
+        std::cout << "\nResults of the 10-fold cross-validation test for run indexed " << foldIndex + 1 << ":\n";
 
-                // Optionally print the true vs estimated class labels
-                if (evalDebug) {
-                    std::cout << testSampleName << ":   true_class: " << true_class_label_for_test_sample
-                              << "    estimated_class: " << most_likely_class_label << "\n";
-                }
 
-                // Update the confusion matrix using .at() for inner map
-                confusion_matrix.at(std::stoi(true_class_label_for_test_sample)).at(most_likely_class_label) +=
-                    1; // Will throw if any key is missing
+        // Print feature values how many uniques dict
+        std::cout << "feature values how many uniques dict\n{";
+        bool first = true;
+        for (const auto &pair : _featuresAndUniqueValuesDict) {
+            if (!first)
+                std::cout << ", ";
+            std::cout << "'" << pair.first << "': " << pair.second.size();
+            first = false;
+        }
+        std::cout << "}\n";
+
+        // Print numeric features value range dict
+        std::cout << "numeric features value range dict\n{";
+        first = true;
+        for (const auto &pair : _numericFeaturesValueRangeDict) {
+            if (!first)
+                std::cout << ", ";
+            std::cout << "'" << pair.first << "': [" << pair.second[0] << ", " << pair.second[1] << "]";
+            first = false;
+        }
+        std::cout << "}\n";
+
+        // Print features and unique values dict
+        std::cout << "features and unique values dict\n{";
+        first = true;
+        for (const auto &pair : _featuresAndUniqueValuesDict) {
+            if (!first)
+                std::cout << ", ";
+            std::cout << "'" << pair.first << "': [";
+            bool firstValue = true;
+            for (const auto &value : pair.second) {
+                if (!firstValue)
+                    std::cout << ", ";
+                std::cout << value;
+                firstValue = false;
             }
-            catch (const std::out_of_range &e) {
-                std::cerr << "Error: Key not found in map for test sample: " << testSampleName << "\n";
-                if (_trainingDataDict.find(test_sample_key) == _trainingDataDict.end()) {
-                    std::cerr << "  Failed on _trainingDataDict.at(" << test_sample_key << ")\n";
-                }
+            std::cout << "]";
+            first = false;
+        }
+        std::cout << "}\n";
 
-                else if (_samplesClassLabelDict.find(test_sample_key) == _samplesClassLabelDict.end()) {
-                    std::cerr << "  Failed on _samplesClassLabelDict.at(" << test_sample_key << ")\n";
-                }
-                else {
-                    std::cerr << "  Unknown error\n";
-                }
-                continue; // Skip this test sample if there is an error
+        // print feature and values dict
+        std::cout << "features and values dict\n{";
+        first = true;
+        for (const auto &pair : _featuresAndValuesDict) {
+            if (!first)
+                std::cout << ", ";
+            std::cout << "'" << pair.first << "': [";
+            bool firstValue = true;
+            for (const auto &value : pair.second) {
+                if (!firstValue)
+                    std::cout << ", ";
+                std::cout << value;
+                firstValue = false;
             }
+            std::cout << "]";
+            first = false;
+        }
+
+        // Print summary
+        std::cout << "shapes: uniques: " << _featuresAndUniqueValuesDict.size()
+                  << ", numeric features: " << _numericFeaturesValueRangeDict.size()
+                  << ", values: " << _featuresAndValuesDict.size()
+                  << " size of each value: " << _featuresAndValuesDict.begin()->second.size() << "\n";
+
+        // probability cache shape
+        std::cout << "probability cache shape: " << _probabilityCache.size() << "\n";
+
+        std::cout << "class priors\n{";
+        first = true;
+        for (const auto &pair : _classPriorsDict) {
+            if (!first)
+                std::cout << ", ";
+            std::cout << "'" << pair.first << "': " << pair.second;
+            first = false;
+        }
+        std::cout << "}\n";
+    }
+}
+
+void EvalTrainingData::evaluationResults(std::vector<std::string> testing_samples,
+                                         std::map<int, std::vector<std::string>> allTrainingData,
+                                         DecisionTreeNode* root_node,
+                                         std::map<int, std::map<std::string, int>> confusion_matrix,
+                                         bool evalDebug)
+{
+    for (const auto &testSampleName : testing_samples) {
+        int test_sample_key = std::stoi(testSampleName);
+
+        try {
+            // Retrieve the data for the test sample safely using .at()
+            const auto &test_sample_data = allTrainingData.at(test_sample_key);
+
+            // Filter out features with '=NA' values (we prepend feature name)
+            int idx = 0;
+            std::vector<std::string> filtered_data;
+            for (const auto &feature_value : test_sample_data) {
+                std::string modified_feature_value = _featureNames[idx % 6] + "=" + feature_value;
+                if (modified_feature_value.find("=NA") == std::string::npos) {
+                    filtered_data.push_back(modified_feature_value);
+                }
+                idx++;
+            }
+
+            // print filtered data
+            // for (const auto &item : filtered_data) {
+            //     std::cout << "Filtered data: " << item << "\n";
+            // }
+
+            // Perform classification using the decision tree
+            auto classification = this->classify(root_node, filtered_data);
+
+            // Check if "solution_path" exists in classification
+            auto solution_path = classification.at("solution_path"); // Will throw if "solution_path" is not found
+            classification.erase("solution_path");
+
+            // Sort the classes based on their probabilities
+            std::vector<std::string> sorted_classes;
+            for (const auto &entry : classification) {
+                sorted_classes.push_back(entry.first);
+            }
+            std::sort(sorted_classes.begin(),
+                      sorted_classes.end(),
+                      [&classification](const std::string &a, const std::string &b) {
+                          return classification.at(a) > classification.at(b); // Will throw if a key is missing
+                      });
+
+            // Get the most likely class label
+            std::string most_likely_class_label = sorted_classes.front();
+
+            // Retrieve the true class label safely using .at()
+            std::string true_class_label_for_test_sample =
+                this->_samplesClassLabelDict.at(test_sample_key); // Will throw if key is not found
+
+            // Optionally print the true vs estimated class labels
+            if (evalDebug) {
+                std::cout << testSampleName << ":   true_class: " << true_class_label_for_test_sample
+                          << "    estimated_class: " << most_likely_class_label << "\n";
+            }
+
+            // Update the confusion matrix using .at() for inner map
+            confusion_matrix.at(std::stoi(true_class_label_for_test_sample)).at(most_likely_class_label) +=
+                1; // Will throw if any key is missing
+        }
+        catch (const std::out_of_range &e) {
+            std::cerr << "Error: Key not found in map for test sample: " << testSampleName << "\n";
+            if (_trainingDataDict.find(test_sample_key) == _trainingDataDict.end()) {
+                std::cerr << "  Failed on _trainingDataDict.at(" << test_sample_key << ")\n";
+            }
+
+            else if (_samplesClassLabelDict.find(test_sample_key) == _samplesClassLabelDict.end()) {
+                std::cerr << "  Failed on _samplesClassLabelDict.at(" << test_sample_key << ")\n";
+            }
+            else {
+                std::cerr << "  Unknown error\n";
+            }
+            continue; // Skip this test sample if there is an error
         }
     }
 }
