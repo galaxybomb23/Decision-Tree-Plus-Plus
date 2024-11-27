@@ -1,14 +1,15 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+#include <algorithm>
+#include <iostream>
 #include <map>
-#include <string>
+#include <memory>
 #include <optional>
 #include <set>
-#include <iostream>
-#include <algorithm>
-#include <vector>
+#include <string>
 #include <tuple>
+#include <vector>
 
 // Stream
 using std::cout;
@@ -16,17 +17,17 @@ using std::endl;
 
 // Data structures
 using std::map;
-using std::string;
-using std::vector;
 using std::pair;
 using std::set;
+using std::string;
 using std::tuple;
+using std::vector;
 
 // Pointers
+using std::make_shared;
+using std::make_unique;
 using std::optional;
 using std::shared_ptr;
 using std::unique_ptr;
-using std::make_shared;
-using std::make_unique;
 
 #endif // COMMON_HPP
