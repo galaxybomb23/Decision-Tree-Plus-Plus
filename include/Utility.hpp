@@ -64,16 +64,11 @@ string removeTrailingZeros(const string &str);
 string formatDouble(double value);
 
 // Overload the << operator for vectors
-template <typename T> std::ostream &operator<<(std::ostream &os, const vector<T> &v)
-{
-    os << "[";
-    for (int i = 0; i < v.size(); ++i) {
-        os << v[i];
-        if (i != v.size() - 1)
-            os << ", ";
-    }
-    os << "]";
-    return os;
-}
+template <typename T> std::ostream &operator<<(std::ostream &os, const vector<T> &v);
+
+// All helper functions for ConstructTreeTests
+std::string roundDouble(double value, int precision = 3);
+std::string join(const std::vector<std::string>& elements, const std::string& delimiter);
+std::string normalizeString(const std::string& input);
 
 #endif // UTILITY_HPP
