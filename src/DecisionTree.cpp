@@ -1,6 +1,5 @@
 // Include
 #include "DecisionTree.hpp"
-
 #include "Utility.hpp"
 #include "logger.cpp"
 
@@ -18,7 +17,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
 
 // --------------- Logger --------------- //
 Logger logger("../logs/decisionTree.log");
@@ -116,7 +114,7 @@ DecisionTree::DecisionTree(map<string, string> kwargs)
 
 DecisionTree::~DecisionTree() {}
 
-//--------------- Functions ----------------//
+//--------------- Class Functions ----------------//
 
 // Get the training data from the CSV file
 void DecisionTree::getTrainingData()

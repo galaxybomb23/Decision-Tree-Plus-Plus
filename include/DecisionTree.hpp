@@ -32,7 +32,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     DecisionTree(map<string, string> kwargs); // constructor
     ~DecisionTree();                          // destructor
 
-    //--------------- Functions ----------------//
+    //--------------- Class Functions ----------------//
     void getTrainingData();
     void calculateFirstOrderProbabilities();
     void showTrainingData() const;
