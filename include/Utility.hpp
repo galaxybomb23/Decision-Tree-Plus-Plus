@@ -63,8 +63,29 @@ string CleanupCsvString(const string &str);
 string removeTrailingZeros(const string &str);
 string formatDouble(double value);
 
-// Overload the << operator for vectors
-template <typename T> std::ostream &operator<<(std::ostream &os, const vector<T> &v);
+/**
+ * @brief Overloaded stream insertion operator for printing vectors.
+ *
+ * This template function allows for printing the contents of a vector to an
+ * output stream in a formatted manner. The elements of the vector are enclosed
+ * in square brackets and separated by commas.
+ *
+ * @tparam T The type of elements contained in the vector.
+ * @param os The output stream to which the vector will be printed.
+ * @param v The vector to be printed.
+ * @return A reference to the output stream.
+ */
+template <typename T> std::ostream &operator<<(std::ostream &os, const vector<T> &v)
+{
+    os << "[";
+    for (int i = 0; i < v.size(); ++i) {
+        os << v[i];
+        if (i != v.size() - 1)
+            os << ", ";
+    }
+    os << "]";
+    return os;
+}
 
 // All helper functions for ConstructTreeTests
 std::string roundDouble(double value, int precision = 3);

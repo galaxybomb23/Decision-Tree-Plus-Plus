@@ -15,7 +15,7 @@ dtree.calculate_class_priors()
 dtree.calculate_first_order_probabilities()
 # dtree.determine_data_condition()
 
-# root_node = dtree.construct_decision_tree_classifier()
+root_node = dtree.construct_decision_tree_classifier()
 # root_node.display_decision_tree("  ")
 # /***************************/ Recusrive Descent /***************************/
 # SYMBOLIC
@@ -45,7 +45,7 @@ dtreeN.calculate_first_order_probabilities()
 dtreeN.calculate_class_priors()
 
 root_nodeN = dtreeN.construct_decision_tree_classifier()
-root_nodeN.display_decision_tree("  ")
+# root_nodeN.display_decision_tree("  ")
 
 # # /***************************/ Recusrive Descent /***************************/
 # # NUMERIC
