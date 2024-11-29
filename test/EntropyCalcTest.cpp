@@ -4,8 +4,9 @@
 
 class EntropyCalcTest : public ::testing::Test {
   protected:
-    std::unique_ptr<DecisionTree> dtS; // Symbolic DecisionTree
-    std::unique_ptr<DecisionTree> dtN; // Numeric DecisionTree
+    shared_ptr<DecisionTree> dtS; // Symbolic DecisionTree
+    shared_ptr<DecisionTree> dtN; // Numeric DecisionTree
+
     void SetUp() override
     {
         map<string, string> kwargsS = {
@@ -26,12 +27,12 @@ class EntropyCalcTest : public ::testing::Test {
             {       "entropy_threshold",                               "0.01"}
         };
 
-        dtS = std::make_unique<DecisionTree>(kwargsS); // Initialize the DecisionTree
+        dtS = make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
         dtS->getTrainingData();
         dtS->calculateFirstOrderProbabilities();
         dtS->calculateClassPriors();
 
-        dtN = std::make_unique<DecisionTree>(kwargsN); // Initialize the DecisionTree
+        dtN = make_shared<DecisionTree>(kwargsN); // Initialize the DecisionTree
         dtN->getTrainingData();
         dtN->calculateFirstOrderProbabilities();
         dtN->calculateClassPriors();
@@ -57,6 +58,14 @@ TEST_F(EntropyCalcTest, classEntropyOnPriorsSymbolic)
     ASSERT_NEAR(classEntropy, 0.958, 0.001);
 }
 
+TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds)
+{
+    vector<string> arrayOfFeaturesAndValuesOrThresholds = {"exercising=never"};
+    double entropy1 =
+        dtS->classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(arrayOfFeaturesAndValuesOrThresholds);
+    ASSERT_NEAR(entropy1, 0.782, 0.001);
+}
+
 
 // ------ Numeric Data Tests ------
 
@@ -66,7 +75,8 @@ TEST_F(EntropyCalcTest, classEntropyOnPriorsNumeric)
     ASSERT_NEAR(classEntropy, 0.951, 0.001);
 }
 
-TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureNumeric) {
+TEST_F(EntropyCalcTest, entropyScannerForANumericFeatureNumeric)
+{
     // dtN->entropyScannerForANumericFeature("age");
 }
 
@@ -96,7 +106,7 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
         feature                              = "age";
         threshold                            = 57.0;
-        expected                             = 0.02443053983169013;
+        expected                             = 0.004453027563883287;
 
         // Tests
         result =
@@ -147,6 +157,20 @@ TEST_F(EntropyCalcTest, classEntropyForLessThanThresholdForFeatureNumeric)
         // Assert
         ASSERT_NEAR(result, expected, Tol);
     }
+    {
+        arrayOfFeaturesAndValuesOrThresholds = {
+            "grade=2.0", "gleason=4.0", "g2>3.84", "age<49", "g2>13.44", "g2>17.04"};
+        feature   = "age";
+        threshold = 47.0;
+        expected  = 0.0314;
+
+        // Tests
+        result =
+            dtN->classEntropyForLessThanThresholdForFeature(arrayOfFeaturesAndValuesOrThresholds, feature, threshold);
+
+        // Assert
+        ASSERT_NEAR(result, expected, Tol);
+    }
 }
 
 TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
@@ -175,7 +199,7 @@ TEST_F(EntropyCalcTest, classEntropyForGreaterThanThresholdForFeatureNumeric)
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84"};
         feature                              = "age";
         threshold                            = 57.0;
-        expected                             = 0.01606423071045408;
+        expected                             = 0.013766658849326036;
 
         // Tests
         result = dtN->classEntropyForGreaterThanThresholdForFeature(
@@ -237,7 +261,7 @@ TEST_F(EntropyCalcTest, classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresh
     {
         // Setup Test 1
         arrayOfFeaturesAndValuesOrThresholds = {"grade=2.0", "gleason=5.0", "g2<3.84", "age>57.0"};
-        expected                             = 0.01606423071045408;
+        expected                             = 0.013766658849326036;
 
         // Tests
         result =

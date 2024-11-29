@@ -16,7 +16,7 @@ class TrainingDataGeneratorSymbolicTest : public ::testing::Test {
     }
 
     // Class members to be used in tests
-    std::map<std::string, std::string> kwargs = {
+    map<string, string> kwargs = {
         {           "output_datafile", "../test/resources/training_symbolic_1.csv"},
         {            "parameter_file",      "../test/resources/param_symbolic.txt"},
         {"number_of_training_samples",                                       "100"},
@@ -63,8 +63,8 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckFeaturesAndValues)
 
     // check feature and values dictionary
     ASSERT_EQ(tdgs.getFeaturesAndValuesDict().size(), 4);
-    std::vector<std::string> features            = {"exercising", "fatIntake", "smoking", "videoAddiction"};
-    std::vector<std::vector<std::string>> values = {
+    vector<string> features            = {"exercising", "fatIntake", "smoking", "videoAddiction"};
+    vector<vector<string>> values = {
         {"never", "occasionally", "regularly"},
         {"low", "medium", "heavy"},
         {"heavy", "medium", "light", "never"},
@@ -85,15 +85,15 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckFeaturesAndValues)
 TEST_F(TrainingDataGeneratorSymbolicTest, CheckBias)
 {
     ASSERT_NO_THROW(tdgs.ReadParameterFileSymbolic());
-    std::map<std::string, std::map<std::string, std::vector<std::string>>> biasDict = tdgs.getBiasDict();
+    map<string, map<string, vector<string>>> biasDict = tdgs.getBiasDict();
     ASSERT_EQ(biasDict.size(), 2);
 
-    std::vector<std::string> expectedClasses               = {"benign", "malignant"};
-    std::vector<std::vector<std::string>> expectedFeatures = {
+    vector<string> expectedClasses               = {"benign", "malignant"};
+    vector<vector<string>> expectedFeatures = {
         {"exercising", "fatIntake", "smoking", "videoAddiction"},
         {"exercising", "fatIntake", "smoking", "videoAddiction"}
     };
-    std::vector<std::vector<std::vector<std::string>>> expectedValues = {
+    vector<vector<vector<string>>> expectedValues = {
         {{"never=0.2"}, {"heavy=0.2"}, {"heavy=0.2"}, {"heavy=0.2"}},
         {{"never=0.8"}, {"heavy=0.8"}, {"heavy=0.8"},            {}}
     };
@@ -126,12 +126,12 @@ TEST_F(TrainingDataGeneratorSymbolicTest, CheckTrainingSampleRecords)
     }
 
     // ensure first entry is a class (either malignant or benign)
-    std::string firstClass = tdgs.getTrainingSampleRecords()[0][0];
+    string firstClass = tdgs.getTrainingSampleRecords()[0][0];
     ASSERT_TRUE(firstClass == "benign" || firstClass == "malignant");
 
     // ensure rest of entries follow this:
-    std::vector<std::string> features            = {"exercising", "fatIntake", "smoking", "videoAddiction"};
-    std::vector<std::vector<std::string>> values = {
+    vector<string> features            = {"exercising", "fatIntake", "smoking", "videoAddiction"};
+    vector<vector<string>> values = {
         {"never", "occasionally", "regularly"},
         {"low", "medium", "heavy"},
         {"heavy", "medium", "light", "never"},

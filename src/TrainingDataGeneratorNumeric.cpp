@@ -1,9 +1,8 @@
 #include "TrainingDataGeneratorNumeric.hpp"
 
-TrainingDataGeneratorNumeric::TrainingDataGeneratorNumeric(std::map<std::string, std::string> kwargs)
+TrainingDataGeneratorNumeric::TrainingDataGeneratorNumeric(map<string, string> kwargs)
 {
-    std::vector<std::string> allowedKeys = {
-        "output_csv_file", "parameter_file", "number_of_samples_per_class", "debug"};
+    vector<string> allowedKeys = {"output_csv_file", "parameter_file", "number_of_samples_per_class", "debug"};
 
     if (kwargs.empty()) {
         throw std::invalid_argument("Missing parameters.");
@@ -22,8 +21,8 @@ TrainingDataGeneratorNumeric::TrainingDataGeneratorNumeric(std::map<std::string,
 
     // go through the passed keyword arguments
     for (const auto &kv : kwargs) {
-        const std::string &key   = kv.first;
-        const std::string &value = kv.second;
+        const string &key   = kv.first;
+        const string &value = kv.second;
 
         if (key == "output_csv_file") {
             _outputCsvFile = value;
@@ -44,17 +43,17 @@ TrainingDataGeneratorNumeric::~TrainingDataGeneratorNumeric() {}
 
 void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 {
-    std::vector<std::string> classNames;
-    std::map<std::string, double> classNamesAndPriors;
-    std::map<std::string, std::pair<double, double>> featuresWithValueRange;
-    std::map<std::string, std::map<std::string, std::vector<double>>> classesAndTheirParamValues;
-    std::vector<std::string> featuresOrdered;
+    vector<string> classNames;
+    map<string, double> classNamesAndPriors;
+    map<string, pair<double, double>> featuresWithValueRange;
+    map<string, map<string, vector<double>>> classesAndTheirParamValues;
+    vector<string> featuresOrdered;
 
     std::regex fpOrSciNotation("[+-]?\\ *\\d+(\\.\\d*)?|\\.\\d+([eE][+-]?\\d+)?");
 
     // Read the parameter file for numeric data
     std::ifstream file(_parameterFile);
-    std::string params((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    string params((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     if (params.empty()) {
         throw std::invalid_argument("Empty file.");
     }
@@ -67,13 +66,13 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 
     if (std::regex_search(params, classMatches, classRegex)) {
         // Extract class names and priors, make them a vector and a map respectively
-        std::string classNamesStr  = classMatches[1].str();
-        std::string classPriorsStr = classMatches[2].str();
+        string classNamesStr  = classMatches[1].str();
+        string classPriorsStr = classMatches[2].str();
         std::istringstream classNamesStream(classNamesStr);
         std::istringstream classPriorsStream(classPriorsStr);
 
-        std::string name, prior;
-        std::vector<double> classPriors;
+        string name, prior;
+        vector<double> classPriors;
 
         // Split classNamesStream by ' ' delimiter and add to classNames
         while (classNamesStream >> name) {
@@ -99,9 +98,9 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
     }
 
     if (_debug) {
-        std::cout << "Class names and priors: " << std::endl;
+        cout << "Class names and priors: " << endl;
         for (const auto &kv : classNamesAndPriors) {
-            std::cout << kv.first << " : " << kv.second << std::endl;
+            cout << kv.first << " : " << kv.second << endl;
         }
     }
 
@@ -115,17 +114,17 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 
     for (std::sregex_iterator i = featureBegin; i != featureEnd; ++i) {
         // Same as above, extract feature names and value ranges
-        std::smatch match         = *i;
-        std::string featureName   = match[1].str(); // feature name is the first match group
-        std::string valueRangeStr = match[2].str(); // value range is the second match group
+        std::smatch match    = *i;
+        string featureName   = match[1].str(); // feature name is the first match group
+        string valueRangeStr = match[2].str(); // value range is the second match group
 
         std::istringstream valueRangeStream(valueRangeStr);
-        std::vector<double> valueRange;
-        std::string value;
+        vector<double> valueRange;
+        string value;
 
         // Split valueRangeStream by '-' delimiter and add to featuresWithValueRange
         while (std::getline(valueRangeStream, value, '-')) {
-            // std::cout << value << std::endl;
+            // cout << value << endl;
             if (!value.empty()) {
                 valueRange.push_back(std::stod(value));
             }
@@ -141,15 +140,15 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
     }
 
     if (_debug) {
-        std::cout << "Features and their value ranges: " << std::endl;
+        cout << "Features and their value ranges: " << endl;
         for (const auto &kv : featuresWithValueRange) {
-            // std::cout << kv.first << " : [" << kv.second.first << ", " << kv.second.second << "]" << std::endl;
+            // cout << kv.first << " : [" << kv.second.first << ", " << kv.second.second << "]" << endl;
         }
     }
 
     // Add class names and their parameter values to classesAndTheirParamValues
     for (int i = 0; i < classNames.size(); i++) {
-        // std::cout << "Adding [" << classNames[i] << "]" << std::endl;
+        // cout << "Adding [" << classNames[i] << "]" << endl;
         classesAndTheirParamValues[classNames[i]] = {};
     }
 
@@ -160,15 +159,15 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
                                 std::regex_constants::icase);
     std::smatch match;
 
-    std::string::const_iterator searchStart(params.cbegin());
+    string::const_iterator searchStart(params.cbegin());
 
     // Search for class names and their parameter values, go through all the matches
     while (std::regex_search(searchStart, params.cend(), match, classParamsRegex)) {
-        std::string className        = match[1].str();
-        std::string meanString       = match[2].str();
-        std::string covarianceString = match[3].str();
+        string className        = match[1].str();
+        string meanString       = match[2].str();
+        string covarianceString = match[3].str();
 
-        std::vector<double> classMean;
+        vector<double> classMean;
         std::istringstream meanStream(meanString);
         double val;
 
@@ -178,13 +177,13 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
         }
 
         std::istringstream covarianceStream(covarianceString);
-        std::string line;
-        std::vector<std::vector<double>> covarianceMatrix;
+        string line;
+        vector<vector<double>> covarianceMatrix;
 
         // Split covarianceString by '\n' delimiter and add to covarianceMatrix
         while (std::getline(covarianceStream, line)) {
             std::istringstream rowStream(line);
-            std::vector<double> row;
+            vector<double> row;
             double value;
             while (rowStream >> value) {
                 // First add value to the row
@@ -198,7 +197,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 
         // Add class name, mean and covariance to classesAndTheirParamValues
         classesAndTheirParamValues[className]["mean"]       = classMean;
-        classesAndTheirParamValues[className]["covariance"] = std::vector<double>();
+        classesAndTheirParamValues[className]["covariance"] = vector<double>();
 
         // Flatten the covariance matrix into a single vector
         for (const auto &row : covarianceMatrix) {
@@ -211,15 +210,15 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
     }
 
     if (_debug) {
-        std::cout << "Classes and their parameter values: " << std::endl;
+        cout << "Classes and their parameter values: " << endl;
         for (const auto &kv : classesAndTheirParamValues) {
-            std::cout << kv.first << " : " << std::endl;
+            cout << kv.first << " : " << endl;
             for (const auto &kv2 : kv.second) {
-                std::cout << kv2.first << " : ";
+                cout << kv2.first << " : ";
                 for (const auto &val : kv2.second) {
-                    std::cout << val << " ";
+                    cout << val << " ";
                 }
-                std::cout << std::endl;
+                cout << endl;
             }
         }
     }
@@ -235,16 +234,16 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 // Function to generate multivariate normal samples, since Eigen does not have a built-in function for this
 // Original Python implementation uses numpy.random.multivariate_normal, but this is not available in cpp
 // We will use the Cholesky decomposition method to generate multivariate normal samples
-std::vector<VectorXd> TrainingDataGeneratorNumeric::GenerateMultivariateSamples(const std::vector<double> &mean,
-                                                                                const MatrixXd &cov,
-                                                                                int numSamples)
+vector<VectorXd> TrainingDataGeneratorNumeric::GenerateMultivariateSamples(const vector<double> &mean,
+                                                                           const MatrixXd &cov,
+                                                                           int numSamples)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::normal_distribution<> dist(0, 1);
 
     // Generate multivariate normal samples
-    std::vector<VectorXd> samples;
+    vector<VectorXd> samples;
     Eigen::LLT<MatrixXd> llt(cov);
     MatrixXd L = llt.matrixL(); // Cholesky decomposition
 
@@ -264,14 +263,14 @@ std::vector<VectorXd> TrainingDataGeneratorNumeric::GenerateMultivariateSamples(
 
 void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
 {
-    std::map<std::string, std::vector<VectorXd>> samplesForClass;
+    map<string, vector<VectorXd>> samplesForClass;
 
     // Generate samples for each class
     for (const auto &classEntry : _classesAndTheirParamValues) {
         // Get class name, mean and covariance
-        std::string className       = classEntry.first;
-        std::vector<double> mean    = classEntry.second.at("mean");
-        std::vector<double> covFlat = classEntry.second.at("covariance");
+        string className       = classEntry.first;
+        vector<double> mean    = classEntry.second.at("mean");
+        vector<double> covFlat = classEntry.second.at("covariance");
 
         // Convert flat covariance back to matrix
         int dim = mean.size();
@@ -288,12 +287,12 @@ void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
 
     // Store data records to be written to the CSV file
     // For each class, for each sample, create a data record
-    std::vector<std::string> dataRecords;
+    vector<string> dataRecords;
     for (const auto &classEntry : samplesForClass) {
         // For each sample in the class, create a data record
-        const std::string &className = classEntry.first;
+        const string &className = classEntry.first;
         for (int sampleIndex = 0; sampleIndex < _numberOfSamplesPerClass; ++sampleIndex) {
-            std::string dataRecord = className + ",";
+            string dataRecord = className + ",";
             // For each feature in the sample, add to the data record
             for (int featureIndex = 0; featureIndex < classEntry.second[sampleIndex].size(); ++featureIndex) {
                 dataRecord += std::to_string(classEntry.second[sampleIndex](featureIndex));
@@ -304,7 +303,7 @@ void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
                 }
             }
             if (_debug) {
-                std::cout << "Data record: " << dataRecord << std::endl;
+                cout << "Data record: " << dataRecord << endl;
             }
             dataRecords.push_back(dataRecord);
         }
@@ -317,12 +316,11 @@ void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
     // Prepare the CSV output
     std::ofstream file(_outputCsvFile);
     file << "\"\",class_name,"
-         << std::accumulate(_featuresOrdered.begin(),
-                            _featuresOrdered.end(),
-                            std::string(),
-                            [](const std::string &acc, const std::string &feature) {
-                                return acc + (acc.empty() ? "" : ",") + feature;
-                            })
+         << std::accumulate(
+                _featuresOrdered.begin(),
+                _featuresOrdered.end(),
+                string(),
+                [](const string &acc, const string &feature) { return acc + (acc.empty() ? "" : ",") + feature; })
          << "\n";
 
     // Write the data records to the CSV file
@@ -335,12 +333,12 @@ void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
 /*
  * Getters
  */
-std::string TrainingDataGeneratorNumeric::getOutputCsvFile() const
+string TrainingDataGeneratorNumeric::getOutputCsvFile() const
 {
     return _outputCsvFile;
 }
 
-std::string TrainingDataGeneratorNumeric::getParameterFile() const
+string TrainingDataGeneratorNumeric::getParameterFile() const
 {
     return _parameterFile;
 }
@@ -355,28 +353,27 @@ int TrainingDataGeneratorNumeric::getDebug() const
     return _debug;
 }
 
-std::vector<std::string> TrainingDataGeneratorNumeric::getClassNames() const
+vector<string> TrainingDataGeneratorNumeric::getClassNames() const
 {
     return _classNames;
 }
 
-std::vector<std::string> TrainingDataGeneratorNumeric::getFeaturesOrdered() const
+vector<string> TrainingDataGeneratorNumeric::getFeaturesOrdered() const
 {
     return _featuresOrdered;
 }
 
-std::map<std::string, double> TrainingDataGeneratorNumeric::getClassNamesAndPriors() const
+map<string, double> TrainingDataGeneratorNumeric::getClassNamesAndPriors() const
 {
     return _classNamesAndPriors;
 }
 
-std::map<std::string, std::pair<double, double>> TrainingDataGeneratorNumeric::getFeaturesWithValueRange() const
+map<string, pair<double, double>> TrainingDataGeneratorNumeric::getFeaturesWithValueRange() const
 {
     return _featuresWithValueRange;
 }
 
-std::map<std::string, std::map<std::string, std::vector<double>>>
-TrainingDataGeneratorNumeric::getClassesAndTheirParamValues() const
+map<string, map<string, vector<double>>> TrainingDataGeneratorNumeric::getClassesAndTheirParamValues() const
 {
     return _classesAndTheirParamValues;
 }

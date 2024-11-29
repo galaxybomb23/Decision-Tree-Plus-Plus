@@ -2,25 +2,37 @@
 #define DECISION_TREE_HPP
 
 // Include
+#include "Common.hpp"
 #include "DecisionTreeNode.hpp"
+#include "Utility.hpp"
 
 #include <iostream>
-#include <map>
 #include <memory>
-#include <set>
-#include <string>
-#include <vector>
 
-using std::string, std::vector, std::map;
+/**
+ * @struct BestFeatureResult
+ * @brief A structure to hold the result of the best feature selection in a decision tree algorithm.
+ *
+ * This structure contains information about the best feature selected during the decision tree
+ * construction process, including the feature's name, its entropy, the entropies based on its values,
+ * and the decision value.
+ */
+struct BestFeatureResult {
+    string bestFeatureName;
+    double bestFeatureEntropy;
+    optional<pair<double, double>> valBasedEntropies;
+    optional<double> decisionValue;
+};
 
 class DecisionTreeNode;
-class DecisionTree {
+class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
   public:
+    shared_ptr<DecisionTree> getShared() { return shared_from_this(); }
     //--------------- Constructors and Destructors ----------------//
     DecisionTree(map<string, string> kwargs); // constructor
     ~DecisionTree();                          // destructor
 
-    //--------------- Functions ----------------//
+    //--------------- Class Functions ----------------//
     void getTrainingData();
     void calculateFirstOrderProbabilities();
     void showTrainingData() const;
@@ -34,12 +46,14 @@ class DecisionTree {
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();
     void recursiveDescent(DecisionTreeNode* node);
+    BestFeatureResult bestFeatureCalculator(const vector<string> &featuresAndValuesOrThresholdsOnBranch,
+                                            double existingNodeEntropy);
 
     //--------------- Entropy Calculators ----------------//
     double classEntropyOnPriors();
-    void entropyScannerForANumericFeature(const std::string &feature);
-    double EntropyForThresholdForFeature(const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds,
-                                         const std::string &feature,
+    void entropyScannerForANumericFeature(const string &feature);
+    double EntropyForThresholdForFeature(const vector<string> &arrayOfFeaturesAndValuesOrThresholds,
+                                         const string &feature,
                                          const double &threshold,
                                          const string &comparison);
     double classEntropyForLessThanThresholdForFeature(const vector<string> &arrayOfFeaturesAndValuesOrThresholds,
@@ -51,7 +65,7 @@ class DecisionTree {
                                                          const double &threshold);
 
     double classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(
-        const std::vector<std::string> &arrayOfFeaturesAndValuesOrThresholds);
+        const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 
     //--------------- Probability Calculators ----------------//
     double priorProbabilityForClass(const string &className);
@@ -96,6 +110,7 @@ class DecisionTree {
     vector<string> getFeatureNames() const;
     map<string, vector<string>> getFeaturesAndValuesDict() const;
     map<int, vector<string>> getTrainingDataDict() const;
+    vector<string> getClassNames() const;
 
     //---------------- Setters ----------------//
     void setTrainingDatafile(const string &trainingDatafile);
@@ -110,7 +125,8 @@ class DecisionTree {
     void setDebug2(int debug2);
     void setDebug3(int debug3);
     void setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples);
-    void setRootNode(std::unique_ptr<DecisionTreeNode> rootNode);
+    void setRootNode(unique_ptr<DecisionTreeNode> rootNode);
+    void setClassNames(const vector<string> &classNames);
 
   private:
     string _trainingDatafile;
@@ -123,13 +139,13 @@ class DecisionTree {
     int _debug1, _debug2, _debug3;
     int _howManyTotalTrainingSamples;
 
-    std::unique_ptr<DecisionTreeNode> _rootNode;
+    unique_ptr<DecisionTreeNode> _rootNode;
     vector<int> _csvColumnsForFeatures;
     map<string, double> _probabilityCache;
     map<string, double> _entropyCache;
     map<int, vector<string>> _trainingDataDict;
     map<string, vector<string>> _featuresAndValuesDict;
-    map<string, std::set<string>> _featuresAndUniqueValuesDict;
+    map<string, set<string>> _featuresAndUniqueValuesDict;
     map<int, string> _samplesClassLabelDict;
     map<string, double> _classPriorsDict;
     vector<string> _featureNames;
@@ -140,5 +156,6 @@ class DecisionTree {
     map<string, double> _histogramDeltaDict;
     map<string, int> _numOfHistogramBinsDict;
 };
+
 
 #endif // DECISION_TREE_HPP

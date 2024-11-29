@@ -1,8 +1,8 @@
 #include "TrainingDataGeneratorSymbolic.hpp"
 
-TrainingDataGeneratorSymbolic::TrainingDataGeneratorSymbolic(std::map<std::string, std::string> kwargs)
+TrainingDataGeneratorSymbolic::TrainingDataGeneratorSymbolic(map<string, string> kwargs)
 {
-    std::vector<std::string> allowedKeys = {
+    vector<string> allowedKeys = {
         "output_datafile", "parameter_file", "number_of_training_samples", "write_to_file", "debug1", "debug2"};
 
     if (kwargs.empty()) {
@@ -46,24 +46,23 @@ TrainingDataGeneratorSymbolic::TrainingDataGeneratorSymbolic(std::map<std::strin
 
 TrainingDataGeneratorSymbolic::~TrainingDataGeneratorSymbolic() {}
 
-std::vector<std::string> TrainingDataGeneratorSymbolic::filterAndClean(const std::string &pattern,
-                                                                       const std::vector<std::string> &input)
+vector<string> TrainingDataGeneratorSymbolic::filterAndClean(const string &pattern, const vector<string> &input)
 {
-    std::vector<std::string> cleaned;
+    vector<string> cleaned;
 
     if (pattern.empty()) {
         // Remove empty strings
         std::copy_if(
-            input.begin(), input.end(), std::back_inserter(cleaned), [](const std::string &s) { return !s.empty(); });
+            input.begin(), input.end(), std::back_inserter(cleaned), [](const string &s) { return !s.empty(); });
     }
     else {
         std::regex regexPattern(pattern);
-        for (const std::string &item : input) {
+        for (const string &item : input) {
             std::sregex_iterator iter(item.begin(), item.end(), regexPattern);
             std::sregex_iterator end;
 
             while (iter != end) {
-                std::string token = iter->str();
+                string token = iter->str();
                 if (!token.empty()) {
                     cleaned.push_back(token);
                 }
@@ -75,16 +74,15 @@ std::vector<std::string> TrainingDataGeneratorSymbolic::filterAndClean(const std
     return cleaned;
 }
 
-std::vector<std::string> TrainingDataGeneratorSymbolic::splitByRegex(const std::string &input,
-                                                                     const std::string &pattern)
+vector<string> TrainingDataGeneratorSymbolic::splitByRegex(const string &input, const string &pattern)
 {
     std::regex regexPattern(pattern);
     std::sregex_token_iterator iter(input.begin(), input.end(), regexPattern, -1);
     std::sregex_token_iterator end;
-    std::vector<std::string> result;
+    vector<string> result;
 
     while (iter != end) {
-        std::string token = *iter++;
+        string token = *iter++;
         if (!token.empty()) {
             result.push_back(token);
         }
@@ -95,23 +93,23 @@ std::vector<std::string> TrainingDataGeneratorSymbolic::splitByRegex(const std::
 
 void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
 {
-    int debug1                     = _debug1;
-    int debug2                     = _debug2;
-    int writeToFile                = _writeToFile;
-    int numberOfTrainingSamples    = _numberOfTrainingSamples;
-    std::string inputParameterFile = _parameterFile;
+    int debug1                  = _debug1;
+    int debug2                  = _debug2;
+    int writeToFile             = _writeToFile;
+    int numberOfTrainingSamples = _numberOfTrainingSamples;
+    string inputParameterFile   = _parameterFile;
 
     // Read the parameter file for symbolic data
     std::ifstream file(inputParameterFile);
-    std::string allParamsStr((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    std::string paramString = "";
+    string allParamsStr((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    string paramString = "";
 
     if (allParamsStr.empty()) {
         throw std::invalid_argument("Empty file.");
     }
 
     // Split by newline
-    std::vector<std::string> allParams;
+    vector<string> allParams;
     std::stringstream ss(allParamsStr);
     while (std::getline(ss, paramString, '\n')) {
         allParams.push_back(paramString);
@@ -126,7 +124,7 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     }
 
     // string used in matching
-    std::string restParams;
+    string restParams;
 
     // Match class names and class priors
     // Regex to match and capture class names
@@ -134,17 +132,17 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     std::smatch m;
 
     if (std::regex_search(paramString, m, classPattern)) {
-        std::string classNames  = m[1].str();
-        std::string classPriors = m[2].str();
-        restParams              = m[3].str();
+        string classNames  = m[1].str();
+        string classPriors = m[2].str();
+        restParams         = m[3].str();
 
         // Split class names and class priors
-        std::vector<std::string> classNamesList  = filterAndClean("", splitByRegex(classNames, "\\s+"));
-        std::vector<std::string> classPriorsList = filterAndClean("", splitByRegex(classPriors, "\\s+"));
+        vector<string> classNamesList  = filterAndClean("", splitByRegex(classNames, "\\s+"));
+        vector<string> classPriorsList = filterAndClean("", splitByRegex(classPriors, "\\s+"));
 
         // Assign to class names and class priors
         _classNames = classNamesList;
-        std::vector<double> classPriorsDouble;
+        vector<double> classPriorsDouble;
         for (const auto &item : classPriorsList) {
             classPriorsDouble.push_back(std::stod(item));
         }
@@ -157,14 +155,14 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     // Now match Feature and bias
     std::regex featureAndBiasPattern("(feature:[\\s\\S]*?)(?=\\s*bias:)((?=bias:)[\\s\\S]*)");
     std::smatch mFeatureBias;
-    std::string featureString;
-    std::string biasString;
-    std::map<std::string, std::vector<std::string>> featuresAndValuesDict;
+    string featureString;
+    string biasString;
+    map<string, vector<string>> featuresAndValuesDict;
 
     if (std::regex_search(restParams, mFeatureBias, featureAndBiasPattern)) {
-        featureString                     = mFeatureBias[1].str();
-        biasString                        = mFeatureBias[2].str();
-        std::vector<std::string> features = filterAndClean("", splitByRegex(featureString, "(feature[:])"));
+        featureString           = mFeatureBias[1].str();
+        biasString              = mFeatureBias[2].str();
+        vector<string> features = filterAndClean("", splitByRegex(featureString, "(feature[:])"));
 
         // for each feature
         for (const auto &feature : features) {
@@ -172,7 +170,7 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
                 continue;
             }
 
-            std::vector<std::string> splits = filterAndClean("", splitByRegex(feature, " "));
+            vector<string> splits = filterAndClean("", splitByRegex(feature, " "));
 
             // for each split
             for (int i = 0; i < splits.size(); i++) {
@@ -209,15 +207,15 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     _featuresAndValuesDict = featuresAndValuesDict;
 
     // Now onto the bias
-    std::map<std::string, std::map<std::string, std::vector<std::string>>> biasDict;
-    std::vector<std::string> biases = filterAndClean("", splitByRegex(biasString, "(bias[:]\\s*class[:])"));
+    map<string, map<string, vector<string>>> biasDict;
+    vector<string> biases = filterAndClean("", splitByRegex(biasString, "(bias[:]\\s*class[:])"));
     for (const auto &bias : biases) {
         if (std::regex_match(bias, std::regex("bias")))
             continue;
 
         // Split bias string by spaces and filter out empty results
-        std::vector<std::string> splits = filterAndClean("", splitByRegex(bias, "\\s+"));
-        std::string featureName;
+        vector<string> splits = filterAndClean("", splitByRegex(bias, "\\s+"));
+        string featureName;
 
         for (size_t i = 0; i < splits.size(); ++i) {
             if (i == 0) {
@@ -240,27 +238,27 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     _biasDict = biasDict; // Assuming _biasDict is defined appropriately
 
     if (_debug1) {
-        std::cout << "\n\n";
-        std::cout << "Class names: " << vecToString(_classNames) << "\n";
+        cout << "\n\n";
+        cout << "Class names: " << vecToString(_classNames) << "\n";
 
         size_t num_of_classes = _classNames.size();
-        std::cout << "Number of classes: " << num_of_classes << "\n\n";
+        cout << "Number of classes: " << num_of_classes << "\n\n";
 
-        std::cout << "Class priors: " << vecToString(_classPriors) << "\n\n";
+        cout << "Class priors: " << vecToString(_classPriors) << "\n\n";
 
-        std::cout << "Here are the features and their possible values:\n\n";
+        cout << "Here are the features and their possible values:\n\n";
         for (const auto &item : _featuresAndValuesDict) {
-            std::cout << item.first << " ===> " << vecToString(item.second) << "\n";
+            cout << item.first << " ===> " << vecToString(item.second) << "\n";
         }
 
-        std::cout << "\nHere is the biasing for each class:\n\n";
+        cout << "\nHere is the biasing for each class:\n\n";
         for (const auto &item : _biasDict) {
-            std::cout << "\n" << item.first << "\n";
+            cout << "\n" << item.first << "\n";
             for (const auto &bias : item.second) {
                 if (bias.second.size() == 2) {
-                    std::cout << bias.first << " ===> (two)" << bias.second[0] << " and " << bias.second[1] << "\n";
+                    cout << bias.first << " ===> (two)" << bias.second[0] << " and " << bias.second[1] << "\n";
                 }
-                std::cout << bias.first << " ===> [" << vecToString(bias.second) << "]\n";
+                cout << bias.first << " ===> [" << vecToString(bias.second) << "]\n";
             }
         }
     }
@@ -270,13 +268,13 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    std::vector<std::string> classNames                                             = this->_classNames;
-    std::vector<double> classPriors                                                 = this->_classPriors;
-    std::map<std::string, std::vector<std::string>> featuresAndValuesDict           = this->_featuresAndValuesDict;
-    std::map<std::string, std::map<std::string, std::vector<std::string>>> biasDict = this->_biasDict;
-    int howManyTrainingSamples                                                      = this->_numberOfTrainingSamples;
+    vector<string> classNames                         = this->_classNames;
+    vector<double> classPriors                        = this->_classPriors;
+    map<string, vector<string>> featuresAndValuesDict = this->_featuresAndValuesDict;
+    map<string, map<string, vector<string>>> biasDict = this->_biasDict;
+    int howManyTrainingSamples                        = this->_numberOfTrainingSamples;
 
-    std::map<std::string, std::pair<double, double>> classPriorsToUnitIntervalMap;
+    map<string, pair<double, double>> classPriorsToUnitIntervalMap;
     double accumulatedInterval = 0.0;
 
     // Map class priors to unit interval
@@ -288,14 +286,13 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
 
     // Debugging output
     if (this->_debug1) {
-        std::cout << "Mapping of class priors to unit interval:" << std::endl;
+        cout << "Mapping of class priors to unit interval:" << endl;
         for (const auto &item : classPriorsToUnitIntervalMap) {
-            std::cout << item.first << " ===> (" << item.second.first << ", " << item.second.second << ")" << std::endl;
+            cout << item.first << " ===> (" << item.second.first << ", " << item.second.second << ")" << endl;
         }
     }
 
-    std::map<std::string, std::map<std::string, std::map<std::string, std::pair<double, double>>>>
-        classAndFeatureBasedValuePriorsToUnitIntervalMap;
+    map<string, map<string, map<string, pair<double, double>>>> classAndFeatureBasedValuePriorsToUnitIntervalMap;
 
     // Initialize maps for each class and feature
     for (const auto &className : classNames) {
@@ -308,8 +305,8 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
     // Process bias for each class and feature
     for (const auto &className : classNames) {
         for (const auto &feature : featuresAndValuesDict) {
-            const std::vector<std::string> &values = featuresAndValuesDict[feature.first];
-            std::string biasString;
+            const vector<string> &values = featuresAndValuesDict[feature.first];
+            string biasString;
 
             if (!biasDict[className][feature.first].empty()) {
                 biasString = biasDict[className][feature.first][0];
@@ -319,13 +316,13 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
                 biasString    = values[0] + "=" + std::to_string(noBias);
             }
 
-            std::map<std::string, std::pair<double, double>> valuePriorsToUnitIntervalMap;
-            std::vector<std::string> splits = splitByRegex(biasString, "=");
-            std::string chosenForBiasValue  = splits[0];
-            double chosenBias               = std::stod(splits[1]);
-            double remainingBias            = 1.0 - chosenBias;
-            double remainingPortionBias     = remainingBias / (values.size() - 1);
-            double accumulated              = 0.0;
+            map<string, pair<double, double>> valuePriorsToUnitIntervalMap;
+            vector<string> splits       = splitByRegex(biasString, "=");
+            string chosenForBiasValue   = splits[0];
+            double chosenBias           = std::stod(splits[1]);
+            double remainingBias        = 1.0 - chosenBias;
+            double remainingPortionBias = remainingBias / (values.size() - 1);
+            double accumulated          = 0.0;
 
             // Assign intervals for each value
             for (size_t i = 0; i < values.size(); ++i) {
@@ -343,17 +340,17 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
 
             // Debugging output
             if (this->_debug2) {
-                std::cout << "For class " << className << ": Mapping feature value priors for feature '"
-                          << feature.first << "' to unit interval: " << std::endl;
+                cout << "For class " << className << ": Mapping feature value priors for feature '" << feature.first
+                     << "' to unit interval: " << endl;
                 for (const auto &item : valuePriorsToUnitIntervalMap) {
-                    std::cout << "    " << item.first << " ===> (" << item.second.first << ", " << item.second.second
-                              << ")" << std::endl;
+                    cout << "    " << item.first << " ===> (" << item.second.first << ", " << item.second.second << ")"
+                         << endl;
                 }
             }
         }
     }
 
-    std::map<int, std::vector<std::string>> trainingSampleRecords;
+    map<int, vector<string>> trainingSampleRecords;
     int eleIndex = 0;
 
     // Generate training samples
@@ -363,9 +360,9 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
 
         // Generate class label for the sample
         double roll_the_dice = randomDouble(0.0, 1.0);
-        std::string classLabel;
+        string classLabel;
         for (const auto &classEntry : classPriorsToUnitIntervalMap) {
-            const std::pair<double, double> &interval = classEntry.second;
+            const pair<double, double> &interval = classEntry.second;
             if (roll_the_dice >= interval.first && roll_the_dice <= interval.second) {
                 trainingSampleRecords[sampleName].push_back(classEntry.first);
                 classLabel = classEntry.first;
@@ -379,7 +376,7 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
             const auto &valuePriorsToUnitIntervalMap =
                 classAndFeatureBasedValuePriorsToUnitIntervalMap[classLabel][feature.first];
             for (const auto &valueEntry : valuePriorsToUnitIntervalMap) {
-                const std::pair<double, double> &interval = valueEntry.second;
+                const pair<double, double> &interval = valueEntry.second;
                 if (roll_the_dice >= interval.first && roll_the_dice <= interval.second) {
                     trainingSampleRecords[sampleName].push_back(valueEntry.first);
                     break;
@@ -394,13 +391,13 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
 
     // Debugging output for the generated records
     if (this->_debug2) {
-        std::cout << "\n\nTERMINAL DISPLAY OF TRAINING RECORDS:\n\n";
+        cout << "\n\nTERMINAL DISPLAY OF TRAINING RECORDS:\n\n";
         for (const auto &sampleEntry : trainingSampleRecords) {
-            std::cout << sampleEntry.first << " = ";
+            cout << sampleEntry.first << " = ";
             for (const auto &record : sampleEntry.second) {
-                std::cout << record << ", ";
+                cout << record << ", ";
             }
-            std::cout << std::endl;
+            cout << endl;
         }
     }
 }
@@ -413,7 +410,7 @@ double TrainingDataGeneratorSymbolic::randomDouble(double lower, double upper)
 void TrainingDataGeneratorSymbolic::WriteTrainingDataToFile()
 {
     if (!_writeToFile) {
-        std::cout << "Write to file option is disabled. Skipping file writing." << std::endl;
+        cout << "Write to file option is disabled. Skipping file writing." << endl;
         return;
     }
 
@@ -427,7 +424,7 @@ void TrainingDataGeneratorSymbolic::WriteTrainingDataToFile()
     for (const auto &feature : _featuresAndValuesDict) {
         outFile << ',' << feature.first;
     }
-    outFile << std::endl;
+    outFile << endl;
 
     // print the sample records
     for (const auto &record : _trainingSampleRecords) {
@@ -435,9 +432,9 @@ void TrainingDataGeneratorSymbolic::WriteTrainingDataToFile()
         for (const auto &feature : record.second) {
             outFile << ',' << feature;
         }
-        outFile << std::endl;
+        outFile << endl;
     }
 
     outFile.close();
-    std::cout << "Training data written to " << _outputDatafile << std::endl;
+    cout << "Training data written to " << _outputDatafile << endl;
 }
