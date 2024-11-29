@@ -103,7 +103,7 @@ std::ostream& operator<<(std::ostream& os, const map<K, V>& m) {
 
 // All helper functions for ConstructTreeTests
 std::string roundDouble(double value, int precision = 3);
-std::string join(const std::vector<std::string>& elements, const std::string& delimiter);
-std::string normalizeString(const std::string& input);
+std::string join(const std::vector<std::string> &elements, const std::string &delimiter);
+std::string normalizeString(const std::string &input);
 
 #endif // UTILITY_HPP
