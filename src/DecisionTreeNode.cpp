@@ -1,4 +1,5 @@
 #include "DecisionTreeNode.hpp"
+
 #include "DecisionTree.hpp"
 
 DecisionTreeNode::DecisionTreeNode(const string &feature,
@@ -167,9 +168,8 @@ void DecisionTreeNode::DisplayNode(const string &offset) const
     string featureAtNode = _feature.empty() ? " " : _feature;
 
     // Format branch features and values with single quotes
-    cout << "NODE " << _serialNumber << ":  " << offset
-         << "BRANCH TESTS TO " << (_linkedTo.empty() ? "LEAF NODE: " : "NODE: ")
-         << "[";
+    cout << "NODE " << _serialNumber << ":  " << offset << "BRANCH TESTS TO "
+         << (_linkedTo.empty() ? "LEAF NODE: " : "NODE: ") << "[";
 
     for (size_t i = 0; i < _branchFeaturesAndValuesOrThresholds.size(); ++i) {
         cout << "'" << _branchFeaturesAndValuesOrThresholds[i] << "'";
@@ -194,14 +194,15 @@ void DecisionTreeNode::DisplayNode(const string &offset) const
     cout << secondLineOffset;
     if (_linkedTo.empty()) {
         // Leaf node: Only print entropy and probabilities
-        cout << "Node Creation Entropy: " << roundDouble(_nodeCreationEntropy, 3)
-             << "   Class Probs: " << "[" << join(classProbabilitiesWithClass, ", ") << "]" << endl
+        cout << "Node Creation Entropy: " << roundDouble(_nodeCreationEntropy, 3) << "   Class Probs: "
+             << "[" << join(classProbabilitiesWithClass, ", ") << "]" << endl
              << endl;
-    } else {
+    }
+    else {
         // Non-leaf node: Print feature, entropy, and probabilities
         cout << "Decision Feature: " << featureAtNode
-             << "   Node Creation Entropy: " << roundDouble(_nodeCreationEntropy, 3)
-             << "   Class Probs: " << "[" << join(classProbabilitiesWithClass, ", ") << "]" << endl
+             << "   Node Creation Entropy: " << roundDouble(_nodeCreationEntropy, 3) << "   Class Probs: "
+             << "[" << join(classProbabilitiesWithClass, ", ") << "]" << endl
              << endl;
     }
 }

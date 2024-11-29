@@ -1,5 +1,6 @@
 // Include
 #include "DecisionTree.hpp"
+
 #include "Utility.hpp"
 #include "logger.cpp"
 
@@ -1069,7 +1070,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
                 }
                 double entrop = classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(extendedAttributes);
                 double probs  = probabilityOfASequenceOfFeaturesAndValuesOrThresholds(extendedAttributes);
-                
+
                 entropy += entrop * probs;
 
                 if (_debug3) {

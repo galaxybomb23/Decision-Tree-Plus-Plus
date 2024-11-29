@@ -1,9 +1,9 @@
 #include "Utility.hpp"
 
 #include <cmath>
+#include <iomanip>
 #include <regex>
 #include <sstream>
-#include <iomanip>
 
 int sampleIndex(string sample_name)
 {
@@ -39,8 +39,8 @@ string CleanupCsvString(const string &line)
     for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
         string match      = (*i).str();
         string cleanMatch = std::regex_replace(match.substr(1, match.size() - 2), std::regex(","), "");
-        cleanMatch             = std::regex_replace(cleanMatch, std::regex("\\s+"), "_");
-        cleaned                = std::regex_replace(
+        cleanMatch        = std::regex_replace(cleanMatch, std::regex("\\s+"), "_");
+        cleaned           = std::regex_replace(
             cleaned, std::regex(std::regex_replace(match, std::regex(R"([\{\}])"), "\\$&")), cleanMatch);
     }
     // cout << "Double-quoted: " << cleaned << "|" << endl;
@@ -112,7 +112,6 @@ string formatDouble(double value)
 }
 
 
-
 /**
  * @brief Rounds a double value to a specified precision and returns it as a string.
  *
@@ -123,7 +122,8 @@ string formatDouble(double value)
  * @param precision The number of decimal places to round to. Default is 3.
  * @return A string representation of the rounded double value.
  */
-std::string roundDouble(double value, int precision) {
+std::string roundDouble(double value, int precision)
+{
     std::ostringstream out;
     out << std::fixed << std::setprecision(precision) << value;
     return out.str();
@@ -139,7 +139,8 @@ std::string roundDouble(double value, int precision) {
  * @param delimiter The string to use as a delimiter between elements.
  * @return A single string containing all elements of the input vector, separated by the delimiter.
  */
-std::string join(const std::vector<std::string>& elements, const std::string& delimiter) {
+std::string join(const std::vector<std::string> &elements, const std::string &delimiter)
+{
     std::ostringstream joined;
     for (size_t i = 0; i < elements.size(); ++i) {
         joined << elements[i];
@@ -157,7 +158,8 @@ std::string join(const std::vector<std::string>& elements, const std::string& de
  * @param input The input string to be normalized.
  * @return A normalized string with trimmed spaces, no empty lines, and single spaces.
  */
-std::string normalizeString(const std::string& input) {
+std::string normalizeString(const std::string &input)
+{
     std::ostringstream normalized;
     std::istringstream inputStream(input);
     std::string line;
@@ -181,7 +183,8 @@ std::string normalizeString(const std::string& input) {
                     collapsed += ' '; // Add a single space
                     inSpace = true;
                 }
-            } else {
+            }
+            else {
                 collapsed += ch;
                 inSpace = false;
             }

@@ -2,8 +2,7 @@
 
 TrainingDataGeneratorNumeric::TrainingDataGeneratorNumeric(map<string, string> kwargs)
 {
-    vector<string> allowedKeys = {
-        "output_csv_file", "parameter_file", "number_of_samples_per_class", "debug"};
+    vector<string> allowedKeys = {"output_csv_file", "parameter_file", "number_of_samples_per_class", "debug"};
 
     if (kwargs.empty()) {
         throw std::invalid_argument("Missing parameters.");
@@ -115,7 +114,7 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 
     for (std::sregex_iterator i = featureBegin; i != featureEnd; ++i) {
         // Same as above, extract feature names and value ranges
-        std::smatch match         = *i;
+        std::smatch match    = *i;
         string featureName   = match[1].str(); // feature name is the first match group
         string valueRangeStr = match[2].str(); // value range is the second match group
 
@@ -236,8 +235,8 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 // Original Python implementation uses numpy.random.multivariate_normal, but this is not available in cpp
 // We will use the Cholesky decomposition method to generate multivariate normal samples
 vector<VectorXd> TrainingDataGeneratorNumeric::GenerateMultivariateSamples(const vector<double> &mean,
-                                                                                const MatrixXd &cov,
-                                                                                int numSamples)
+                                                                           const MatrixXd &cov,
+                                                                           int numSamples)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -317,12 +316,11 @@ void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
     // Prepare the CSV output
     std::ofstream file(_outputCsvFile);
     file << "\"\",class_name,"
-         << std::accumulate(_featuresOrdered.begin(),
-                            _featuresOrdered.end(),
-                            string(),
-                            [](const string &acc, const string &feature) {
-                                return acc + (acc.empty() ? "" : ",") + feature;
-                            })
+         << std::accumulate(
+                _featuresOrdered.begin(),
+                _featuresOrdered.end(),
+                string(),
+                [](const string &acc, const string &feature) { return acc + (acc.empty() ? "" : ",") + feature; })
          << "\n";
 
     // Write the data records to the CSV file
@@ -375,8 +373,7 @@ map<string, pair<double, double>> TrainingDataGeneratorNumeric::getFeaturesWithV
     return _featuresWithValueRange;
 }
 
-map<string, map<string, vector<double>>>
-TrainingDataGeneratorNumeric::getClassesAndTheirParamValues() const
+map<string, map<string, vector<double>>> TrainingDataGeneratorNumeric::getClassesAndTheirParamValues() const
 {
     return _classesAndTheirParamValues;
 }
