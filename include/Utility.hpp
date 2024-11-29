@@ -87,6 +87,20 @@ template <typename T> std::ostream &operator<<(std::ostream &os, const vector<T>
     return os;
 }
 
+// Function to print out a map
+template <typename K, typename V>
+std::ostream& operator<<(std::ostream& os, const map<K, V>& m) {
+    os << "{ ";
+    for (const auto& [key, value] : m) {
+        os << key << ": " << value << ", ";
+    }
+    if (!m.empty()) {
+        os.seekp(-2, std::ios_base::end); // Remove trailing comma and space
+    }
+    os << " }";
+    return os;
+}
+
 // All helper functions for ConstructTreeTests
 std::string roundDouble(double value, int precision = 3);
 std::string join(const std::vector<std::string>& elements, const std::string& delimiter);

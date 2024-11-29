@@ -45,6 +45,7 @@ class ConstructTreeTest : public ::testing::Test {
     void TearDown() override
     {
         dtS.reset(); // Reset the DecisionTree
+        dtN.reset(); // Reset the DecisionTree
     }
 };
 

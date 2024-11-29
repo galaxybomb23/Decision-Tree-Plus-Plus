@@ -90,6 +90,9 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     vector<vector<string>> findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes);
     void printStats();
 
+    
+    std::string trim(const std::string& str);
+
     int _nodesCreated;
     string _classLabel; // The class label for the training data currently unused
     vector<string> _classNames;

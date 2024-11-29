@@ -7,55 +7,71 @@ protected:
     // Class members to be used in tests
     map<string, string> kwargsS;
     shared_ptr<DecisionTree> dtS; // Symbolic DecisionTree
-    unique_ptr<DecisionTreeNode> nodeS;
+
+    map<string, string> kwargsN;
+    shared_ptr<DecisionTree> dtN; // Numeric DecisionTree
 
     void SetUp() override
     {
         kwargsS = {
-            {"training_datafile", "../test/resources/stage3cancer.csv"},
-            {"entropy_threshold", "0.1"},
-            {"max_depth_desired", "20"},
-            {"csv_class_column_index", "8"},
-            {"symbolic_to_numeric_cardinality_threshold", "20"},
-            {"csv_columns_for_features", {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
-            {"number_of_histogram_bins", "10"},
-            {"csv_cleanup_needed", "1"},
-            {"debug1", "1"},
-            {"debug2", "2"},
-            {"debug3", "0"}
+            // Symbolic kwargs
+            {       "training_datafile", "../test/resources/training_symbolic.csv"},
+            {  "csv_class_column_index",                                       "1"},
+            {"csv_columns_for_features",                              {2, 3, 4, 5}},
+            {       "max_depth_desired",                                       "5"},
+            {       "entropy_threshold",                                     "0.1"},
+            {                  "debug3",                                       "0"}
         };
+
+        kwargsN = {
+            // Numeric kwargs
+            {       "training_datafile", "../test/resources/stage3cancer.csv"},
+            {  "csv_class_column_index",                                  "2"},
+            {"csv_columns_for_features",                   {3, 4, 5, 6, 7, 8}},
+            {       "max_depth_desired",                                  "8"},
+            {       "entropy_threshold",                               "0.01"},
+            {                  "debug3",                                  "0"}
+        };
+
         dtS = make_shared<DecisionTree>(kwargsS);
-        nodeS = make_unique<DecisionTreeNode>(
-            "feature", 0.1, vector<double>{0.2}, vector<string>{"branch"}, dtS, true);
+        dtS->getTrainingData();
+        dtS->calculateFirstOrderProbabilities();
+        dtS->calculateClassPriors();
+
+        dtN = make_shared<DecisionTree>(kwargsN);
+        dtN->getTrainingData();
+        dtN->calculateFirstOrderProbabilities();
+        dtN->calculateClassPriors();
     }
 
     void TearDown() override
     {
         dtS.reset();
+        dtN.reset();
     }
 };
 
 TEST_F(ClassifyTest, CheckdtExists)
 {
     ASSERT_NE(dtS, nullptr);
+    ASSERT_NE(dtN, nullptr);
 }
 
-TEST_F(ClassifyTest, ConstructorInitializesNode)
+TEST_F(ClassifyTest, ClassifySymbolic)
 {
-    ASSERT_NE(nodeS, nullptr);
+    // Construct Tree
+    DecisionTreeNode* rootS = dtS->constructDecisionTreeClassifier();
+    ASSERT_NE(rootS, nullptr);
+    
+    vector<string> testSample;
+    map<string, string> classification;
+    map<string, string> expected;
+
+    {
+        testSample = {"exercising=never", "smoking=heavy", "fatIntake=heavy", "videoAddiction=heavy"};
+        classification = dtS->classify(rootS, testSample);
+        cout << classification << endl;
+    }
+
+    ASSERT_EQ(1, 0);
 }
-
-// TEST_F(ClassifyTest, ClassifyFunction)
-// {
-    // Construct the features and values vector out of the features and values dictionary
-    // vector<string> featuresAndValues;
-    // for (const auto& kv : dt.getFeaturesAndValuesDict())
-    // {
-    //     for (const auto& value : kv.second)
-    //     {
-    //         featuresAndValues.push_back(kv.first + "=" + value);
-    //     }
-    // }
-
-    // map<string, string> classification = dt.classify(&node, featuresAndValues);
-// }

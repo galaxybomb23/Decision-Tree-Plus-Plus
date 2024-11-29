@@ -308,25 +308,19 @@ map<string, string> DecisionTree::classify(DecisionTreeNode* rootNode, const vec
     }
 
     vector<string> newFeaturesAndValues;
-    std::regex pattern(R"((\S+)\s*=\s*(\S+))");
-    std::smatch match;
 
-    for (const auto &fv : featuresAndValues) {
-        if (std::regex_match(fv, match, pattern)) {
-            string feature = match[1];
-            string value   = match[2];
-            newFeaturesAndValues.push_back(feature + "=" + value);
-        }
-        else {
+    for (const auto& fv : featuresAndValues) {
+        // Find the '=' character
+        auto pos = fv.find('=');
+        if (pos == std::string::npos) {
             throw std::runtime_error("\n\nError in the format of the feature and value pairs. "
                                      "Use the format feature=value.");
         }
-    }
 
-    // Update the features and values
-    for (const auto &fv : newFeaturesAndValues) {
-        string feature = fv.substr(0, fv.find("="));
-        string value   = fv.substr(fv.find("=") + 1);
+        std::string feature = trim(fv.substr(0, pos));
+        std::string value = trim(fv.substr(pos + 1));
+
+        newFeaturesAndValues.push_back(feature + "=" + value);
         _featuresAndValuesDict[feature].push_back(value);
     }
 
@@ -386,6 +380,7 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
         map<string, double> classProbabilities;
         for (size_t i = 0; i < _classNames.size(); ++i) {
             classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
+            answer[_classNames[i]] = {leafNodeClassProbabilities[i]};
         }
         answer["solution_path"].push_back(node->GetNextSerialNum());
         return classProbabilities;
@@ -418,6 +413,7 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
         map<string, double> classProbabilities;
         for (size_t i = 0; i < _classNames.size(); ++i) {
             classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
+            answer[_classNames[i]] = {leafNodeClassProbabilities[i]};
         }
         answer["solution_path"].push_back(node->GetNextSerialNum());
 
@@ -427,8 +423,9 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
     // Numeric feature case
     if (_probDistributionNumericFeaturesDict.find(featureTestedAtNode) != _probDistributionNumericFeaturesDict.end()) {
         if (_debug3) {
-            cout << "\nCLRD2 In the numeric section";
+            cout << "\nCLRD2 In the truly numeric section";
         }
+
         for (const auto &child : children) {
             vector<string> branchFeaturesAndValues = child->GetBranchFeaturesAndValuesOrThresholds();
             string lastFeatureAndValueOnBranch     = branchFeaturesAndValues.back();
@@ -2432,26 +2429,43 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 
 //--------------- Class Based Utilities ----------------//
 
-bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)
-{
-    for (const auto &featureAndValue : featuresAndValues) {
-        std::regex pattern(R"(\S+)\s*=\s*(\S+)");
-        std::smatch match;
-        std::regex_search(featureAndValue, match, pattern);
 
-        auto feature = match[1];
-        auto value   = match[2];
-
-        if (feature == "" || value == "") {
-            throw std::runtime_error("Your test data has a formatting error");
-        }
-        if (_featuresAndValuesDict.find(feature) == _featuresAndValuesDict.end()) {
-            return false;
-        }
-        return true;
+std::string DecisionTree::trim(const std::string& str) {
+    size_t first = str.find_first_not_of(" \t");
+    size_t last = str.find_last_not_of(" \t");
+    if (first == std::string::npos || last == std::string::npos) {
+        return ""; // Empty or all whitespace
     }
-    return false;
+    return str.substr(first, (last - first + 1));
 }
+
+bool DecisionTree::checkNamesUsed(const std::vector<std::string>& featuresAndValues) {
+    for (const auto& featureAndValue : featuresAndValues) {
+        // Find the '=' character
+        auto pos = featureAndValue.find('=');
+        if (pos == std::string::npos) {
+            throw std::runtime_error("Your test data has a formatting error: Missing '=' in feature-value pair.");
+        }
+
+        // Split into feature and value
+        std::string feature = trim(featureAndValue.substr(0, pos));
+        std::string value = trim(featureAndValue.substr(pos + 1));
+
+        // Check for empty feature or value
+        if (feature.empty() || value.empty()) {
+            throw std::runtime_error("Your test data has a formatting error: Feature or value is empty.");
+        }
+
+        // Check if feature exists in _featureNames
+        if (std::find(_featureNames.begin(), _featureNames.end(), feature) == _featureNames.end()) {
+            return false; // Feature not found in the feature names list
+        }
+    }
+
+    return true; // All features are valid
+}
+
+
 
 DecisionTree &DecisionTree::operator=(const DecisionTree &dt)
 {
