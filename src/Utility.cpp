@@ -111,7 +111,6 @@ string formatDouble(double value)
     return removeTrailingZeros(ss.str()); // Remove any unnecessary trailing zeros
 }
 
-
 /**
  * @brief Rounds a double value to a specified precision and returns it as a string.
  *
