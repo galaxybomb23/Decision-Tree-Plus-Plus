@@ -75,6 +75,14 @@ TEST_F(ClassifyTest, ClassifySymbolic)
         expected["solution_path"] = "NODE0, NODE1, NODE2, NODE3, NODE4";
         ASSERT_EQ(classification, expected);
     }
+    {
+        testSample = {"videoAddiction=heavy"};
+        classification = dtS->classify(rootS, testSample);
+        expected["benign"] = "0.620";
+        expected["malignant"] = "0.380";
+        expected["solution_path"] = "NODE0";
+        ASSERT_EQ(classification, expected);
+    }
 }
 
 TEST_F(ClassifyTest, ClassifyNumeric) 

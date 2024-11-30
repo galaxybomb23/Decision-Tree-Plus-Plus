@@ -2431,34 +2431,24 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 
 //--------------- Class Based Utilities ----------------//
 
-
-std::string DecisionTree::trim(const std::string& str) {
-    size_t first = str.find_first_not_of(" \t");
-    size_t last = str.find_last_not_of(" \t");
-    if (first == std::string::npos || last == std::string::npos) {
-        return ""; // Empty or all whitespace
-    }
-    return str.substr(first, (last - first + 1));
-}
-
-bool DecisionTree::checkNamesUsed(const std::vector<std::string>& featuresAndValues) {
+bool DecisionTree::checkNamesUsed(const vector<string>& featuresAndValues) {
     for (const auto& featureAndValue : featuresAndValues) {
         // Find the '=' character
         auto pos = featureAndValue.find('=');
-        if (pos == std::string::npos) {
-            throw std::runtime_error("Your test data has a formatting error: Missing '=' in feature-value pair.");
+
+        if (pos == string::npos) {
+            throw runtime_error("Your test data has a formatting error: Missing '=' in feature-value pair.");
         }
 
         // Split into feature and value
-        std::string feature = trim(featureAndValue.substr(0, pos));
-        std::string value = trim(featureAndValue.substr(pos + 1));
+        string feature = trim(featureAndValue.substr(0, pos));
+        string value = trim(featureAndValue.substr(pos + 1));
 
         // Check for empty feature or value
         if (feature.empty() || value.empty()) {
             throw std::runtime_error("Your test data has a formatting error: Feature or value is empty.");
         }
 
-        // Check if feature exists in _featureNames
         if (std::find(_featureNames.begin(), _featureNames.end(), feature) == _featureNames.end()) {
             return false; // Feature not found in the feature names list
         }

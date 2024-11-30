@@ -19,7 +19,7 @@ root_node = dtree.construct_decision_tree_classifier()
 # root_node.display_decision_tree("  ")
 
 # /***************************/ Classify /***************************/
-test_sample = ['exercising=never', 'smoking=heavy', 'fatIntake=heavy', 'videoAddiction=heavy']
+test_sample = ['videoAddiction=heavy']
 classification = dtree.classify(root_node, test_sample)
 print("Classification: " + str(classification))
 

@@ -32,7 +32,14 @@ struct BestFeatureResult {
 class DecisionTreeNode;
 class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
   public:
+
+    // MARK: Discuss if these need to be private or can stay public
+    int _nodesCreated;
+    string _classLabel; // The class label for the training data currently unused
+    vector<string> _classNames;
+
     shared_ptr<DecisionTree> getShared() { return shared_from_this(); }
+
     //--------------- Constructors and Destructors ----------------//
     DecisionTree(map<string, string> kwargs); // constructor
     ~DecisionTree();                          // destructor
@@ -94,13 +101,6 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     DecisionTree &operator=(const DecisionTree &dt);
     vector<vector<string>> findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes);
     void printStats();
-
-    
-    std::string trim(const std::string& str);
-
-    int _nodesCreated;
-    string _classLabel; // The class label for the training data currently unused
-    vector<string> _classNames;
 
     // --------------- Getters ----------------//
     string getTrainingDatafile() const;
