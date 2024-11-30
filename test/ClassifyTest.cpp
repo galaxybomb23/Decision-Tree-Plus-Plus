@@ -57,35 +57,24 @@ TEST_F(ClassifyTest, CheckdtExists)
     ASSERT_NE(dtN, nullptr);
 }
 
-
-// MARK: Start with this test
-TEST_F(ClassifyTest, recursiveDescentForClassificationSymbolic) 
-{
-    
-}
-
-TEST_F(ClassifyTest, recursiveDescentForClassificationNumeric) 
-{
-    
-}
-
 TEST_F(ClassifyTest, ClassifySymbolic)
 {
     // Construct Tree
-    // DecisionTreeNode* rootS = dtS->constructDecisionTreeClassifier();
-    // ASSERT_NE(rootS, nullptr);
+    DecisionTreeNode* rootS = dtS->constructDecisionTreeClassifier();
+    ASSERT_NE(rootS, nullptr);
     
-    // vector<string> testSample;
-    // map<string, string> classification;
-    // map<string, string> expected;
+    vector<string> testSample;
+    map<string, string> classification;
+    map<string, string> expected;
 
-    // {
-    //     testSample = {"exercising=never", "smoking=heavy", "fatIntake=heavy", "videoAddiction=heavy"};
-    //     classification = dtS->classify(rootS, testSample);
-    //     cout << classification << endl;
-    // }
-
-    // ASSERT_EQ(1, 0);
+    {
+        testSample = {"exercising=never", "smoking=heavy", "fatIntake=heavy", "videoAddiction=heavy"};
+        classification = dtS->classify(rootS, testSample);
+        expected["benign"] = "0.005";
+        expected["malignant"] = "0.995";
+        expected["solution_path"] = "NODE0, NODE1, NODE2, NODE3, NODE4";
+        ASSERT_EQ(classification, expected);
+    }
 }
 
 TEST_F(ClassifyTest, ClassifyNumeric) 

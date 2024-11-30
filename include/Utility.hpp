@@ -89,15 +89,17 @@ template <typename T> std::ostream &operator<<(std::ostream &os, const vector<T>
 
 // Function to print out a map
 template <typename K, typename V>
-std::ostream& operator<<(std::ostream& os, const map<K, V>& m) {
+std::ostream& operator<<(std::ostream& os, const std::map<K, V>& m) {
     os << "{ ";
+    bool first = true;
     for (const auto& [key, value] : m) {
-        os << key << ": " << value << ", ";
+        if (!first) {
+            os << ", ";
+        }
+        first = false;
+        os << key << ": " << value;
     }
-    if (!m.empty()) {
-        os.seekp(-2, std::ios_base::end); // Remove trailing comma and space
-    }
-    os << " }";
+    os << " }" << std::endl;
     return os;
 }
 

@@ -9,6 +9,11 @@
 #include <iostream>
 #include <memory>
 
+struct ClassificationAnswer {
+    map<string, double> classProbabilities;
+    vector<int> solutionPath;
+};
+
 /**
  * @struct BestFeatureResult
  * @brief A structure to hold the result of the best feature selection in a decision tree algorithm.
@@ -39,9 +44,9 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
 
     //--------------- Classify ----------------//
     map<string, string> classify(DecisionTreeNode* rootNode, const vector<string> &featuresAndValues);
-    map<string, double> recursiveDescentForClassification(DecisionTreeNode* node,
-                                                          const vector<string> &feature_and_values,
-                                                          map<string, vector<double>> &answer);
+    void recursiveDescentForClassification(DecisionTreeNode* node,
+                                                     const vector<string>& featureAndValues,
+                                                     ClassificationAnswer& answer);
 
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();
