@@ -1,10 +1,8 @@
 // Include
 #include "DecisionTree.hpp"
 
-#include "Utility.hpp"
 #include "logger.cpp"
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <fstream>
@@ -12,12 +10,9 @@
 #include <iterator>
 #include <numeric>
 #include <regex>
-#include <set>
 #include <sstream>
 #include <stdexcept>
-#include <string>
 #include <unordered_map>
-#include <vector>
 
 // --------------- Logger --------------- //
 Logger logger("../logs/decisionTree.log");
