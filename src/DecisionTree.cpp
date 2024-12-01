@@ -539,7 +539,6 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
     // Calculate prior class probabilities
     vector<double> classProbabilities;
     for (const auto &className : _classNames) {
-        // TODO //
         classProbabilities.push_back(priorProbabilityForClass(className));
     }
 

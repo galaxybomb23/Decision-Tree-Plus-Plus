@@ -195,7 +195,16 @@ std::string normalizeString(const std::string &input)
     return normalized.str();
 }
 
-// MARK: Comment
+/**
+ * @brief Trims leading and trailing whitespace from a given string.
+ *
+ * This function removes any leading and trailing spaces or tab characters
+ * from the input string. If the string is empty or contains only whitespace,
+ * an empty string is returned.
+ *
+ * @param str The input string to be trimmed.
+ * @return A new string with leading and trailing whitespace removed.
+ */
 std::string trim(const std::string& str) {
     size_t first = str.find_first_not_of(" \t");
     size_t last = str.find_last_not_of(" \t");
