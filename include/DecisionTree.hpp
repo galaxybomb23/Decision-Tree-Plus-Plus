@@ -97,6 +97,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
         const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 
     //--------------- Class Based Utilities ----------------//
+    void determineDataCondition();
     bool checkNamesUsed(const vector<string> &featuresAndValues);
     DecisionTree &operator=(const DecisionTree &dt);
     vector<vector<string>> findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes);

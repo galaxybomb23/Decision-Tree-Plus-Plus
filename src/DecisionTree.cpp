@@ -531,8 +531,7 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
     cout << "\nConstructing a decision tree" << endl;
 
     if (_debug3) {
-        // TODO //
-        // determineDataCondition();
+        determineDataCondition();
         cout << endl << "Starting construction of the decision tree:" << endl;
     }
 
@@ -2429,6 +2428,69 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 }
 
 //--------------- Class Based Utilities ----------------//
+
+void DecisionTree::determineDataCondition() {
+    /*
+    This method estimates the worst-case fan-out of the decision tree taking into
+    account the number of values (and therefore the number of branches emanating
+    from a node) for the symbolic features.
+    */
+    int numOfFeatures = static_cast<int>(_featureNames.size());
+
+    // Collect unique values for symbolic features
+    vector<vector<string>> values;
+    for (const auto& feature : _featuresAndUniqueValuesDict) {
+        // Check if the feature is not numeric
+        if (_numericFeaturesValueRangeDict.find(feature.first) == _numericFeaturesValueRangeDict.end()) {
+            // It's a symbolic feature
+            values.push_back(vector<string>(feature.second.begin(), feature.second.end()));
+
+        }
+    }
+
+    // Return if no symbolic features found
+    if (values.empty()) return;
+
+    cout << "Number of features: " << numOfFeatures << endl;
+
+    // Find the largest number of values among symbolic features
+    size_t maxNumValues = 0;
+    for (const auto& valList : values) {
+        if (valList.size() > maxNumValues) {
+            maxNumValues = valList.size();
+        }
+    }
+
+    cout << "Largest number of values for symbolic features is: " << maxNumValues << endl;
+
+    // Estimate the number of nodes (worst-case scenario)
+    double estimatedNumberOfNodes = std::pow(static_cast<double>(maxNumValues), static_cast<double>(numOfFeatures)); // Use double to prevent integer overflow for large exponents
+
+    cout << "\nWORST CASE SCENARIO: The decision tree COULD have as many as " << estimatedNumberOfNodes
+              << " nodes. The exact number of nodes created depends critically on "
+                 "the entropy_threshold used for node expansion (the default value "
+                 "for this threshold is 0.01) and on the value set for max_depth_desired "
+                 "for the depth of the tree\n";
+
+    // Warn the user if the estimated number of nodes is too high
+    if (estimatedNumberOfNodes > 10000.0) {
+        cout << "THIS IS WAY TOO MANY NODES. Consider using a relatively "
+                     "large value for entropy_threshold and/or a small value for "
+                     "max_depth_desired to reduce the number of nodes created";
+        cout << "\nDo you wish to continue? Enter 'y' if yes:  ";
+
+        string ans;
+        std::getline(std::cin, ans);
+
+        // Remove leading and trailing whitespace
+        ans.erase(ans.find_last_not_of(" \n\r\t")+1);
+        ans.erase(0, ans.find_first_not_of(" \n\r\t"));
+        
+        if (ans != "y") {
+            exit(0);
+        }
+    }
+}
 
 bool DecisionTree::checkNamesUsed(const vector<string>& featuresAndValues) {
     for (const auto& featureAndValue : featuresAndValues) {
