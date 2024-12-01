@@ -75,14 +75,15 @@ TEST_F(IntrospectionTest, CheckdtIExists)
 
 TEST_F(IntrospectionTest, CheckdtIInitialize)
 {
+    dtS->constructDecisionTreeClassifier();
+    dtN->constructDecisionTreeClassifier();
+    
     ASSERT_NO_THROW(dtSI->initialize());
     ASSERT_NO_THROW(dtNI->initialize());
 }
 
 TEST_F(IntrospectionTest, CheckdtIInitializeThrows)
 {
-    dtS.reset();
-    dtN.reset();
     ASSERT_THROW(dtSI->initialize(), std::runtime_error);
     ASSERT_THROW(dtNI->initialize(), std::runtime_error);
 }

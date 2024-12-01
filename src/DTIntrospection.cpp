@@ -6,7 +6,7 @@
 DTIntrospection::DTIntrospection(shared_ptr<DecisionTree> dt)
 {
     _dt = dt;
-    _rootNode = dt->getRootNode();
+    _rootNode = nullptr;
     _samplesAtNodesDict = {};
     _branchFeaturesToNodesDict = {};
     _sampleToNodeMappingDirectDict = {};
@@ -27,6 +27,8 @@ DTIntrospection::~DTIntrospection()
 
 void DTIntrospection::initialize()
 {
+    _rootNode = _dt->getRootNode();
+
     if (_rootNode == nullptr)
     {
         throw std::runtime_error("Root node is not set. You must first construct the decision tree before using introspection.");
