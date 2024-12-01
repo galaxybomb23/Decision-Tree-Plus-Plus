@@ -50,8 +50,8 @@ public:
     FeatureOpValue extractFeatureOpValue(string featureValueCombo);
 
 private:
-    DecisionTree _dt;
-    DecisionTreeNode _rootNode;
+    std::weak_ptr<DecisionTree> _dt;
+    DecisionTreeNode* _rootNode;
     map<int, vector<string>> _samplesAtNodesDict;
     map<int, vector<string>> _branchFeaturesToNodesDict;
     map<int, vector<string>> _sampleToNodeMappingDirectDict;

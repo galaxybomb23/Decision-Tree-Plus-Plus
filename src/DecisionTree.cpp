@@ -2642,6 +2642,11 @@ vector<string> DecisionTree::getClassNames() const
     return _classNames;
 }
 
+DecisionTreeNode *DecisionTree::getRootNode() const
+{
+    return _rootNode.get();
+}
+
 //--------------- Setters ----------------//
 void DecisionTree::setTrainingDatafile(const string &trainingDatafile)
 {
