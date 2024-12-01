@@ -41,14 +41,14 @@ protected:
         dtS->calculateFirstOrderProbabilities();
         dtS->calculateClassPriors();
         dtSI = make_shared<DTIntrospection>(dtS);
-        dtSI->initialize();
+        // dtSI->initialize();
 
         dtN = make_shared<DecisionTree>(kwargsN);
         dtN->getTrainingData();
         dtN->calculateFirstOrderProbabilities();
         dtN->calculateClassPriors();
         dtNI = make_shared<DTIntrospection>(dtN);
-        dtNI->initialize();
+        // dtNI->initialize();
     }
 
     void TearDown() override

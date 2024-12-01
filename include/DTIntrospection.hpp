@@ -23,12 +23,12 @@ struct FeatureOpValue {
 };
 
 
-class DTIntrospection : public std::enable_shared_from_this<DecisionTree> {
+class DTIntrospection : public std::enable_shared_from_this<DTIntrospection> {
 public:
-    shared_ptr<DecisionTree> getShared() { return shared_from_this(); }
+    shared_ptr<DTIntrospection> getShared() { return shared_from_this(); }
 
     //--------------- Constructors and Destructors ----------------//
-    DTIntrospection(DecisionTree dt);
+    DTIntrospection(shared_ptr<DecisionTree> dt);
     ~DTIntrospection();
     void initialize();
 
@@ -50,7 +50,7 @@ public:
     FeatureOpValue extractFeatureOpValue(string featureValueCombo);
 
 private:
-    std::weak_ptr<DecisionTree> _dt;
+    shared_ptr<DecisionTree> _dt;
     DecisionTreeNode* _rootNode;
     map<int, vector<string>> _samplesAtNodesDict;
     map<int, vector<string>> _branchFeaturesToNodesDict;
