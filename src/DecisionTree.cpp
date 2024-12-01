@@ -2432,7 +2432,7 @@ bool DecisionTree::checkNamesUsed(const vector<string>& featuresAndValues) {
         auto pos = featureAndValue.find('=');
 
         if (pos == string::npos) {
-            throw runtime_error("Your test data has a formatting error: Missing '=' in feature-value pair.");
+            throw std::runtime_error("Your test data has a formatting error: Missing '=' in feature-value pair.");
         }
 
         // Split into feature and value
