@@ -17,6 +17,14 @@ dtree.calculate_first_order_probabilities()
 
 root_node = dtree.construct_decision_tree_classifier()
 # root_node.display_decision_tree("  ")
+
+# /***************************/ Classify /***************************/
+# SYMBOLIC
+# test_sample = ['exercising=never', 'smoking=never', 'fatIntake=heavy', 'videoAddiction=heavy']
+# classification = dtree.classify(root_node, test_sample)
+# print("Classification: " + str(classification))
+
+
 # /***************************/ Recusrive Descent /***************************/
 # SYMBOLIC
 # dtree._debug3 = True  # needed for recursive_descent bc void function
@@ -46,6 +54,12 @@ dtreeN.calculate_class_priors()
 
 root_nodeN = dtreeN.construct_decision_tree_classifier()
 # root_nodeN.display_decision_tree("  ")
+
+# NUMERIC CLASSIFY
+test_sample = ['"age"=65', '"eet"=2', '"g2"=6.2', '"grade"=2', '"gleason"=5', '"ploidy"=tetraploid']
+classification = dtreeN.classify(root_nodeN, test_sample)
+print("Classification:", str(classification))
+
 
 # # /***************************/ Recusrive Descent /***************************/
 # # NUMERIC
