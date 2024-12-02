@@ -4219,7 +4219,6 @@ class EvalTrainingData(DecisionTree):
             print("Class priors")
             print(trainingDT._class_priors_dict)
 
-            continue
             if evaldebug:
                 root_node.display_decision_tree("     ")
             for test_sample_name in testing_samples:
@@ -4250,7 +4249,6 @@ class EvalTrainingData(DecisionTree):
                              (test_sample_name, true_class_label_for_test_sample, most_likely_class_label))
                 confusion_matrix[true_class_label_for_test_sample][most_likely_class_label] += 1    
         
-        return
         print("\n\n       DISPLAYING THE CONFUSION MATRIX FOR THE 10-FOLD CROSS-VALIDATION TEST:\n")
         matrix_header = " " * 30
         for class_name in self._class_names:  

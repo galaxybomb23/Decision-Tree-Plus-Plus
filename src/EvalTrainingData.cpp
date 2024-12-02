@@ -8,7 +8,7 @@ EvalTrainingData::~EvalTrainingData()
 }
 
 // Method to evaluate training data
-void EvalTrainingData::evaluateTrainingData()
+double EvalTrainingData::evaluateTrainingData()
 {
     bool evalDebug = true;
 
@@ -206,6 +206,7 @@ void EvalTrainingData::evaluateTrainingData()
     displayConfusionMatrix(confusion_matrix);
     auto idx = calculateDataQualityIndex(confusion_matrix);
     printDataQualityEvaluation(idx);
+    return idx;
 }
 
 // methods to print information << NEEDS TO BE IMPLEMENTED >>

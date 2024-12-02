@@ -13,7 +13,7 @@ class EvalTrainingData : public DecisionTree {
     EvalTrainingData(std::map<std::string, std::string> kwargs); // Constructor
     ~EvalTrainingData();                                         // Destructor
 
-    void evaluateTrainingData(); // Evaluate the training data
+    double evaluateTrainingData(); // Evaluate the training data
     void evaluationResults(std::vector<std::string> testing_samples,
                            std::map<int, std::vector<std::string>> allTrainingData,
                            DecisionTreeNode* root_node,

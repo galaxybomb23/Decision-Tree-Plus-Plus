@@ -35,5 +35,8 @@ TEST_F(EvalTrainingDataTest, testEvaluateTrainingData)
 
     // Initialize and run evaluation
     evalData->getTrainingData();
-    evalData->evaluateTrainingData();
+    double idx = evalData->evaluateTrainingData();
+
+    // assert within ~5 points
+    ASSERT_NEAR(idx, 64.3, 5.0);
 }
