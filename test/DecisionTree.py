@@ -3419,8 +3419,9 @@ class DecisionTree(object):
 
 
         print(f'ALL FAVD for feature {feature_name}')
-        for f in self._features_and_values_dict[feature_name]:
-            print(f'FAV: {f}')
+        sorte = sorted(self._features_and_values_dict[feature_name])
+        for f in sorte:
+            print(f)
 
         if feature_name in self._numeric_features_valuerange_dict:
             if self._feature_values_how_many_uniques_dict[feature_name] > self._symbolic_to_numeric_cardinality_threshold:
@@ -3430,19 +3431,12 @@ class DecisionTree(object):
                     diffrange = valuerange[1] - valuerange[0]
                     unique_values_for_feature = sorted(list(set(filter(lambda x: x != 'NA', 
                                    self._features_and_values_dict[feature_name]))))
-                    
-                    print(f'FAVD for feature {feature_name}')
-                    for f in self._features_and_values_dict[feature_name]:
-                        print(f'FAV: {f}')
-
-
-                    for v in unique_values_for_feature:
-                        print("UNIQUE VALUE: ", v)
+                
 
                     diffs = sorted([unique_values_for_feature[i] - unique_values_for_feature[i-1] 
                                             for i in range(1,len(unique_values_for_feature))])
 
-
+                    print(f'diffs for feature {feature_name}')
                     for d in diffs:
                         print("DIFF: ", d)
                     median_diff = diffs[int(len(diffs)/2) - 1]
@@ -4119,6 +4113,11 @@ class EvalTrainingData(DecisionTree):
         fold_size = int(0.1 * len(all_training_data))
         confusion_matrix = {class_name : {class_name : 0 for class_name in self._class_names} \
                                                                   for class_name in self._class_names}
+        
+        print("training data dict")
+        print(self._features_and_values_dict)
+        print(self._feature_names)
+
         for fold_index in range(10):
             print("\nStarting the iteration indexed %d of the 10-fold cross-validation test" % fold_index)
             testing_samples = all_sample_names[fold_size * fold_index : fold_size * (fold_index+1)]
@@ -4126,6 +4125,10 @@ class EvalTrainingData(DecisionTree):
                                                       all_sample_names[fold_size * (fold_index+1):] 
             testing_data = { x : all_training_data[x] for x in testing_samples }
             training_data = { x : all_training_data[x] for x in training_samples }
+            
+            print("length of training data")
+            print(len(training_data))
+
             trainingDT = DecisionTree('evalmode')
             trainingDT._training_data_dict = training_data
             trainingDT._class_names = self._class_names
@@ -4137,12 +4140,20 @@ class EvalTrainingData(DecisionTree):
                                                            for sample_name in training_samples}
             trainingDT._features_and_values_dict = {feature : [] for feature in self._features_and_values_dict}
             pattern = r'(\S+)\s*=\s*(\S+)'        
+        
+            
             for item in sorted(trainingDT._training_data_dict.items(), key = lambda x: sample_index(x[0])):
                 for feature_and_value in item[1]:
                     m = re.search(pattern, feature_and_value)
                     feature,value = m.group(1),m.group(2)
                     if value != 'NA':
+                        if feature == "g2": print("we shall append to feature: " + feature + " the value: " + value)
                         trainingDT._features_and_values_dict[feature].append(convert(value))
+
+            print(f'len of class vs training dt: {len(self._features_and_values_dict["g2"])} vs {len(trainingDT._features_and_values_dict["g2"])}')
+            for item in sorted(trainingDT._features_and_values_dict['g2'], key = lambda x: x):
+                print(f'item: {item}')
+
             trainingDT._features_and_unique_values_dict = {feature : 
                                       sorted(list(set(trainingDT._features_and_values_dict[feature]))) for 
                                                             feature in trainingDT._features_and_values_dict}
@@ -4152,6 +4163,9 @@ class EvalTrainingData(DecisionTree):
                                       [min(trainingDT._features_and_unique_values_dict[feature]), 
                                        max(trainingDT._features_and_unique_values_dict[feature])] 
                                                          for feature in self._numeric_features_valuerange_dict}
+            
+            
+            
             if evaldebug:
                 print("\n\nprinting samples in the testing set: " + str(testing_samples))            
                 print("\n\nPrinting features and their values in the training set:\n")
@@ -4174,15 +4188,15 @@ class EvalTrainingData(DecisionTree):
             print("probability cache shape")
             print(len(trainingDT._probability_cache))
 
-            print(f'FEATSHAPE: {len(self._features_and_values_dict["g2"])}')
+            print(f'FEATSHAPE: {len(trainingDT._features_and_values_dict["g2"])}')
 
-            for val in self._features_and_values_dict["g2"]:
+            for val in trainingDT._features_and_values_dict["g2"]:
                 print(f'VAL: {val}')
 
 
 
-            # trainingDT.calculate_first_order_probabilities()
-            # trainingDT.calculate_class_priors()
+            trainingDT.calculate_first_order_probabilities()
+            trainingDT.calculate_class_priors()
             # #root_node = trainingDT.construct_decision_tree_classifier()
 
 

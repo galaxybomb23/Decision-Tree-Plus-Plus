@@ -56,6 +56,25 @@ void EvalTrainingData::evaluateTrainingData()
             confusion_matrix[class_index][class_name2] = 0;
         }
     }
+
+    // print trainingdatadict and featurenames
+    int idx = 0;
+    std::cout << "Training data dict: \n";
+    for (const auto &item : _trainingDataDict) {
+        std::cout << "sample_" << item.first << ": ";
+        for (const auto &feature : item.second) {
+            std::cout << _featureNames[idx % 6] << "=" << feature << ", ";
+            idx++;
+        }
+        std::cout << "\n";
+    }
+
+    std::cout << "Feature names: \n";
+    for (const auto &feature : _featureNames) {
+        std::cout << feature << ", ";
+    }
+
+
     // Perform 10-fold cross-validation
     for (int foldIndex = 0; foldIndex < 10; ++foldIndex) {
         std::vector<std::string> testing_samples(allSampleNames.begin() + foldSize * foldIndex,
@@ -75,20 +94,34 @@ void EvalTrainingData::evaluateTrainingData()
             trainingData[samp] = allTrainingData[samp];
         }
 
+        // length of training data
+        std::cout << "Length of training data: " << trainingData.size() << "\n";
+
         _trainingDataDict = trainingData;
         _featuresAndValuesDict.clear();
+
+        // length of training data dict
+        // std::cout << "Length of training data dict: " << _trainingDataDict.size() << "\n";
 
         int idx = 0;
         for (const auto &item : _trainingDataDict) {
             for (const auto &feature_and_value : item.second) {
                 std::string feature = _featureNames[idx % 6];
                 std::string value   = feature_and_value;
+
                 if (value != "NA") {
+                    if (feature == "g2") {
+                        std::cout << "We shall append: " << value << "\n";
+                    }
                     _featuresAndValuesDict[feature].push_back(value);
                 }
                 idx++;
             }
         }
+
+        // print features and values dict
+        std::cout << "len of favd = " << _featuresAndValuesDict["g2"].size() << "\n";
+
         // Set unique values for features
         for (auto &pair : _featuresAndValuesDict) {
             std::set<std::string> unique_values(pair.second.begin(), pair.second.end());
@@ -130,8 +163,8 @@ void EvalTrainingData::evaluateTrainingData()
         }
 
 
-        // this->calculateFirstOrderProbabilities();
-        // this->calculateClassPriors();
+        calculateFirstOrderProbabilities();
+        calculateClassPriors();
 
 
         // TODO: wait for implementation of constructDecisionTreeClassifier and re-enable the following code
@@ -200,6 +233,16 @@ void EvalTrainingData::evaluateTrainingData()
             std::cout << "]";
             first = false;
         }
+
+
+        // std::cout << "INSIDEALL FAVD FOR feature " << "g2" << " are: \n";
+        // auto sortedFavd = _featuresAndValuesDict["g2"];
+        // std::sort(sortedFavd.begin(), sortedFavd.end(), [](const string &a, const string &b) {
+        //     return convert(a) < convert(b);
+        // });
+        // for (const auto &v : sortedFavd) {
+        //     cout << v << "\n";
+        // }
 
         // Print summary
         std::cout << "shapes: uniques: " << _featuresAndUniqueValuesDict.size()
