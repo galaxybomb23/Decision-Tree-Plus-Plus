@@ -38,5 +38,6 @@ TEST_F(EvalTrainingDataTest, testEvaluateTrainingData)
     double idx = evalData->evaluateTrainingData();
 
     // assert within ~5 points
+    // TODO: Fix evaluate to get exact value
     ASSERT_NEAR(idx, 64.3, 5.0);
 }

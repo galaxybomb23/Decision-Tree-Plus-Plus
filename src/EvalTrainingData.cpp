@@ -34,7 +34,6 @@ double EvalTrainingData::evaluateTrainingData()
     // Sort samples based on some index
     for (const auto &entry : allTrainingData) {
         auto ent = std::to_string(entry.first);
-        // std::cout << "Sample name: " << ent << "\n";
         allSampleNames.push_back(ent);
     }
 
@@ -77,22 +76,12 @@ double EvalTrainingData::evaluateTrainingData()
             trainingData[samp] = allTrainingData[samp];
         }
 
-        // print training data
-        std::cout << "Training data:\n";
-        for (const auto &entry : trainingData) {
-            std::cout << entry.first << ": ";
-            for (const auto &feature : entry.second) {
-                std::cout << feature << " ";
-            }
-            std::cout << "\n";
-        }
-
         // Initialize DecisionTree
         map<string, string> kwargs = {
             {"training_datafile", _trainingDatafile}
         };
         shared_ptr<DecisionTree> trainingDT                = make_unique<DecisionTree>(kwargs);
-        trainingDT->_trainingDataDict                      = trainingData;
+        trainingDT->_trainingDataDict                      = _trainingDataDict;
         trainingDT->_classNames                            = _classNames;
         trainingDT->_featureNames                          = _featureNames;
         trainingDT->_entropyThreshold                      = _entropyThreshold;
@@ -147,11 +136,6 @@ double EvalTrainingData::evaluateTrainingData()
             }
         }
 
-        // Calculate probabilities and construct decision tree
-        cout << "Class names are: ";
-        for (const auto &class_name : trainingDT->_classNames) {
-            cout << class_name << " ";
-        }
         trainingDT->calculateFirstOrderProbabilities();
         trainingDT->calculateClassPriors();
         auto rootNode = trainingDT->constructDecisionTreeClassifier();
@@ -169,20 +153,11 @@ double EvalTrainingData::evaluateTrainingData()
                 }
             }
 
-            // print test sample data
-            std::cout << "\n\nTest sample data:\n";
-            for (const auto &feature : testSampleData) {
-                std::cout << feature << " ";
-            }
-
             auto classification = trainingDT->classify(rootNode, testSampleData);
             auto solutionPath   = classification["solution_path"];
 
             // print classification info and solution path
-            // print sample number
-            std::cout << "\n\nSample number: " << testSampleName << "\n";
             printClassificationInfo(trainingDT->_classNames, classification, solutionPath, rootNode);
-
             classification.erase("solution_path");
 
             std::vector<std::string> whichClasses;
@@ -203,7 +178,9 @@ double EvalTrainingData::evaluateTrainingData()
     }
 
     // Display confusion matrix
-    displayConfusionMatrix(confusion_matrix);
+    if (_debug1) {
+        displayConfusionMatrix(confusion_matrix);
+    }
     auto idx = calculateDataQualityIndex(confusion_matrix);
     printDataQualityEvaluation(idx);
     return idx;
@@ -212,21 +189,6 @@ double EvalTrainingData::evaluateTrainingData()
 // methods to print information << NEEDS TO BE IMPLEMENTED >>
 void EvalTrainingData::printDebugInformation(DecisionTree &trainingDT, const std::vector<std::string> &testing_samples)
 {
-    // if evaldebug:
-    //         print("\n\nprinting samples in the testing set: " +
-    //         str(testing_samples)) print("\n\nPrinting features and their
-    //         values in the training set:\n") for item in
-    //         sorted(_features_and_values_dict.items()):
-    //             print(item[0]  + "  =>  "  + str(item[1]))
-    //         print("\n\nPrinting unique values for features:\n")
-    //         for item in
-    //         sorted(_features_and_unique_values_dict.items()):
-    //             print(item[0]  + "  =>  "  + str(item[1]))
-    //         print("\n\nPrinting unique value ranges for features:\n")
-    //         for item in
-    //         sorted(_numeric_features_valuerange_dict.items()):
-    //             print(item[0]  + "  =>  "  + str(item[1]))
-
     std::cout << "\n\nPrinting samples in the testing set:";
     for (const auto &sample : testing_samples) {
         std::cout << sample << "\n";
@@ -254,16 +216,6 @@ void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &w
                                                const std::string &solution_path,
                                                DecisionTreeNode* root_node)
 {
-    // print("\nClassification:\n")
-    //             print("     "  + str.ljust("class name", 30) +
-    //             "probability") print("     ---------- -----------") for
-    //             which_class in which_classes:
-    //                 if which_class is not 'solution_path':
-    //                     print("     "  + str.ljust(which_class, 30) +
-    //                     str(classification[which_class]))
-    //             print("\nSolution path in the decision tree: " +
-    //             str(solution_path)) print("\nNumber of nodes created: " +
-    //             str(root_node.how_many_nodes()))
     std::cout << "\nClassification for sample:\n";
     std::cout << "     " << std::setw(30) << "class name" << "  probability\n";
     std::cout << "     ----------                    -----------\n";
@@ -277,30 +229,6 @@ void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &w
 }
 void EvalTrainingData::displayConfusionMatrix(const std::map<int, std::map<std::string, int>> &confusion_matrix)
 {
-    //   print("\n\n       DISPLAYING THE CONFUSION MATRIX FOR THE 10-FOLD
-    //   CROSS-VALIDATION TEST:\n")
-    // matrix_header = " " * 30
-    // for class_name in self._class_names:
-    //     matrix_header += '{:^30}'.format(class_name)
-    // print("\n" + matrix_header + "\n")
-    // for row_class_name in sorted(confusion_matrix.keys()):
-    //     row_display = str.rjust(row_class_name, 30)
-    //     for col_class_name in
-    //     sorted(confusion_matrix[row_class_name].keys()):
-    //         row_display +=
-    //         '{:^30}'.format(str(confusion_matrix[row_class_name][col_class_name])
-    //         )
-    //     print(row_display + "\n")
-    // diagonal_sum, off_diagonal_sum = 0,0
-    // for row_class_name in sorted(confusion_matrix.keys()):
-    //     for col_class_name in
-    //     sorted(confusion_matrix[row_class_name].keys()):
-    //         if row_class_name == col_class_name:
-    //             diagonal_sum +=
-    //             confusion_matrix[row_class_name][col_class_name]
-    //         else:
-    //             off_diagonal_sum +=
-    //             confusion_matrix[row_class_name][col_class_name]
     std::cout << "\n\n       DISPLAYING THE CONFUSION MATRIX FOR THE 10-FOLD "
                  "CROSS-VALIDATION TEST:\n";
     std::string matrix_header = std::string(30, ' ');
