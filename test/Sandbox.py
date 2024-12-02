@@ -53,11 +53,18 @@ root_nodeN = dtreeN.construct_decision_tree_classifier()
 # /***************************/ Introspection /***************************/
 # SYMBOLIC
 dtreeSI = dtI(dtreeS)
-
 dtreeSI.initialize()
 
-print(dtreeSI._node_serial_num_to_node_dict)
-
+# print(f'_node_serial_num_to_node_dict: {dtreeSI._node_serial_num_to_node_dict}')
+# print(f'_branch_features_to_nodes_dict: {dtreeSI._branch_features_to_nodes_dict}')
+# print(f'_samples_at_nodes_dict: {dtreeSI._samples_at_nodes_dict}')
+# print(f'_sample_to_node_mapping_direct_dict: {dtreeSI._sample_to_node_mapping_direct_dict}')
 
 # NUMERIC
 dtreeNI = dtI(dtreeN)
+dtreeNI.initialize()
+
+# print(f'_node_serial_num_to_node_dict: {dtreeNI._node_serial_num_to_node_dict}')
+# print(f'_branch_features_to_nodes_dict: {dtreeNI._branch_features_to_nodes_dict}')
+# print(f'_samples_at_nodes_dict: {dtreeNI._samples_at_nodes_dict}')
+print(f'_sample_to_node_mapping_direct_dict: {dtreeNI._sample_to_node_mapping_direct_dict}')

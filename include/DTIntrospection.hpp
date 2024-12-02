@@ -46,18 +46,24 @@ public:
     void explainClassificationAtOneNode(int nodeID);
 
     //--------------- Class Utility ----------------//
-    vector<string> getSamplesForFeatureValueCombo(string featureValueCombo);
+    vector<int> getSamplesForFeatureValueCombo(string featureValueCombo);
     FeatureOpValue extractFeatureOpValue(string featureValueCombo);
+
+    //--------------- Getters ----------------//
+    map<int, vector<string>> getSamplesAtNodesDict() const { return _samplesAtNodesDict; }
+    map<int, vector<string>> getBranchFeaturesToNodesDict() const { return _branchFeaturesToNodesDict; }
+    map<string, vector<int>> getSampleToNodeMappingDirectDict() const { return _sampleToNodeMappingDirectDict; }
+    map<int, DecisionTreeNode*> getNodeSerialNumToNodeDict() const { return _nodeSerialNumToNodeDict; }
 
 private:
     shared_ptr<DecisionTree> _dt;
     DecisionTreeNode* _rootNode;
     map<int, vector<string>> _samplesAtNodesDict;
     map<int, vector<string>> _branchFeaturesToNodesDict;
-    map<int, vector<string>> _sampleToNodeMappingDirectDict;
-    map<int, DecisionTreeNode> _nodeSerialNumToNodeDict;
-    int awarenessRaisingMessageShown;
-    int debug;
+    map<string, vector<int>> _sampleToNodeMappingDirectDict;
+    map<int, DecisionTreeNode*> _nodeSerialNumToNodeDict;
+    int _awarenessRaisingMessageShown;
+    int _debug;
 };
 
 #endif // DT_INTROSPECTION_HPP

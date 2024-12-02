@@ -195,7 +195,6 @@ std::string normalizeString(const std::string &input)
     return normalized.str();
 }
 
-// MARK: Comment
 std::string trim(const std::string& str) {
     size_t first = str.find_first_not_of(" \t");
     size_t last = str.find_last_not_of(" \t");
