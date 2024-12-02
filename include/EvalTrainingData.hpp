@@ -24,11 +24,11 @@ class EvalTrainingData : public DecisionTree {
 
     void printDebugInformation(DecisionTree &trainingDT, const std::vector<std::string> &testing_samples);
     void printClassificationInfo(const std::vector<std::string> &which_classes,
-                                 const std::map<std::string, double> &classification,
+                                 const std::map<std::string, std::string> &classification,
                                  const std::string &most_likely_class_label,
-                                 std::shared_ptr<DecisionTreeNode> root_node);
+                                 DecisionTreeNode* root_node);
     void displayConfusionMatrix(const std::map<int, std::map<std::string, int>> &confusion_matrix);
-    double calculateDataQualityIndex(const std::map<std::string, std::map<std::string, int>> &confusion_matrix);
+    double calculateDataQualityIndex(const std::map<int, std::map<std::string, int>> &confusion_matrix);
     void printDataQualityEvaluation(double data_quality_index);
 
   private:

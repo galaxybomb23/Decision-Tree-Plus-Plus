@@ -1,11 +1,7 @@
 #include "EvalTrainingData.hpp"
 
 // Constructor inheriting from the DecisionTree
-EvalTrainingData::EvalTrainingData(std::map<std::string, std::string> kwargs) : DecisionTree(kwargs)
-{
-    this->getTrainingData();
-    _csvClassColumnIndex = std::stoi(kwargs["csv_class_column_index"]);
-}
+EvalTrainingData::EvalTrainingData(std::map<std::string, std::string> kwargs) : DecisionTree(kwargs) {}
 EvalTrainingData::~EvalTrainingData()
 {
     // Destructor
@@ -57,87 +53,87 @@ void EvalTrainingData::evaluateTrainingData()
         }
     }
 
-    // print trainingdatadict and featurenames
-    int idx = 0;
-    std::cout << "Training data dict: \n";
-    for (const auto &item : _trainingDataDict) {
-        std::cout << "sample_" << item.first << ": ";
-        for (const auto &feature : item.second) {
-            std::cout << _featureNames[idx % 6] << "=" << feature << ", ";
-            idx++;
-        }
-        std::cout << "\n";
-    }
-
-    std::cout << "Feature names: \n";
-    for (const auto &feature : _featureNames) {
-        std::cout << feature << ", ";
-    }
-
 
     // Perform 10-fold cross-validation
     for (int foldIndex = 0; foldIndex < 10; ++foldIndex) {
-        std::vector<std::string> testing_samples(allSampleNames.begin() + foldSize * foldIndex,
-                                                 allSampleNames.begin() + foldSize * (foldIndex + 1));
-        std::vector<std::string> training_samples(allSampleNames.begin(),
-                                                  allSampleNames.begin() + foldSize * foldIndex);
-        training_samples.insert(
-            training_samples.end(), allSampleNames.begin() + foldSize * (foldIndex + 1), allSampleNames.end());
+        std::cout << "\nStarting the iteration indexed " << foldIndex << " of the 10-fold cross-validation test\n";
 
+        // Define testing and training samples
+        auto testingSamplesStart = allSampleNames.begin() + foldSize * foldIndex;
+        auto testingSamplesEnd   = allSampleNames.begin() + foldSize * (foldIndex + 1);
+        std::vector<std::string> testingSamples(testingSamplesStart, testingSamplesEnd);
+
+        std::vector<std::string> trainingSamples(allSampleNames.begin(), testingSamplesStart);
+        trainingSamples.insert(trainingSamples.end(), testingSamplesEnd, allSampleNames.end());
+
+        // Create testing and training data
         std::map<int, std::vector<std::string>> testingData, trainingData;
-        for (const auto &sample : testing_samples) {
+        for (const auto &sample : testingSamples) {
             auto samp         = std::stoi(sample);
             testingData[samp] = allTrainingData[samp];
         }
-        for (const auto &sample : training_samples) {
+        for (const auto &sample : trainingSamples) {
             auto samp          = std::stoi(sample);
             trainingData[samp] = allTrainingData[samp];
         }
 
-        // length of training data
-        std::cout << "Length of training data: " << trainingData.size() << "\n";
+        // print training data
+        std::cout << "Training data:\n";
+        for (const auto &entry : trainingData) {
+            std::cout << entry.first << ": ";
+            for (const auto &feature : entry.second) {
+                std::cout << feature << " ";
+            }
+            std::cout << "\n";
+        }
 
-        _trainingDataDict = trainingData;
-        _featuresAndValuesDict.clear();
+        // Initialize DecisionTree
+        map<string, string> kwargs = {
+            {"training_datafile", _trainingDatafile}
+        };
+        shared_ptr<DecisionTree> trainingDT                = make_unique<DecisionTree>(kwargs);
+        trainingDT->_trainingDataDict                      = trainingData;
+        trainingDT->_classNames                            = _classNames;
+        trainingDT->_featureNames                          = _featureNames;
+        trainingDT->_entropyThreshold                      = _entropyThreshold;
+        trainingDT->_maxDepthDesired                       = _maxDepthDesired;
+        trainingDT->_symbolicToNumericCardinalityThreshold = _symbolicToNumericCardinalityThreshold;
 
-        // length of training data dict
-        // std::cout << "Length of training data dict: " << _trainingDataDict.size() << "\n";
+        // Assign samples class labels
+        for (const auto &sample : trainingSamples) {
+            trainingDT->_samplesClassLabelDict[std::stod(sample)] = _samplesClassLabelDict.at(std::stod(sample));
+        }
 
+        // Populate feature and values dictionary
+        trainingDT->_featuresAndValuesDict.clear();
         int idx = 0;
-        for (const auto &item : _trainingDataDict) {
+        for (const auto &item : trainingDT->_trainingDataDict) {
             for (const auto &feature_and_value : item.second) {
-                std::string feature = _featureNames[idx % 6];
+                std::string feature = trainingDT->_featureNames[idx % trainingDT->_featureNames.size()];
                 std::string value   = feature_and_value;
 
                 if (value != "NA") {
-                    if (feature == "g2") {
-                        std::cout << "We shall append: " << value << "\n";
-                    }
-                    _featuresAndValuesDict[feature].push_back(value);
+                    trainingDT->_featuresAndValuesDict[feature].push_back(value);
                 }
                 idx++;
             }
         }
 
-        // print features and values dict
-        std::cout << "len of favd = " << _featuresAndValuesDict["g2"].size() << "\n";
-
-        // Set unique values for features
-        for (auto &pair : _featuresAndValuesDict) {
+        // Calculate unique values for each feature
+        trainingDT->_featuresAndUniqueValuesDict.clear();
+        for (const auto &pair : trainingDT->_featuresAndValuesDict) {
             std::set<std::string> unique_values(pair.second.begin(), pair.second.end());
-            _featuresAndUniqueValuesDict[pair.first] =
+            trainingDT->_featuresAndUniqueValuesDict[pair.first] =
                 std::set<std::string>(unique_values.begin(), unique_values.end());
         }
 
-        // Calculate numeric value ranges for features
-        _numericFeaturesValueRangeDict.clear();
-
-        // Assuming _numericFeaturesValueRangeDict is a map of {key -> {min, max}}
-        for (const auto &feature : _featuresAndUniqueValuesDict) {
+        // Calculate numeric feature value ranges
+        trainingDT->_numericFeaturesValueRangeDict.clear();
+        for (const auto &feature : _numericFeaturesValueRangeDict) {
             std::set<double> numeric_values;
             for (const auto &value : feature.second) {
                 try {
-                    numeric_values.insert(std::stod(value));
+                    numeric_values.insert(value);
                 }
                 catch (const std::invalid_argument &e) {
                     continue;
@@ -146,204 +142,70 @@ void EvalTrainingData::evaluateTrainingData()
             if (!numeric_values.empty()) {
                 std::vector<double> numeric_values_vec(numeric_values.begin(), numeric_values.end());
                 std::sort(numeric_values_vec.begin(), numeric_values_vec.end());
-                _numericFeaturesValueRangeDict[feature.first] = {numeric_values_vec.front(), numeric_values_vec.back()};
+                trainingDT->_numericFeaturesValueRangeDict[feature.first] = {numeric_values_vec.front(),
+                                                                             numeric_values_vec.back()};
             }
         }
 
-        // Probabilities and construction of decision tree root node
-
-        // print prob cache shape
-        std::cout << "Sprobability cache shape: " << _probabilityCache.size() << "\n";
-
-        std::cout << "FEATSHAPE: " << _featuresAndValuesDict["g2"].size() << "\n";
-
-        // print the above
-        for (const auto &val : _featuresAndValuesDict["g2"]) {
-            std::cout << "VAL: " << val << "\n";
+        // Calculate probabilities and construct decision tree
+        cout << "Class names are: ";
+        for (const auto &class_name : trainingDT->_classNames) {
+            cout << class_name << " ";
         }
-
-
-        calculateFirstOrderProbabilities();
-        calculateClassPriors();
-
-
-        // TODO: wait for implementation of constructDecisionTreeClassifier and re-enable the following code
-        // DecisionTreeNode* root_node = this->constructDecisionTreeClassifier();
-        // this->evaluationResults(testing_samples, allTrainingData, root_node, confusion_matrix, evalDebug);
-
+        trainingDT->calculateFirstOrderProbabilities();
+        trainingDT->calculateClassPriors();
+        auto rootNode = trainingDT->constructDecisionTreeClassifier();
 
         std::cout << "\nResults of the 10-fold cross-validation test for run indexed " << foldIndex + 1 << ":\n";
+        for (const auto &testSampleName : testingSamples) {
+            auto testSampleDataUnfiltered = allTrainingData[std::stoi(testSampleName)];
+            std::vector<std::string> testSampleData;
 
-
-        // Print feature values how many uniques dict
-        std::cout << "feature values how many uniques dict\n{";
-        bool first = true;
-        for (const auto &pair : _featuresAndUniqueValuesDict) {
-            if (!first)
-                std::cout << ", ";
-            std::cout << "'" << pair.first << "': " << pair.second.size();
-            first = false;
-        }
-        std::cout << "}\n";
-
-        // Print numeric features value range dict
-        std::cout << "numeric features value range dict\n{";
-        first = true;
-        for (const auto &pair : _numericFeaturesValueRangeDict) {
-            if (!first)
-                std::cout << ", ";
-            std::cout << "'" << pair.first << "': [" << pair.second[0] << ", " << pair.second[1] << "]";
-            first = false;
-        }
-        std::cout << "}\n";
-
-        // Print features and unique values dict
-        std::cout << "features and unique values dict\n{";
-        first = true;
-        for (const auto &pair : _featuresAndUniqueValuesDict) {
-            if (!first)
-                std::cout << ", ";
-            std::cout << "'" << pair.first << "': [";
-            bool firstValue = true;
-            for (const auto &value : pair.second) {
-                if (!firstValue)
-                    std::cout << ", ";
-                std::cout << value;
-                firstValue = false;
-            }
-            std::cout << "]";
-            first = false;
-        }
-        std::cout << "}\n";
-
-        // print feature and values dict
-        std::cout << "features and values dict\n{";
-        first = true;
-        for (const auto &pair : _featuresAndValuesDict) {
-            if (!first)
-                std::cout << ", ";
-            std::cout << "'" << pair.first << "': [";
-            bool firstValue = true;
-            for (const auto &value : pair.second) {
-                if (!firstValue)
-                    std::cout << ", ";
-                std::cout << value;
-                firstValue = false;
-            }
-            std::cout << "]";
-            first = false;
-        }
-
-
-        // std::cout << "INSIDEALL FAVD FOR feature " << "g2" << " are: \n";
-        // auto sortedFavd = _featuresAndValuesDict["g2"];
-        // std::sort(sortedFavd.begin(), sortedFavd.end(), [](const string &a, const string &b) {
-        //     return convert(a) < convert(b);
-        // });
-        // for (const auto &v : sortedFavd) {
-        //     cout << v << "\n";
-        // }
-
-        // Print summary
-        std::cout << "shapes: uniques: " << _featuresAndUniqueValuesDict.size()
-                  << ", numeric features: " << _numericFeaturesValueRangeDict.size()
-                  << ", values: " << _featuresAndValuesDict.size()
-                  << " size of each value: " << _featuresAndValuesDict.begin()->second.size() << "\n";
-
-        // probability cache shape
-        std::cout << "probability cache shape: " << _probabilityCache.size() << "\n";
-
-        std::cout << "class priors\n{";
-        first = true;
-        for (const auto &pair : _classPriorsDict) {
-            if (!first)
-                std::cout << ", ";
-            std::cout << "'" << pair.first << "': " << pair.second;
-            first = false;
-        }
-        std::cout << "}\n";
-    }
-}
-
-void EvalTrainingData::evaluationResults(std::vector<std::string> testing_samples,
-                                         std::map<int, std::vector<std::string>> allTrainingData,
-                                         DecisionTreeNode* root_node,
-                                         std::map<int, std::map<std::string, int>> confusion_matrix,
-                                         bool evalDebug)
-{
-    for (const auto &testSampleName : testing_samples) {
-        int test_sample_key = std::stoi(testSampleName);
-
-        try {
-            // Retrieve the data for the test sample safely using .at()
-            const auto &test_sample_data = allTrainingData.at(test_sample_key);
-
-            // Filter out features with '=NA' values (we prepend feature name)
-            int idx = 0;
-            std::vector<std::string> filtered_data;
-            for (const auto &feature_value : test_sample_data) {
-                std::string modified_feature_value = _featureNames[idx % 6] + "=" + feature_value;
-                if (modified_feature_value.find("=NA") == std::string::npos) {
-                    filtered_data.push_back(modified_feature_value);
+            for (size_t idx = 0; idx < testSampleDataUnfiltered.size(); ++idx) {
+                const auto &data = testSampleDataUnfiltered[idx];
+                if (!data.empty() && data != "NA") {
+                    testSampleData.push_back(trainingDT->_featureNames[idx % trainingDT->_featureNames.size()] + "=" +
+                                             data);
                 }
-                idx++;
             }
 
-            // print filtered data
-            // for (const auto &item : filtered_data) {
-            //     std::cout << "Filtered data: " << item << "\n";
-            // }
+            // print test sample data
+            std::cout << "\n\nTest sample data:\n";
+            for (const auto &feature : testSampleData) {
+                std::cout << feature << " ";
+            }
 
-            // Perform classification using the decision tree
-            auto classification = this->classify(root_node, filtered_data);
+            auto classification = trainingDT->classify(rootNode, testSampleData);
+            auto solutionPath   = classification["solution_path"];
 
-            // Check if "solution_path" exists in classification
-            auto solution_path = classification.at("solution_path"); // Will throw if "solution_path" is not found
+            // print classification info and solution path
+            // print sample number
+            std::cout << "\n\nSample number: " << testSampleName << "\n";
+            printClassificationInfo(trainingDT->_classNames, classification, solutionPath, rootNode);
+
             classification.erase("solution_path");
 
-            // Sort the classes based on their probabilities
-            std::vector<std::string> sorted_classes;
+            std::vector<std::string> whichClasses;
             for (const auto &entry : classification) {
-                sorted_classes.push_back(entry.first);
+                whichClasses.push_back(entry.first);
             }
-            std::sort(sorted_classes.begin(),
-                      sorted_classes.end(),
+
+            std::sort(whichClasses.begin(),
+                      whichClasses.end(),
                       [&classification](const std::string &a, const std::string &b) {
-                          return classification.at(a) > classification.at(b); // Will throw if a key is missing
+                          return classification.at(a) > classification.at(b);
                       });
 
-            // Get the most likely class label
-            std::string most_likely_class_label = sorted_classes.front();
-
-            // Retrieve the true class label safely using .at()
-            std::string true_class_label_for_test_sample =
-                this->_samplesClassLabelDict.at(test_sample_key); // Will throw if key is not found
-
-            // Optionally print the true vs estimated class labels
-            if (evalDebug) {
-                std::cout << testSampleName << ":   true_class: " << true_class_label_for_test_sample
-                          << "    estimated_class: " << most_likely_class_label << "\n";
-            }
-
-            // Update the confusion matrix using .at() for inner map
-            confusion_matrix.at(std::stoi(true_class_label_for_test_sample)).at(most_likely_class_label) +=
-                1; // Will throw if any key is missing
-        }
-        catch (const std::out_of_range &e) {
-            std::cerr << "Error: Key not found in map for test sample: " << testSampleName << "\n";
-            if (_trainingDataDict.find(test_sample_key) == _trainingDataDict.end()) {
-                std::cerr << "  Failed on _trainingDataDict.at(" << test_sample_key << ")\n";
-            }
-
-            else if (_samplesClassLabelDict.find(test_sample_key) == _samplesClassLabelDict.end()) {
-                std::cerr << "  Failed on _samplesClassLabelDict.at(" << test_sample_key << ")\n";
-            }
-            else {
-                std::cerr << "  Unknown error\n";
-            }
-            continue; // Skip this test sample if there is an error
+            auto mostLikelyClassLabel = whichClasses.front();
+            auto trueClassLabel       = _samplesClassLabelDict.at(std::stoi(testSampleName));
+            confusion_matrix[std::stoi(trueClassLabel)][mostLikelyClassLabel] += 1;
         }
     }
+
+    // Display confusion matrix
+    displayConfusionMatrix(confusion_matrix);
+    auto idx = calculateDataQualityIndex(confusion_matrix);
+    printDataQualityEvaluation(idx);
 }
 
 // methods to print information << NEEDS TO BE IMPLEMENTED >>
@@ -387,9 +249,9 @@ void EvalTrainingData::printDebugInformation(DecisionTree &trainingDT, const std
 }
 
 void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &which_classes,
-                                               const std::map<std::string, double> &classification,
-                                               const std::string &most_likely_class_label,
-                                               std::shared_ptr<DecisionTreeNode> root_node)
+                                               const std::map<std::string, std::string> &classification,
+                                               const std::string &solution_path,
+                                               DecisionTreeNode* root_node)
 {
     // print("\nClassification:\n")
     //             print("     "  + str.ljust("class name", 30) +
@@ -401,12 +263,12 @@ void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &w
     //             print("\nSolution path in the decision tree: " +
     //             str(solution_path)) print("\nNumber of nodes created: " +
     //             str(root_node.how_many_nodes()))
-    std::cout << "\nClassification:\n";
-    std::cout << "     " << std::setw(30) << "class name" << "probability\n";
+    std::cout << "\nClassification for sample:\n";
+    std::cout << "     " << std::setw(30) << "class name" << "  probability\n";
     std::cout << "     ----------                    -----------\n";
     for (const auto &which_class : which_classes) {
         if (which_class != "solution_path") {
-            std::cout << "     " << std::setw(30) << which_class << classification.at(which_class) << "\n";
+            std::cout << "     " << std::setw(30) << which_class << " " << classification.at(which_class) << "\n";
         }
     }
     std::cout << "\nSolution path in the decision tree: " << classification.at("solution_path") << "\n";
@@ -454,17 +316,16 @@ void EvalTrainingData::displayConfusionMatrix(const std::map<int, std::map<std::
         std::cout << row_display << "\n";
     }
 }
-double
-EvalTrainingData::calculateDataQualityIndex(const std::map<std::string, std::map<std::string, int>> &confusion_matrix)
+double EvalTrainingData::calculateDataQualityIndex(const std::map<int, std::map<std::string, int>> &confusion_matrix)
 {
     int diagonal_sum = 0, off_diagonal_sum = 0;
     for (const auto &row_class_name : _classNames) {
         for (const auto &col_class_name : _classNames) {
             if (row_class_name == col_class_name) {
-                diagonal_sum += confusion_matrix.at(row_class_name).at(col_class_name);
+                diagonal_sum += confusion_matrix.at(std::stoi(row_class_name)).at(col_class_name);
             }
             else {
-                off_diagonal_sum += confusion_matrix.at(row_class_name).at(col_class_name);
+                off_diagonal_sum += confusion_matrix.at(std::stoi(row_class_name)).at(col_class_name);
             }
         }
     }

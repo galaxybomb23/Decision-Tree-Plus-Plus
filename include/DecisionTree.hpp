@@ -115,7 +115,6 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     map<string, vector<double>> getNumericFeaturesValueRangeDict() const;
 
     map<int, vector<string>> getTrainingDataDict() const;
-    vector<string> getClassNames() const;
 
     //---------------- Setters ----------------//
     void setTrainingDatafile(const string &trainingDatafile);
@@ -133,7 +132,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     void setRootNode(unique_ptr<DecisionTreeNode> rootNode);
     void setClassNames(const vector<string> &classNames);
 
-  protected:
+  public:
     string _trainingDatafile;
     double _entropyThreshold;
     int _maxDepthDesired;
