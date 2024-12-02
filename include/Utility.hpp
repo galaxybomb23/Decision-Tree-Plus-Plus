@@ -87,9 +87,28 @@ template <typename T> std::ostream &operator<<(std::ostream &os, const vector<T>
     return os;
 }
 
+// Function to print out a map
+template <typename K, typename V> std::ostream &operator<<(std::ostream &os, const std::map<K, V> &m)
+{
+    os << "{ ";
+    bool first = true;
+    for (const auto &[key, value] : m) {
+        if (!first) {
+            os << ", ";
+        }
+        first = false;
+        os << key << ": " << value;
+    }
+    os << " }" << std::endl;
+    return os;
+}
+
 // All helper functions for ConstructTreeTests
 std::string roundDouble(double value, int precision = 3);
 std::string join(const std::vector<std::string> &elements, const std::string &delimiter);
 std::string normalizeString(const std::string &input);
+
+// Function to trim a string when classifying
+std::string trim(const std::string &str);
 
 #endif // UTILITY_HPP

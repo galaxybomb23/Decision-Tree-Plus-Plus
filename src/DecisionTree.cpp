@@ -309,92 +309,98 @@ map<string, string> DecisionTree::classify(DecisionTreeNode* rootNode, const vec
     }
 
     vector<string> newFeaturesAndValues;
-    std::regex pattern(R"((\S+)\s*=\s*(\S+))");
-    std::smatch match;
 
     for (const auto &fv : featuresAndValues) {
-        if (std::regex_match(fv, match, pattern)) {
-            string feature = match[1];
-            string value   = match[2];
-            newFeaturesAndValues.push_back(feature + "=" + value);
-        }
-        else {
+        auto pos = fv.find('=');
+
+        if (pos == string::npos) {
             throw std::runtime_error("\n\nError in the format of the feature and value pairs. "
                                      "Use the format feature=value.");
         }
-    }
 
-    // Update the features and values
-    for (const auto &fv : newFeaturesAndValues) {
-        string feature = fv.substr(0, fv.find("="));
-        string value   = fv.substr(fv.find("=") + 1);
+        string feature = trim(fv.substr(0, pos));
+        string value   = trim(fv.substr(pos + 1));
+
+        newFeaturesAndValues.push_back(feature + "=" + value);
         _featuresAndValuesDict[feature].push_back(value);
     }
 
     if (_debug3) {
         cout << "\nCL1 New features and values:\n";
+
         for (const auto &item : newFeaturesAndValues) {
             cout << item << " ";
         }
     }
 
-    map<string, vector<double>> answer;
+    ClassificationAnswer answer;
+    answer.solutionPath = {};
     for (const auto &className : _classNames) {
-        answer[className] = {};
+        answer.classProbabilities[className] = 0.0;
     }
-    answer["solution_path"] = {};
 
-    map<string, double> classification = recursiveDescentForClassification(rootNode, newFeaturesAndValues, answer);
-    std::reverse(answer["solution_path"].begin(), answer["solution_path"].end());
+    // Perform classification
+    recursiveDescentForClassification(rootNode, newFeaturesAndValues, answer);
+
+    // Reverse the solution path (Top-down traversal instead of bottom up, more user readable)
+    std::reverse(answer.solutionPath.begin(), answer.solutionPath.end());
 
     if (_debug3) {
         cout << "\nCL2 The classification:" << endl;
+
         for (const auto &className : _classNames) {
-            cout << "    " << className << " with probability " << classification[className] << endl;
+            cout << "    " << className << " with probability " << answer.classProbabilities[className] << endl;
         }
     }
 
-    map<string, string> classificationForDisplay = {};
-    for (const auto &kv : classification) {
-        if (std::isfinite(kv.second)) {
-            std::ostringstream oss;
-            oss << std::fixed << setprecision(3) << kv.second;
-            classificationForDisplay[kv.first] = oss.str();
-        }
-        else {
-            vector<string> nodes;
-            for (const auto &x : kv.first) {
-                nodes.push_back("NODE" + std::to_string(x));
-            }
-            std::ostringstream oss;
-            std::copy(nodes.begin(), nodes.end(), std::ostream_iterator<string>(oss, ", "));
-            classificationForDisplay[kv.first] = oss.str();
+    // Prepare the classification for display
+    map<string, string> classificationForDisplay;
+    for (const auto &kv : answer.classProbabilities) {
+        std::ostringstream oss;
+        oss << std::fixed << setprecision(3) << kv.second;
+        classificationForDisplay[kv.first] = oss.str();
+    }
+
+    // Prepare solution path
+    vector<string> solutionPathStrs;
+    for (int nodeSerial : answer.solutionPath) {
+        solutionPathStrs.push_back("NODE" + std::to_string(nodeSerial));
+    }
+
+    std::ostringstream oss;
+    for (size_t i = 0; i < solutionPathStrs.size(); ++i) {
+        oss << solutionPathStrs[i];
+        if (i != solutionPathStrs.size() - 1) {
+            oss << ", ";
         }
     }
+    classificationForDisplay["solution_path"] = oss.str();
 
     return classificationForDisplay;
 }
 
-map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTreeNode* node,
-                                                                    const vector<string> &featureAndValues,
-                                                                    map<string, vector<double>> &answer)
+void DecisionTree::recursiveDescentForClassification(DecisionTreeNode* node,
+                                                     const vector<string> &featureAndValues,
+                                                     ClassificationAnswer &answer)
 {
     const auto &children = node->GetChildren();
 
+    // Leaf node: assign class probabilities
     if (children.empty()) {
-        // If leaf node, assign class probabilities
         vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
-        map<string, double> classProbabilities;
+
         for (size_t i = 0; i < _classNames.size(); ++i) {
-            classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
+            answer.classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
         }
-        answer["solution_path"].push_back(node->GetNextSerialNum());
-        return classProbabilities;
+
+        answer.solutionPath.push_back(node->GetSerialNum());
+        return;
     }
 
     string featureTestedAtNode = node->GetFeature();
+
     if (_debug3) {
-        cout << "\nCLRD1 Feature tested at node for classifcation: " << featureTestedAtNode << endl;
+        cout << "\nCLRD1 Feature tested at node for classification: " << featureTestedAtNode << endl;
     }
 
     string valueForFeature;
@@ -408,7 +414,8 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
             string feature = match[1].str();
             string value   = match[2].str();
             if (feature == featureTestedAtNode) {
-                valueForFeature = convert(value);
+                valueForFeature = value;
+                break;
             }
         }
     }
@@ -416,110 +423,102 @@ map<string, double> DecisionTree::recursiveDescentForClassification(DecisionTree
     // Handle missing feature values
     if (valueForFeature.empty()) {
         vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
-        map<string, double> classProbabilities;
-        for (size_t i = 0; i < _classNames.size(); ++i) {
-            classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
-        }
-        answer["solution_path"].push_back(node->GetNextSerialNum());
 
-        return classProbabilities;
+        for (size_t i = 0; i < _classNames.size(); ++i) {
+            answer.classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
+        }
+
+        answer.solutionPath.push_back(node->GetSerialNum());
+        return;
     }
 
     // Numeric feature case
     if (_probDistributionNumericFeaturesDict.find(featureTestedAtNode) != _probDistributionNumericFeaturesDict.end()) {
         if (_debug3) {
-            cout << "\nCLRD2 In the numeric section";
+            cout << "\nCLRD2 In the truly numeric section" << endl;
         }
+
+        double numericValue = std::stod(valueForFeature);
+
         for (const auto &child : children) {
             vector<string> branchFeaturesAndValues = child->GetBranchFeaturesAndValuesOrThresholds();
             string lastFeatureAndValueOnBranch     = branchFeaturesAndValues.back();
             std::regex pattern1(R"((.+)<(.+))");
             std::regex pattern2(R"((.+)>(.+))");
 
-            if (std::regex_search(lastFeatureAndValueOnBranch, match, pattern1)) {
-                string threshold = match[2].str();
-                if (std::stod(valueForFeature) <= std::stod(threshold)) {
-                    pathFound   = true;
-                    auto result = recursiveDescentForClassification(child, featureAndValues, answer);
-                    answer.insert(result.begin(), result.end());
-                    answer["solution_path"].push_back(node->GetNextSerialNum());
+            if (std::regex_match(lastFeatureAndValueOnBranch, match, pattern1)) {
+                string thresholdStr = match[2].str();
+                double threshold    = std::stod(thresholdStr);
+
+                if (numericValue <= threshold) {
+                    pathFound = true;
+                    recursiveDescentForClassification(child, featureAndValues, answer);
+                    answer.solutionPath.push_back(node->GetSerialNum());
                     break;
                 }
             }
-            else if (std::regex_search(lastFeatureAndValueOnBranch, match, pattern2)) {
-                string threshold = match[2].str();
-                if (std::stod(valueForFeature) > std::stod(threshold)) {
-                    pathFound   = true;
-                    auto result = recursiveDescentForClassification(child, featureAndValues, answer);
-                    answer.insert(result.begin(), result.end());
-                    answer["solution_path"].push_back(node->GetNextSerialNum());
+            else if (std::regex_match(lastFeatureAndValueOnBranch, match, pattern2)) {
+                string thresholdStr = match[2].str();
+                double threshold    = std::stod(thresholdStr);
+
+                if (numericValue > threshold) {
+                    pathFound = true;
+                    recursiveDescentForClassification(child, featureAndValues, answer);
+                    answer.solutionPath.push_back(node->GetSerialNum());
                     break;
                 }
             }
         }
 
         if (pathFound) {
-            map<string, double> result;
-            for (const auto &kv : answer) {
-                if (kv.first != "solution_path") {
-                    result[kv.first] = kv.second.empty() ? 0.0 : kv.second[0];
-                }
-            }
-
-            return result;
+            return;
         }
     }
-    else { // Symbolic feature case
+    else {
+        // Symbolic feature case
         string featureValueCombo = featureTestedAtNode + "=" + valueForFeature;
+
         if (_debug3) {
-            cout << "\nCLRD3 In the symbolic section with feature_value_combo: " << featureValueCombo;
+            cout << "\nCLRD3 In the symbolic section with feature_value_combo: " << featureValueCombo << endl;
         }
 
         for (const auto &child : children) {
-            vector<string> branch_features_and_values = child->GetBranchFeaturesAndValuesOrThresholds();
+            vector<string> branchFeaturesAndValues = child->GetBranchFeaturesAndValuesOrThresholds();
+
             if (_debug3) {
-                cout << "\nCLRD4 branch features and values: " << branch_features_and_values.back();
+                cout << "\nCLRD4 branch features and values: ";
+                for (const auto &s : branchFeaturesAndValues) {
+                    cout << s << " ";
+                }
+                cout << endl;
             }
-            string lastFeatureAndValueOnBranch = branch_features_and_values.back();
+
+            string lastFeatureAndValueOnBranch = branchFeaturesAndValues.back();
 
             if (lastFeatureAndValueOnBranch == featureValueCombo) {
-                auto result = recursiveDescentForClassification(child, featureAndValues, answer);
-                answer.insert(result.begin(), result.end());
-                answer["solution_path"].push_back(node->GetNextSerialNum());
                 pathFound = true;
+                recursiveDescentForClassification(child, featureAndValues, answer);
+                answer.solutionPath.push_back(node->GetSerialNum());
                 break;
             }
         }
 
         if (pathFound) {
-            map<string, double> result;
-            for (const auto &kv : answer) {
-                if (kv.first != "solution_path") {
-                    result[kv.first] = kv.second.empty() ? 0.0 : kv.second[0];
-                }
-            }
-
-            return result;
+            return;
         }
     }
 
     // If no path found, assign class probabilities from the current node
     if (!pathFound) {
         vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
+
         for (size_t i = 0; i < _classNames.size(); ++i) {
-            answer[_classNames[i]].push_back(leafNodeClassProbabilities[i]);
+            answer.classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
         }
-        answer["solution_path"].push_back(node->GetNextSerialNum());
-    }
 
-    map<string, double> result;
-    for (const auto &kv : answer) {
-        if (kv.first != "solution_path") {
-            result[kv.first] = kv.second.empty() ? 0.0 : kv.second[0];
-        }
+        answer.solutionPath.push_back(node->GetSerialNum());
+        return;
     }
-
-    return result;
 }
 
 //--------------- Construct Tree ----------------//
@@ -533,15 +532,13 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
     cout << "\nConstructing a decision tree" << endl;
 
     if (_debug3) {
-        // TODO //
-        // determineDataCondition();
+        determineDataCondition();
         cout << endl << "Starting construction of the decision tree:" << endl;
     }
 
     // Calculate prior class probabilities
     vector<double> classProbabilities;
     for (const auto &className : _classNames) {
-        // TODO //
         classProbabilities.push_back(priorProbabilityForClass(className));
     }
 
@@ -2433,26 +2430,99 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 
 //--------------- Class Based Utilities ----------------//
 
+void DecisionTree::determineDataCondition()
+{
+    /*
+    This method estimates the worst-case fan-out of the decision tree taking into
+    account the number of values (and therefore the number of branches emanating
+    from a node) for the symbolic features.
+    */
+    int numOfFeatures = static_cast<int>(_featureNames.size());
+
+    // Collect unique values for symbolic features
+    vector<vector<string>> values;
+    for (const auto &feature : _featuresAndUniqueValuesDict) {
+        // Check if the feature is not numeric
+        if (_numericFeaturesValueRangeDict.find(feature.first) == _numericFeaturesValueRangeDict.end()) {
+            // It's a symbolic feature
+            values.push_back(vector<string>(feature.second.begin(), feature.second.end()));
+        }
+    }
+
+    // Return if no symbolic features found
+    if (values.empty())
+        return;
+
+    cout << "Number of features: " << numOfFeatures << endl;
+
+    // Find the largest number of values among symbolic features
+    size_t maxNumValues = 0;
+    for (const auto &valList : values) {
+        if (valList.size() > maxNumValues) {
+            maxNumValues = valList.size();
+        }
+    }
+
+    cout << "Largest number of values for symbolic features is: " << maxNumValues << endl;
+
+    // Estimate the number of nodes (worst-case scenario)
+    double estimatedNumberOfNodes =
+        std::pow(static_cast<double>(maxNumValues),
+                 static_cast<double>(numOfFeatures)); // Use double to prevent integer overflow for large exponents
+
+    cout << "\nWORST CASE SCENARIO: The decision tree COULD have as many as " << estimatedNumberOfNodes
+         << " nodes. The exact number of nodes created depends critically on "
+            "the entropy_threshold used for node expansion (the default value "
+            "for this threshold is 0.01) and on the value set for max_depth_desired "
+            "for the depth of the tree\n";
+
+    // Warn the user if the estimated number of nodes is too high
+    if (estimatedNumberOfNodes > 10000.0) {
+        cout << "THIS IS WAY TOO MANY NODES. Consider using a relatively "
+                "large value for entropy_threshold and/or a small value for "
+                "max_depth_desired to reduce the number of nodes created";
+        cout << "\nDo you wish to continue? Enter 'y' if yes:  ";
+
+        string ans;
+        std::getline(std::cin, ans);
+
+        // Remove leading and trailing whitespace
+        ans.erase(ans.find_last_not_of(" \n\r\t") + 1);
+        ans.erase(0, ans.find_first_not_of(" \n\r\t"));
+
+        if (ans != "y") {
+            exit(0);
+        }
+    }
+}
+
 bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)
 {
     for (const auto &featureAndValue : featuresAndValues) {
-        std::regex pattern(R"((\S+)=([\S]+))");
-        std::smatch match;
-        std::regex_search(featureAndValue, match, pattern);
+        // Find the '=' character
+        auto pos = featureAndValue.find('=');
 
-        auto feature = match[1];
-        auto value   = match[2];
+        if (pos == string::npos) {
+            throw runtime_error("Your test data has a formatting error: Missing '=' in feature-value pair.");
+        }
 
-        if (feature == "" || value == "") {
-            throw std::runtime_error("Your test data has a formatting error");
+        // Split into feature and value
+        string feature = trim(featureAndValue.substr(0, pos));
+        string value   = trim(featureAndValue.substr(pos + 1));
+
+        // Check for empty feature or value
+        if (feature.empty() || value.empty()) {
+            throw std::runtime_error("Your test data has a formatting error: Feature or value is empty.");
         }
-        if (_featuresAndValuesDict.find(feature) == _featuresAndValuesDict.end()) {
-            return false;
+
+        if (std::find(_featureNames.begin(), _featureNames.end(), feature) == _featureNames.end()) {
+            return false; // Feature not found in the feature names list
         }
-        return true;
     }
-    return false;
+
+    return true; // All features are valid
 }
+
 
 DecisionTree &DecisionTree::operator=(const DecisionTree &dt)
 {

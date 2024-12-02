@@ -9,6 +9,11 @@
 #include <iostream>
 #include <memory>
 
+struct ClassificationAnswer {
+    map<string, double> classProbabilities;
+    vector<int> solutionPath;
+};
+
 /**
  * @struct BestFeatureResult
  * @brief A structure to hold the result of the best feature selection in a decision tree algorithm.
@@ -27,7 +32,14 @@ struct BestFeatureResult {
 class DecisionTreeNode;
 class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
   public:
+
+    // MARK: Discuss if these need to be private or can stay public
+    int _nodesCreated;
+    string _classLabel; // The class label for the training data currently unused
+    vector<string> _classNames;
+
     shared_ptr<DecisionTree> getShared() { return shared_from_this(); }
+
     //--------------- Constructors and Destructors ----------------//
     DecisionTree(map<string, string> kwargs); // constructor
     ~DecisionTree();                          // destructor
@@ -39,9 +51,9 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
 
     //--------------- Classify ----------------//
     map<string, string> classify(DecisionTreeNode* rootNode, const vector<string> &featuresAndValues);
-    map<string, double> recursiveDescentForClassification(DecisionTreeNode* node,
-                                                          const vector<string> &feature_and_values,
-                                                          map<string, vector<double>> &answer);
+    void recursiveDescentForClassification(DecisionTreeNode* node,
+                                                     const vector<string>& featureAndValues,
+                                                     ClassificationAnswer& answer);
 
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();
@@ -85,14 +97,11 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
         const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 
     //--------------- Class Based Utilities ----------------//
+    void determineDataCondition();
     bool checkNamesUsed(const vector<string> &featuresAndValues);
     DecisionTree &operator=(const DecisionTree &dt);
     vector<vector<string>> findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes);
     void printStats();
-
-    int _nodesCreated;
-    string _classLabel; // The class label for the training data currently unused
-    vector<string> _classNames;
 
     // --------------- Getters ----------------//
     string getTrainingDatafile() const;

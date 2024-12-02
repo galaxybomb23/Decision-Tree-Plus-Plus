@@ -45,6 +45,7 @@ class ConstructTreeTest : public ::testing::Test {
     void TearDown() override
     {
         dtS.reset(); // Reset the DecisionTree
+        dtN.reset(); // Reset the DecisionTree
     }
 };
 
@@ -176,15 +177,15 @@ TEST_F(ConstructTreeTest, constructDecisionTreeClassifierSymbolic)
 
     // Capture the output of DisplayDecisionTree
     std::ostringstream outputBuffer;
-    std::streambuf* oldCoutBuffer = std::cout.rdbuf(outputBuffer.rdbuf());
+    std::streambuf* oldCoutBuffer = cout.rdbuf(outputBuffer.rdbuf());
     rootS->DisplayDecisionTree(" ");
-    std::cout.rdbuf(oldCoutBuffer); // Restore the original buffer
+    cout.rdbuf(oldCoutBuffer); // Restore the original buffer
 
     // The captured output
-    std::string actualOutput = normalizeString(outputBuffer.str());
+    string actualOutput = normalizeString(outputBuffer.str());
 
     // Define the expected output
-    std::string expectedOutput = R"(NODE 0:    BRANCH TESTS TO NODE: []
+    string expectedOutput = R"(NODE 0:    BRANCH TESTS TO NODE: []
            Decision Feature: fatIntake   Node Creation Entropy: 0.958   Class Probs: ['class=benign => 0.620', 'class=malignant => 0.380']
 
 NODE 1:       BRANCH TESTS TO NODE: ['fatIntake=heavy']
@@ -220,7 +221,7 @@ NODE 9:       BRANCH TESTS TO LEAF NODE: ['fatIntake=medium']
     // Split normalized strings into lines
     std::istringstream actualStream(actualOutput);
     std::istringstream expectedStream(expectedOutput);
-    std::string actualLine, expectedLine;
+    string actualLine, expectedLine;
 
     // Compare line by line
     while (std::getline(expectedStream, expectedLine)) {
@@ -242,15 +243,15 @@ TEST_F(ConstructTreeTest, constructDecisionTreeClassifierNumeric)
 
     // Capture the output of DisplayDecisionTree
     std::ostringstream outputBuffer;
-    std::streambuf* oldCoutBuffer = std::cout.rdbuf(outputBuffer.rdbuf());
+    std::streambuf* oldCoutBuffer = cout.rdbuf(outputBuffer.rdbuf());
     rootN->DisplayDecisionTree(" ");
-    std::cout.rdbuf(oldCoutBuffer); // Restore the original buffer
+    cout.rdbuf(oldCoutBuffer); // Restore the original buffer
 
     // The captured output
-    std::string actualOutput = normalizeString(outputBuffer.str());
+    string actualOutput = normalizeString(outputBuffer.str());
 
     // Define the expected output
-    std::string expectedOutput = R"(NODE 0:    BRANCH TESTS TO NODE: []
+    string expectedOutput = R"(NODE 0:    BRANCH TESTS TO NODE: []
            Decision Feature: grade   Node Creation Entropy: 0.951   Class Probs: ['class=0 => 0.630', 'class=1 => 0.370']
 
 NODE 1:       BRANCH TESTS TO LEAF NODE: ['grade=1']
@@ -340,7 +341,7 @@ NODE 27:       BRANCH TESTS TO LEAF NODE: ['grade=4']
     // Split normalized strings into lines
     std::istringstream actualStream(actualOutput);
     std::istringstream expectedStream(expectedOutput);
-    std::string actualLine, expectedLine;
+    string actualLine, expectedLine;
 
     // Compare line by line
     while (std::getline(expectedStream, expectedLine)) {
