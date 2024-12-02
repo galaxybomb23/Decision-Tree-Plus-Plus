@@ -2,15 +2,6 @@
 
 #include "DecisionTree.hpp"
 
-// for vector output
-std::ostream &operator<<(std::ostream &os, const vector<string> &vec)
-{
-    for (const auto &str : vec) {
-        os << str << " ";
-    }
-    return os;
-}
-
 DecisionTreeNode::DecisionTreeNode(const string &feature,
                                    double entropy,
                                    const vector<double> &class_probabilities,
@@ -31,7 +22,6 @@ DecisionTreeNode::DecisionTreeNode(const string &feature,
 
     if (isRoot) {
         tree->_nodesCreated = -1;
-        tree->_classNames.clear();
     }
 
     _serialNumber = GetNextSerialNum();
@@ -97,7 +87,6 @@ DecisionTreeNode &DecisionTreeNode::operator=(const DecisionTreeNode &other)
 
     return *this;
 }
-
 
 DecisionTreeNode::~DecisionTreeNode() {}
 
@@ -175,34 +164,47 @@ void DecisionTreeNode::DeleteAllLinks()
 
 void DecisionTreeNode::DisplayNode(const string &offset) const
 {
-    // Handle feature at node
+    // Format feature at the node
     string featureAtNode = _feature.empty() ? " " : _feature;
 
-    // Format entropy value
-    cout << offset << "\n\nNODE " << _serialNumber << ":" << endl;
+    // Format branch features and values with single quotes
+    cout << "NODE " << _serialNumber << ":  " << offset << "BRANCH TESTS TO "
+         << (_linkedTo.empty() ? "LEAF NODE: " : "NODE: ") << "[";
 
-    // Format branch features and values
-    cout << offset << "  Branch features and values to this node: [" << _branchFeaturesAndValuesOrThresholds << "]"
-         << endl;
-
-
-    // Format class probabilities
-    cout << offset << "  Class probabilities at current node: [";
-    for (size_t i = 0; i < _classProbabilities.size(); ++i) {
-        cout << _dt.lock()->_classNames[i] << ": ";
-        cout << std::fixed << std::setprecision(3) << _classProbabilities[i];
-        if (i < _classProbabilities.size() - 1) {
+    for (size_t i = 0; i < _branchFeaturesAndValuesOrThresholds.size(); ++i) {
+        cout << "'" << _branchFeaturesAndValuesOrThresholds[i] << "'";
+        if (i < _branchFeaturesAndValuesOrThresholds.size() - 1) {
             cout << ", ";
         }
     }
     cout << "]" << endl;
 
-    // Display entropy value
-    cout << offset << "  Entropy at current node: " << std::fixed << std::setprecision(3) << _nodeCreationEntropy
-         << endl;
+    // Offset for the second line
+    string secondLineOffset = offset + string(8 + to_string(_serialNumber).length(), ' ');
 
-    // Display best feature test at current node
-    cout << offset << "  Best feature test at current node: " << featureAtNode << endl << endl;
+    // Format class probabilities with class names and brackets
+    vector<string> classProbabilitiesWithClass;
+    for (size_t i = 0; i < _classProbabilities.size(); ++i) {
+        string classProbability =
+            "'class=" + _dt.lock()->_classNames[i] + " => " + roundDouble(_classProbabilities[i], 3) + "'";
+        classProbabilitiesWithClass.push_back(classProbability);
+    }
+
+    // Print entropy and class probabilities
+    cout << secondLineOffset;
+    if (_linkedTo.empty()) {
+        // Leaf node: Only print entropy and probabilities
+        cout << "Node Creation Entropy: " << roundDouble(_nodeCreationEntropy, 3) << "   Class Probs: "
+             << "[" << join(classProbabilitiesWithClass, ", ") << "]" << endl
+             << endl;
+    }
+    else {
+        // Non-leaf node: Print feature, entropy, and probabilities
+        cout << "Decision Feature: " << featureAtNode
+             << "   Node Creation Entropy: " << roundDouble(_nodeCreationEntropy, 3) << "   Class Probs: "
+             << "[" << join(classProbabilitiesWithClass, ", ") << "]" << endl
+             << endl;
+    }
 }
 
 void DecisionTreeNode::DisplayDecisionTree(const string &offset) const
@@ -212,6 +214,8 @@ void DecisionTreeNode::DisplayDecisionTree(const string &offset) const
 
     // Recursively display child nodes with an increased offset
     for (const auto &child : _linkedTo) {
-        child->DisplayDecisionTree(offset + "  ");
+        if (child) {
+            child->DisplayDecisionTree(offset + "   ");
+        }
     }
 }

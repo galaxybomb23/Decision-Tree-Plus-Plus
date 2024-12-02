@@ -19,7 +19,6 @@
 #include <unordered_map>
 #include <vector>
 
-
 // --------------- Logger --------------- //
 Logger logger("../logs/decisionTree.log");
 
@@ -116,7 +115,7 @@ DecisionTree::DecisionTree(map<string, string> kwargs)
 
 DecisionTree::~DecisionTree() {}
 
-//--------------- Functions ----------------//
+//--------------- Class Functions ----------------//
 
 // Get the training data from the CSV file
 void DecisionTree::getTrainingData()
@@ -559,7 +558,7 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
     // Create the root node
     auto rootNode = make_unique<DecisionTreeNode>(
         string(""), entropy, classProbabilities, vector<string>{}, shared_from_this(), true);
-    rootNode->SetClassNames(_classNames);
+    rootNode->SetClassNames(_classNames); // MARK: This might be redundant
     setRootNode(std::move(rootNode));
     // Start recursive descent
     if (!_rootNode) {
@@ -612,7 +611,7 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     }
 
     // Get the best feature info
-    vector<string> copyOfPathAttributes  = featuresAndValuesOrThresholdsOnBranch; // deep copy?
+    vector<string> copyOfPathAttributes  = featuresAndValuesOrThresholdsOnBranch;
     BestFeatureResult bestFeatureResults = bestFeatureCalculator(copyOfPathAttributes, existingNodeEntropy);
     string bestFeature                   = bestFeatureResults.bestFeatureName;
     double bestFeatureEntropy            = bestFeatureResults.bestFeatureEntropy;
@@ -1049,6 +1048,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
             for (const auto &value : values) {
                 string featureValueString;
                 double valueAsDouble = convert(value);
+
                 if (std::isnan(valueAsDouble)) {
                     featureValueString = featureName + "=" + value;
                 }
@@ -1068,9 +1068,9 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
                 else {
                     extendedAttributes = {featureValueString};
                 }
-                // print inputs
-                auto entrop = classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(extendedAttributes);
-                auto probs  = probabilityOfASequenceOfFeaturesAndValuesOrThresholds(extendedAttributes);
+                double entrop = classEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds(extendedAttributes);
+                double probs  = probabilityOfASequenceOfFeaturesAndValuesOrThresholds(extendedAttributes);
+
                 entropy += entrop * probs;
 
                 if (_debug3) {
@@ -2635,6 +2635,11 @@ map<int, vector<string>> DecisionTree::getTrainingDataDict() const
 map<string, vector<string>> DecisionTree::getFeaturesAndValuesDict() const
 {
     return _featuresAndValuesDict;
+}
+
+vector<string> DecisionTree::getClassNames() const
+{
+    return _classNames;
 }
 
 //--------------- Setters ----------------//

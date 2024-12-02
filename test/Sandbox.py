@@ -7,15 +7,15 @@ dtree = dt.DecisionTree(training_datafile="test/resources/training_symbolic.csv"
                         csv_columns_for_features=[2, 3, 4, 5],
                         max_depth_desired=5,
                         entropy_threshold=0.1,
-                        debug3=True
+                        debug3=False
                         )
 
 dtree.get_training_data()
 dtree.calculate_class_priors()
-# dtree.calculate_first_order_probabilities()
+dtree.calculate_first_order_probabilities()
 # dtree.determine_data_condition()
 
-# root_node = dtree.construct_decision_tree_classifier()
+root_node = dtree.construct_decision_tree_classifier()
 # root_node.display_decision_tree("  ")
 # /***************************/ Recusrive Descent /***************************/
 # SYMBOLIC
@@ -30,21 +30,22 @@ dtree.calculate_class_priors()
 
 # <============== NUMERIC TREE ===============>
 # print(f"NUMERIC TREE")
-# dtreeN = dt.DecisionTree(
-#     training_datafile="test/resources/stage3cancer.csv",
-#     csv_class_column_index=2,
-#     csv_columns_for_features=[3, 4, 5, 6, 7, 8],
-#     max_depth_desired=8,
-#     entropy_threshold=0.01
-#     # , debug2=True
-# )
+dtreeN = dt.DecisionTree(
+    training_datafile="test/resources/stage3cancer.csv",
+    csv_class_column_index=2,
+    csv_columns_for_features=[3, 4, 5, 6, 7, 8],
+    max_depth_desired=8,
+    entropy_threshold=0.01
+    # , debug2=True
+)
 
-# dtreeN.get_training_data()
+dtreeN.get_training_data()
 
-# dtreeN.calculate_first_order_probabilities()
-# dtreeN.calculate_class_priors()
+dtreeN.calculate_first_order_probabilities()
+dtreeN.calculate_class_priors()
 
-# root_nodeN = dtreeN.construct_decision_tree_classifier()
+root_nodeN = dtreeN.construct_decision_tree_classifier()
+# root_nodeN.display_decision_tree("  ")
 
 # # /***************************/ Recusrive Descent /***************************/
 # # NUMERIC
@@ -73,8 +74,9 @@ dtree.calculate_class_priors()
 # dtree.entropy_scanner_for_a_numeric_feature('videoAddiction')
 
 # ----- ClassEntropyForAGivenSequenceOfFeaturesAndValuesOrThresholds -----
-print(dtree.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
-    ['exercising=never']))
+# print(f'\n\nTESTS - Class Entropy For A Given Sequence Of Features And Values Or Thresholds')
+# print("['exercising=never']:", dtree.class_entropy_for_a_given_sequence_of_features_and_values_or_thresholds(
+#     ['exercising=never']))
 
 
 # NUMERIC

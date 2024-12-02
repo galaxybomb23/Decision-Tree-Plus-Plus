@@ -4,6 +4,7 @@
 // Include
 #include "Common.hpp"
 #include "DecisionTreeNode.hpp"
+#include "Utility.hpp"
 
 #include <iostream>
 #include <memory>
@@ -31,7 +32,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     DecisionTree(map<string, string> kwargs); // constructor
     ~DecisionTree();                          // destructor
 
-    //--------------- Functions ----------------//
+    //--------------- Class Functions ----------------//
     void getTrainingData();
     void calculateFirstOrderProbabilities();
     void showTrainingData() const;
@@ -114,6 +115,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     map<string, vector<double>> getNumericFeaturesValueRangeDict() const;
 
     map<int, vector<string>> getTrainingDataDict() const;
+    vector<string> getClassNames() const;
 
     //---------------- Setters ----------------//
     void setTrainingDatafile(const string &trainingDatafile);

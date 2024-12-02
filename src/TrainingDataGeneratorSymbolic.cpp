@@ -46,8 +46,7 @@ TrainingDataGeneratorSymbolic::TrainingDataGeneratorSymbolic(map<string, string>
 
 TrainingDataGeneratorSymbolic::~TrainingDataGeneratorSymbolic() {}
 
-vector<string> TrainingDataGeneratorSymbolic::filterAndClean(const string &pattern,
-                                                                       const vector<string> &input)
+vector<string> TrainingDataGeneratorSymbolic::filterAndClean(const string &pattern, const vector<string> &input)
 {
     vector<string> cleaned;
 
@@ -75,8 +74,7 @@ vector<string> TrainingDataGeneratorSymbolic::filterAndClean(const string &patte
     return cleaned;
 }
 
-vector<string> TrainingDataGeneratorSymbolic::splitByRegex(const string &input,
-                                                                     const string &pattern)
+vector<string> TrainingDataGeneratorSymbolic::splitByRegex(const string &input, const string &pattern)
 {
     std::regex regexPattern(pattern);
     std::sregex_token_iterator iter(input.begin(), input.end(), regexPattern, -1);
@@ -95,11 +93,11 @@ vector<string> TrainingDataGeneratorSymbolic::splitByRegex(const string &input,
 
 void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
 {
-    int debug1                     = _debug1;
-    int debug2                     = _debug2;
-    int writeToFile                = _writeToFile;
-    int numberOfTrainingSamples    = _numberOfTrainingSamples;
-    string inputParameterFile = _parameterFile;
+    int debug1                  = _debug1;
+    int debug2                  = _debug2;
+    int writeToFile             = _writeToFile;
+    int numberOfTrainingSamples = _numberOfTrainingSamples;
+    string inputParameterFile   = _parameterFile;
 
     // Read the parameter file for symbolic data
     std::ifstream file(inputParameterFile);
@@ -136,7 +134,7 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     if (std::regex_search(paramString, m, classPattern)) {
         string classNames  = m[1].str();
         string classPriors = m[2].str();
-        restParams              = m[3].str();
+        restParams         = m[3].str();
 
         // Split class names and class priors
         vector<string> classNamesList  = filterAndClean("", splitByRegex(classNames, "\\s+"));
@@ -162,8 +160,8 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     map<string, vector<string>> featuresAndValuesDict;
 
     if (std::regex_search(restParams, mFeatureBias, featureAndBiasPattern)) {
-        featureString                     = mFeatureBias[1].str();
-        biasString                        = mFeatureBias[2].str();
+        featureString           = mFeatureBias[1].str();
+        biasString              = mFeatureBias[2].str();
         vector<string> features = filterAndClean("", splitByRegex(featureString, "(feature[:])"));
 
         // for each feature
@@ -270,11 +268,11 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    vector<string> classNames                                             = this->_classNames;
-    vector<double> classPriors                                                 = this->_classPriors;
-    map<string, vector<string>> featuresAndValuesDict           = this->_featuresAndValuesDict;
+    vector<string> classNames                         = this->_classNames;
+    vector<double> classPriors                        = this->_classPriors;
+    map<string, vector<string>> featuresAndValuesDict = this->_featuresAndValuesDict;
     map<string, map<string, vector<string>>> biasDict = this->_biasDict;
-    int howManyTrainingSamples                                                      = this->_numberOfTrainingSamples;
+    int howManyTrainingSamples                        = this->_numberOfTrainingSamples;
 
     map<string, pair<double, double>> classPriorsToUnitIntervalMap;
     double accumulatedInterval = 0.0;
@@ -294,8 +292,7 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
         }
     }
 
-    map<string, map<string, map<string, pair<double, double>>>>
-        classAndFeatureBasedValuePriorsToUnitIntervalMap;
+    map<string, map<string, map<string, pair<double, double>>>> classAndFeatureBasedValuePriorsToUnitIntervalMap;
 
     // Initialize maps for each class and feature
     for (const auto &className : classNames) {
@@ -320,12 +317,12 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
             }
 
             map<string, pair<double, double>> valuePriorsToUnitIntervalMap;
-            vector<string> splits = splitByRegex(biasString, "=");
-            string chosenForBiasValue  = splits[0];
-            double chosenBias               = std::stod(splits[1]);
-            double remainingBias            = 1.0 - chosenBias;
-            double remainingPortionBias     = remainingBias / (values.size() - 1);
-            double accumulated              = 0.0;
+            vector<string> splits       = splitByRegex(biasString, "=");
+            string chosenForBiasValue   = splits[0];
+            double chosenBias           = std::stod(splits[1]);
+            double remainingBias        = 1.0 - chosenBias;
+            double remainingPortionBias = remainingBias / (values.size() - 1);
+            double accumulated          = 0.0;
 
             // Assign intervals for each value
             for (size_t i = 0; i < values.size(); ++i) {
@@ -343,11 +340,11 @@ void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
 
             // Debugging output
             if (this->_debug2) {
-                cout << "For class " << className << ": Mapping feature value priors for feature '"
-                          << feature.first << "' to unit interval: " << endl;
+                cout << "For class " << className << ": Mapping feature value priors for feature '" << feature.first
+                     << "' to unit interval: " << endl;
                 for (const auto &item : valuePriorsToUnitIntervalMap) {
-                    cout << "    " << item.first << " ===> (" << item.second.first << ", " << item.second.second
-                              << ")" << endl;
+                    cout << "    " << item.first << " ===> (" << item.second.first << ", " << item.second.second << ")"
+                         << endl;
                 }
             }
         }
