@@ -45,8 +45,8 @@ install(EXPORT DecisionTreeLibraryConfig
 enable_testing()
 find_package(GTest REQUIRED)
 # TODO: Change this to include all test files when ready
-# file(GLOB_RECURSE TEST_SOURCES "test/*Test.cpp")
-file(GLOB_RECURSE TEST_SOURCES "test/IntrospectionTest.cpp")
+file(GLOB_RECURSE TEST_SOURCES "test/*Test.cpp")
+# file(GLOB_RECURSE TEST_SOURCES "test/IntrospectionTest.cpp")
 add_executable(DecisionTreeTests ${TEST_SOURCES})
 
 # Link the test executable to the library, Google Test, and Eigen

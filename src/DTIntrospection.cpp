@@ -248,22 +248,18 @@ FeatureOpValue DTIntrospection::extractFeatureOpValue(string featureValueCombo) 
     std::regex pattern3(R"((.+)>(.+))");
 
     string feature, op, value;
+    std::smatch match;
 
-    if (std::regex_match(featureValueCombo, pattern1)) {
-        std::smatch match;
-        std::regex_search(featureValueCombo, match, pattern1);
+
+    if (std::regex_search(featureValueCombo, match, pattern1)) {
         feature = match[1];
         op = "=";
         value = match[2];
-    } else if (std::regex_match(featureValueCombo, pattern2)) {
-        std::smatch match;
-        std::regex_search(featureValueCombo, match, pattern2);
+    } else if (std::regex_search(featureValueCombo, match, pattern2)) {
         feature = match[1];
         op = "<";
         value = match[2];
-    } else if (std::regex_match(featureValueCombo, pattern3)) {
-        std::smatch match;
-        std::regex_search(featureValueCombo, match, pattern3);
+    } else if (std::regex_search(featureValueCombo, match, pattern3)) {
         feature = match[1];
         op = ">";
         value = match[2];
