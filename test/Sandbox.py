@@ -55,14 +55,7 @@ root_nodeN = dtreeN.construct_decision_tree_classifier()
 dtreeSI = dtI(dtreeS)
 dtreeSI.initialize()
 
-# print(f'_node_serial_num_to_node_dict: {dtreeSI._node_serial_num_to_node_dict}')
-# print(f'_branch_features_to_nodes_dict: {dtreeSI._branch_features_to_nodes_dict}')
-# print(f'_samples_at_nodes_dict: {dtreeSI._samples_at_nodes_dict}')
-# print(f'_sample_to_node_mapping_direct_dict: {dtreeSI._sample_to_node_mapping_direct_dict}')
-
-# print(f'display_training_samples_at_all_nodes_direct_influence_only: {dtreeSI.display_training_samples_at_all_nodes_direct_influence_only()}')
-print(f'display_training_samples_to_nodes_influence_propagation: {dtreeSI.display_training_samples_to_nodes_influence_propagation()}')
-
+dtreeSI.explain_classification_at_one_node(1)
 
 # NUMERIC
 dtreeNI = dtI(dtreeN)

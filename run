@@ -16,7 +16,7 @@ build() {
 
 # usage
 usage() {
-    echo "Usage: $0 {build|clean|test}"
+    echo "Usage: $0 {build|clean|test|sandbox|install|install-python}"
 }
 
 #remove build repo
@@ -24,12 +24,22 @@ clean(){
     echo "Cleaning build..."
     rm -r build 
 }
+
 # Function to perform the tests
 test() {
     build
     echo "Running tests..."
     cd build
     ctest --output-on-failure
+    cd ..
+}
+
+# Function to run the sandbox
+run_sandbox() {
+    build
+    echo "Running sandbox..."
+    cd build
+    ./sandbox
     cd ..
 }
 
@@ -89,6 +99,9 @@ case $1 in
     ;;
   install-python)
     install-python
+    ;;
+  sandbox)
+    run_sandbox
     ;;
   *)
     asciiquarium

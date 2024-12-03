@@ -232,8 +232,109 @@ void DTIntrospection::explainClassificationsAtMultipleNodesInteractively() {
 
 }
 
-void DTIntrospection::explainClassificationAtOneNode(int nodeID){
+void DTIntrospection::explainClassificationAtOneNode(int nodeId) {
+    using namespace ConsoleColors;
+
+    if (_samplesAtNodesDict.empty()) {
+        throw std::runtime_error("You called explainClassificationAtOneNode() without first initializing the DTIntrospection instance in your code. Aborting.");
+    }
+
+    if (_samplesAtNodesDict.find(nodeId) == _samplesAtNodesDict.end()) {
+        cout << "Node " << nodeId << " is not a node in the tree" << endl;
+        return;
+    }
+
+    if (nodeId == 0) {
+        cout << "Nothing useful to be explained at the root node" << endl;
+        return;
+    }
+
+    if (!_awarenessRaisingMessageShown) {
+        cout << BOLD_BLUE + "\n\nIn order for the decision tree to introspect at Node " << nodeId << ": \n" + RESET;
+        string msg = BOLD + "  DO YOU ACCEPT the fact that, in general, a region of the feature space\n"
+                          "  that corresponds to a DT node may have NON-ZERO probabilities associated\n"
+                          "  with it even when there are NO training data points in that region?\n" + RESET
+                          + BOLD + "\n    Enter " + BOLD_GREEN + "'y' for yes" + RESET + BOLD + " or any " + BOLD_RED + "other character for no:  " + RESET;
+        cout << msg;
+        string ans;
+        std::getline(std::cin, ans);
+        ans.erase(ans.find_last_not_of(" \n\r\t")+1);
+
+        if (ans != "y" && ans != "yes") {
+            throw std::runtime_error(BOLD_RED + "\n\n  Since you answered 'no' to a very real theoretical possibility, no explanations possible for the classification decision at node " + std::to_string(nodeId) + RESET);
+        }
+
+        _awarenessRaisingMessageShown = 1;
+    }
+
+    vector<string> samplesAtNode = _samplesAtNodesDict[nodeId];
+    vector<string> branchFeaturesToNode = _branchFeaturesToNodesDict[nodeId];
+    vector<string> classNames = _rootNode->GetClassNames();
+
+    string msg2;
+    if (!samplesAtNode.empty()) {
+        msg2 = "\n    Samples in the portion of the feature space assigned to Node " + std::to_string(nodeId) + ": ";
+        
+        for (const auto& sample : samplesAtNode) {
+            msg2 += sample + " ";
+        }
+
+        msg2 += "\n";
+    } else {
+        msg2 = "\n\n    There are NO training data samples directly in the region of the feature space assigned to node " + std::to_string(nodeId) + ".\n";
+    }
+
+    msg2 += "\n    Features tests on the branch to node " + std::to_string(nodeId) + ": ";
     
+    for (const auto& featureTest : branchFeaturesToNode) {
+        msg2 += featureTest + " ";
+    }
+
+    msg2 += "\n";
+    msg2 += BOLD_BLUE + "\n\nWould you like to see the probability associated with the last feature test on the branch leading to Node " + std::to_string(nodeId) + "?\n" + RESET;
+    msg2 += BOLD + "\n    Enter " + BOLD_GREEN + "'y' for yes" + RESET + BOLD + " or any " + BOLD_RED + "other character for no:  " + RESET;
+
+    string ans;
+    cout << msg2;
+    std::getline(std::cin, ans);
+    ans.erase(ans.find_last_not_of(" \n\r\t")+1);
+
+    if (ans == "y" || ans == "yes") {
+        vector<string> sequence = { branchFeaturesToNode.back() };
+        double prob = _dt->probabilityOfASequenceOfFeaturesAndValuesOrThresholds(sequence);
+        cout << "\n    Probability of [";
+
+        for (const auto& s : sequence) {
+            cout << s << " ";
+        }
+
+        cout << "] is: " << prob << endl;
+    }
+
+    string msg3 = BOLD_BLUE + "\n\nUsing Bayes rule, would you like to see the class probabilities predicated on just the last feature test on the branch leading to Node " + std::to_string(nodeId) + "?\n" + RESET;
+    msg3 += BOLD + "\n    Enter " + BOLD_GREEN + "'y' for yes" + RESET + BOLD + " or any " + BOLD_RED + "other character for no:  " + RESET;
+    cout << msg3;
+    std::getline(std::cin, ans);
+    ans.erase(ans.find_last_not_of(" \n\r\t")+1);
+
+    if (ans == "y" || ans == "yes") {
+        vector<string> sequence = { branchFeaturesToNode.back() };
+        
+        for (const auto& cls : classNames) {
+            double prob = _dt->probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(cls, sequence);
+            cout << "\n    Probability of class " << cls << " given just one feature test [";
+            
+            for (const auto& s : sequence) {
+                cout << s << " ";
+            }
+            
+            cout << "] is: " << prob << endl;
+        }
+    } else {
+        cout << "goodbye" << endl;
+    }
+
+    cout << BOLD_GREEN + "\nFinished supplying information on Node " << nodeId << "\n\n" + RESET;
 }
 
 
