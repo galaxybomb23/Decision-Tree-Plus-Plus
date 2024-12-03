@@ -205,9 +205,10 @@ std::string normalizeString(const std::string &input)
  * @param str The input string to be trimmed.
  * @return A new string with leading and trailing whitespace removed.
  */
-std::string trim(const std::string& str) {
+std::string trim(const std::string &str)
+{
     size_t first = str.find_first_not_of(" \t");
-    size_t last = str.find_last_not_of(" \t");
+    size_t last  = str.find_last_not_of(" \t");
     if (first == std::string::npos || last == std::string::npos) {
         return ""; // Empty or all whitespace
     }

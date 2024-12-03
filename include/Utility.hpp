@@ -14,7 +14,7 @@ int sampleIndex(string sample_name);
 template <typename T> vector<T> deepCopy(const vector<T> &vec)
 {
     // The purpose of this function is to create a deep copy of a vector.
-    vector<T> copy;
+    std::vector<T> copy;
     for (const T &elem : vec) {
         copy.push_back(elem);
     }
@@ -88,11 +88,11 @@ template <typename T> std::ostream &operator<<(std::ostream &os, const vector<T>
 }
 
 // Function to print out a map
-template <typename K, typename V>
-std::ostream& operator<<(std::ostream& os, const std::map<K, V>& m) {
+template <typename K, typename V> std::ostream &operator<<(std::ostream &os, const std::map<K, V> &m)
+{
     os << "{ ";
     bool first = true;
-    for (const auto& [key, value] : m) {
+    for (const auto &[key, value] : m) {
         if (!first) {
             os << ", ";
         }
@@ -109,6 +109,6 @@ std::string join(const std::vector<std::string> &elements, const std::string &de
 std::string normalizeString(const std::string &input);
 
 // Function to trim a string when classifying
-std::string trim(const std::string& str);
+std::string trim(const std::string &str);
 
 #endif // UTILITY_HPP
