@@ -32,7 +32,6 @@ struct BestFeatureResult {
 class DecisionTreeNode;
 class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
   public:
-
     // MARK: Discuss if these need to be private or can stay public
     int _nodesCreated;
     string _classLabel; // The class label for the training data currently unused
@@ -52,8 +51,8 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     //--------------- Classify ----------------//
     map<string, string> classify(DecisionTreeNode* rootNode, const vector<string> &featuresAndValues);
     void recursiveDescentForClassification(DecisionTreeNode* node,
-                                                     const vector<string>& featureAndValues,
-                                                     ClassificationAnswer& answer);
+                                           const vector<string> &featureAndValues,
+                                           ClassificationAnswer &answer);
 
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();

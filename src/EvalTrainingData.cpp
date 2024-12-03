@@ -217,7 +217,8 @@ void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &w
                                                DecisionTreeNode* root_node)
 {
     std::cout << "\nClassification for sample:\n";
-    std::cout << "     " << std::setw(30) << "class name" << "  probability\n";
+    std::cout << "     " << std::setw(30) << "class name"
+              << "  probability\n";
     std::cout << "     ----------                    -----------\n";
     for (const auto &which_class : which_classes) {
         if (which_class != "solution_path") {
