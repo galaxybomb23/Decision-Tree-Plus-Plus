@@ -121,9 +121,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     map<int, string> getSamplesClassLabelDict() const;
     map<string, std::set<string>> getFeaturesAndUniqueValuesDict() const;
     map<string, vector<double>> getNumericFeaturesValueRangeDict() const;
-
     map<int, vector<string>> getTrainingDataDict() const;
-    vector<string> getClassNames() const;
     DecisionTreeNode* getRootNode() const;
 
     //---------------- Setters ----------------//
