@@ -30,6 +30,15 @@ struct BestFeatureResult {
 };
 
 class DecisionTreeNode;
+
+/**
+ * @class DecisionTree
+ * @brief A class representing a Decision Tree for classification tasks.
+ *
+ * This class provides functionalities to construct, train, and use a decision tree for classification.
+ * It includes methods for calculating probabilities, entropies, and classifying data based on the trained model.
+ *
+ */
 class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
   public:
     // MARK: Discuss if these need to be private or can stay public

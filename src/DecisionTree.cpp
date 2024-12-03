@@ -118,6 +118,22 @@ DecisionTree::~DecisionTree() {}
 //--------------- Class Functions ----------------//
 
 // Get the training data from the CSV file
+/**
+ * @brief Reads and processes training data from a CSV file.
+ *
+ * This function performs the following steps:
+ * 1. Checks if the training data file is a CSV file.
+ * 2. Opens the CSV file and reads the header to extract feature names.
+ * 3. Reads the data rows, extracting unique IDs, class labels, and feature values.
+ * 4. Stores the training data in dictionaries for further processing.
+ * 5. Extracts unique class labels and counts the number of unique class labels.
+ * 6. Counts the total number of training samples.
+ * 7. Extracts all values and unique values for each feature.
+ * 8. Counts the number of unique values for each feature.
+ * 9. Calculates the min and max values for numeric features and stores them.
+ *
+ * @throws std::invalid_argument if the file is not a CSV file or cannot be opened.
+ */
 void DecisionTree::getTrainingData()
 {
     // Check if training data file is a CSV file
@@ -245,6 +261,26 @@ void DecisionTree::getTrainingData()
 }
 
 // Calculate first order probabilities
+/**
+ * @brief Calculates the first-order probabilities for each feature in the decision tree.
+ *
+ * This function iterates over all feature names stored in the `_featureNames` member variable
+ * and calculates the probability for each feature's value using the `probabilityOfFeatureValue` method.
+ * If the `_debug2` flag is enabled, it outputs the probability distributions for each feature.
+ *
+ * For numeric features, it presents the sorted sampling points and their corresponding probabilities.
+ * For symbolic features, it presents the probabilities for each unique value of the feature.
+ *
+ * The function utilizes the following member variables:
+ * - `_featureNames`: A list of feature names.
+ * - `_debug2`: A flag indicating whether debug output is enabled.
+ * - `_probDistributionNumericFeaturesDict`: A dictionary containing probability distributions for numeric features.
+ * - `_featuresAndUniqueValuesDict`: A dictionary containing unique values for each feature.
+ *
+ * The function calls the following member function:
+ * - `probabilityOfFeatureValue(const std::string &feature, const std::string &value)`: Calculates the probability of a
+ * feature's value.
+ */
 void DecisionTree::calculateFirstOrderProbabilities()
 {
     for (const auto &feature : _featureNames) {
@@ -295,6 +331,24 @@ void DecisionTree::showTrainingData() const
 
 //--------------- Classify ----------------//
 
+/**
+ * @brief Classifies a test sample using the decision tree.
+ *
+ * This function classifies one test sample at a time using the decision tree
+ * constructed from the training file. The data record for the test sample must
+ * be supplied in the format shown in the scripts in the `Examples` subdirectory.
+ * See the scripts construct_dt_and_classify_one_sample_caseX.py in that subdirectory.
+ *
+ * @param rootNode Pointer to the root node of the decision tree.
+ * @param featuresAndValues A vector of strings representing the features and their values
+ *                          in the format "feature=value".
+ * @return A map where the keys are class names and the values are the corresponding
+ *         probabilities as strings. Additionally, the map contains the solution path
+ *         under the key "solution_path".
+ *
+ * @throws std::runtime_error if there is an error in the names used for features and/or values,
+ *                            or if there is an error in the format of the feature and value pairs.
+ */
 map<string, string> DecisionTree::classify(DecisionTreeNode* rootNode, const vector<string> &featuresAndValues)
 {
     /*
@@ -379,6 +433,17 @@ map<string, string> DecisionTree::classify(DecisionTreeNode* rootNode, const vec
     return classificationForDisplay;
 }
 
+/**
+ * @brief Recursively descends the decision tree to classify an instance.
+ *
+ * This function navigates through the decision tree based on the provided feature values
+ * to classify an instance. It updates the classification answer with class probabilities
+ * and the solution path.
+ *
+ * @param node Pointer to the current node in the decision tree.
+ * @param featureAndValues Vector of strings representing the feature-value pairs of the instance.
+ * @param answer Reference to the ClassificationAnswer object to store the classification result.
+ */
 void DecisionTree::recursiveDescentForClassification(DecisionTreeNode* node,
                                                      const vector<string> &featureAndValues,
                                                      ClassificationAnswer &answer)
@@ -523,6 +588,17 @@ void DecisionTree::recursiveDescentForClassification(DecisionTreeNode* node,
 
 //--------------- Construct Tree ----------------//
 
+/**
+ * @brief Constructs a decision tree classifier.
+ *
+ * This function initializes the root node of the decision tree and sets its entropy value
+ * based on the prior probabilities of the different classes. It then starts the recursive
+ * descent to build the rest of the tree.
+ *
+ * @return DecisionTreeNode* Pointer to the root node of the constructed decision tree.
+ *
+ * @throws std::runtime_error If the root node is null after creation.
+ */
 DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
 {
     /*
@@ -566,17 +642,40 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
     return _rootNode.get();
 }
 
+/**
+ * @brief Recursively constructs the decision tree by finding the best feature that
+ *        yields the greatest reduction in class entropy and creating child nodes.
+ *
+ * This method is invoked after the root node of the decision tree is constructed.
+ * It finds the feature that yields the greatest reduction in class entropy from the
+ * entropy based on just the class priors. The logic for finding this feature is
+ * different for symbolic features and numeric features. The method then recursively
+ * creates the rest of the tree.
+ *
+ * @param node Pointer to the current node in the decision tree.
+ *
+ * The method performs the following steps:
+ * - Checks if the node is null and returns an error message if it is.
+ * - Retrieves the serial number, branch features and values or thresholds, and
+ *   existing node entropy.
+ * - If the existing node entropy is below a threshold, it returns.
+ * - Gets the best feature information using the best feature calculator.
+ * - Sets the best feature and its entropy for the current node.
+ * - Checks if the maximum depth desired is reached and returns if it is.
+ * - If the best feature is "None", it returns.
+ * - Calculates the entropy gain.
+ * - If the entropy gain is greater than a threshold, it creates child nodes based on
+ *   whether the feature is numeric or symbolic.
+ * - For numeric features, it creates child nodes for values less than and greater
+ *   than the best threshold.
+ * - For symbolic features, it creates child nodes for each unique value of the best
+ *   feature.
+ * - Recursively calls itself for each child node created.
+ *
+ * Debugging information is printed at various steps if the _debug3 flag is set.
+ */
 void DecisionTree::recursiveDescent(DecisionTreeNode* node)
 {
-    /*
-    After the root node of the decision tree is constructed by the previous method, we
-    find  at that node the feature that yields the greatest reduction in class entropy
-    from the entropy based on just the class priors. The logic for finding this
-    feature is different for symbolic features and for numeric features (that logic is
-    built into the best feature calculator). We then invoke this method recursively to
-    create the rest of the tree.
-    */
-
     if (_debug3) {
         cout << "\n==================== ENTERING RECURSIVE DESCENT ==========================" << endl;
     }

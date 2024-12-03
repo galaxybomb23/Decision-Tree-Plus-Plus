@@ -13,6 +13,10 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
+/**
+ * @class TrainingDataGeneratorNumeric
+ * @brief A class to generate training data for numeric data.
+ */
 class TrainingDataGeneratorNumeric {
   private:
     // Attributes

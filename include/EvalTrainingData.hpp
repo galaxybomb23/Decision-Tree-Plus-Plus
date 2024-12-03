@@ -8,6 +8,13 @@
 #include <map>
 #include <string>
 
+/**
+ * @class EvalTrainingData
+ * @brief A class that evaluates training data for a decision tree.
+ *
+ * This class inherits from the DecisionTree class and provides methods to evaluate
+ * the quality of training data, print debug information, and display evaluation results.
+ */
 class EvalTrainingData : public DecisionTree {
   public:
     EvalTrainingData(std::map<std::string, std::string> kwargs); // Constructor

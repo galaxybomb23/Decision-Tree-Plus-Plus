@@ -15,6 +15,14 @@ class DecisionTree;
 
 using namespace std;
 
+/**
+ * @class DecisionTreeNode
+ * @brief Represents a node in a decision tree.
+ *
+ * This class encapsulates the properties and behaviors of a node within a decision tree.
+ * It includes information about the feature used for splitting, the entropy of the node,
+ * class probabilities, and links to child nodes.
+ */
 class DecisionTreeNode {
   public:
     explicit DecisionTreeNode(shared_ptr<DecisionTree> dt); // Constructor
