@@ -265,31 +265,25 @@ double EvalTrainingData::calculateDataQualityIndex(const std::map<int, std::map<
 void EvalTrainingData::printDataQualityEvaluation(double data_quality_index)
 {
     std::cout << "\nTraining Data Quality Index: " << data_quality_index << "   (out of a possible maximum of 100)\n";
+
     if (data_quality_index <= 80) {
         std::cout << "\nYour training data does not possess much class "
-                     "discriminatory "
-                     "information.  It could be that the classes are inherently not "
-                     "well "
-                     "separable or that your constructor parameter choices are not "
-                     "appropriate.\n";
+                     "discriminatory information. It could be that the classes are "
+                     "inherently not well separable or that your constructor "
+                     "parameter choices are not appropriate.\n";
     }
-    else if (80 < data_quality_index <= 90) {
+    else if (data_quality_index > 80 && data_quality_index <= 90) {
         std::cout << "\nYour training data possesses some class discriminatory "
-                     "information "
-                     "but it may not be sufficient for real-world applications.  "
-                     "You might "
-                     "try tweaking the constructor parameters to see if that "
-                     "improves the "
-                     "class discriminations.\n";
+                     "information but it may not be sufficient for real-world "
+                     "applications. You might try tweaking the constructor "
+                     "parameters to see if that improves the class discriminations.\n";
     }
-    else if (90 < data_quality_index <= 95) {
+    else if (data_quality_index > 90 && data_quality_index <= 95) {
         std::cout << "\nYour training data appears to possess good class "
-                     "discriminatory "
-                     "information.  Whether or not it is acceptable would depend "
-                     "on your "
-                     "application.\n";
+                     "discriminatory information. Whether or not it is acceptable "
+                     "would depend on your application.\n";
     }
-    else if (95 < data_quality_index < 98) {
+    else if (data_quality_index > 95 && data_quality_index < 98) {
         std::cout << "\nYour training data is of very high quality.\n";
     }
     else {
