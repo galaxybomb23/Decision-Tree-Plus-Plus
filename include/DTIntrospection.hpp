@@ -35,7 +35,7 @@ public:
     //--------------- Recursive Descent ----------------//
     void recursiveDescent(DecisionTreeNode *node);
     void recursiveDescentForShowingSamplesAtANode(DecisionTreeNode *node);
-    void recursiveDescentForSampleToNodeInfluence(int nodeSerialNum, vector<DecisionTreeNode> &nodesAlreadyAccountedFor, int offset);
+    void recursiveDescentForSampleToNodeInfluence(int nodeSerialNum, vector<int> nodesAlreadyAccountedFor, int offset);
 
     //--------------- Display ----------------//
     void displayTrainingSamplesAtAllNodesDirectInfluenceOnly();

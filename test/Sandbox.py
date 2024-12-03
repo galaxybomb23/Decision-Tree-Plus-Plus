@@ -60,6 +60,10 @@ dtreeSI.initialize()
 # print(f'_samples_at_nodes_dict: {dtreeSI._samples_at_nodes_dict}')
 # print(f'_sample_to_node_mapping_direct_dict: {dtreeSI._sample_to_node_mapping_direct_dict}')
 
+# print(f'display_training_samples_at_all_nodes_direct_influence_only: {dtreeSI.display_training_samples_at_all_nodes_direct_influence_only()}')
+print(f'display_training_samples_to_nodes_influence_propagation: {dtreeSI.display_training_samples_to_nodes_influence_propagation()}')
+
+
 # NUMERIC
 dtreeNI = dtI(dtreeN)
 dtreeNI.initialize()
@@ -67,4 +71,6 @@ dtreeNI.initialize()
 # print(f'_node_serial_num_to_node_dict: {dtreeNI._node_serial_num_to_node_dict}')
 # print(f'_branch_features_to_nodes_dict: {dtreeNI._branch_features_to_nodes_dict}')
 # print(f'_samples_at_nodes_dict: {dtreeNI._samples_at_nodes_dict}')
-print(f'_sample_to_node_mapping_direct_dict: {dtreeNI._sample_to_node_mapping_direct_dict}')
+# print(f'_sample_to_node_mapping_direct_dict: {dtreeNI._sample_to_node_mapping_direct_dict}')
+
+# print(f'display_training_samples_at_all_nodes_direct_influence_only: {dtreeNI.display_training_samples_at_all_nodes_direct_influence_only()}')

@@ -40,7 +40,6 @@ void DTIntrospection::initialize()
 
 //--------------- Recursive Descent ----------------//
 
-// MARK: Do we need unique_ptr here? ---------------------v
 void DTIntrospection::recursiveDescent(DecisionTreeNode *node) {
     int nodeSerialNum = node->GetSerialNum();
     _nodeSerialNumToNodeDict[nodeSerialNum] = node;
@@ -133,22 +132,97 @@ void DTIntrospection::recursiveDescent(DecisionTreeNode *node) {
 }
 
 void DTIntrospection::recursiveDescentForShowingSamplesAtANode(DecisionTreeNode *node) {
+    int nodeSerialNum = node->GetSerialNum();
+    vector<string> branchFeaturesAndValuesOrThresholds = node->GetBranchFeaturesAndValuesOrThresholds();
 
+    // If the nodeSerialNum is in the _samplesAtNodesDict, display the samples
+    if (_samplesAtNodesDict.find(nodeSerialNum) != _samplesAtNodesDict.end()) {
+        if (_debug) {
+            cout << "\nat node " << nodeSerialNum << ": the branch features and values are: " << branchFeaturesAndValuesOrThresholds << endl;
+        }
+
+        cout << "Node " << nodeSerialNum << ": the samples are: " << _samplesAtNodesDict[nodeSerialNum] << endl;
+    }
+    else {
+        cout << "Node " << nodeSerialNum << ": the samples are: None" << endl;
+    }
+    
+    // Recursively Process Child Nodes
+    vector<DecisionTreeNode*> children = node->GetChildren();
+    for (auto child : children) {
+        recursiveDescentForShowingSamplesAtANode(child);
+    }
 }
 
-void DTIntrospection::recursiveDescentForSampleToNodeInfluence(int nodeSerialNum, vector<DecisionTreeNode> &nodesAlreadyAccountedFor, int offset) {
+void DTIntrospection::recursiveDescentForSampleToNodeInfluence(int nodeSerialNum, vector<int> nodesAlreadyAccountedFor, int offset) {
+    offset += 4;
+    DecisionTreeNode* node = _nodeSerialNumToNodeDict[nodeSerialNum];
+    vector<DecisionTreeNode*> children = node->GetChildren();
+    vector<int> childrenSerialNums;
 
+    for (auto child : children) {
+        childrenSerialNums.push_back(child->GetSerialNum());
+    }
+
+    // Determine which children are not already accounted for
+    vector<int> childrenSerialNumsAffected;
+    for (auto childSerialNum : childrenSerialNums) {
+        if (std::find(nodesAlreadyAccountedFor.begin(), nodesAlreadyAccountedFor.end(), childSerialNum) == nodesAlreadyAccountedFor.end()) {
+            childrenSerialNumsAffected.push_back(childSerialNum);
+        }
+    }
+
+    // Display the influence
+    if (!childrenSerialNumsAffected.empty()) {
+        cout << string(offset, ' ') << nodeSerialNum << " -> ";
+        for (const auto& serialNum : childrenSerialNumsAffected) {
+            cout << serialNum << " ";
+        }
+        cout << endl;
+    }
+
+    // Recursively process child nodes
+    for (auto childSerialNum : childrenSerialNumsAffected) {
+        vector<int> newNodesAlreadyAccountedFor = nodesAlreadyAccountedFor;
+        newNodesAlreadyAccountedFor.push_back(childSerialNum);
+        recursiveDescentForSampleToNodeInfluence(childSerialNum, newNodesAlreadyAccountedFor, offset);
+    }
 }
 
 
 //--------------- Display ----------------//
 
 void DTIntrospection::displayTrainingSamplesAtAllNodesDirectInfluenceOnly() {
+    if (_rootNode == nullptr) {
+        throw std::runtime_error("Root node is not set. You must first construct the decision tree before using introspection.");
+    }
 
+    recursiveDescentForShowingSamplesAtANode(_rootNode);
 }
 
 void DTIntrospection::displayTrainingSamplesToNodesInfluencePropagation() {
-    
+    auto trainingDataDict = _dt->getTrainingDataDict();
+
+    for (const auto& samplePair : trainingDataDict) {
+        const string sample = std::to_string(samplePair.first);
+
+        if (_sampleToNodeMappingDirectDict.find(sample) != _sampleToNodeMappingDirectDict.end()) {
+            vector<int> nodesDirectlyAffected = _sampleToNodeMappingDirectDict[sample];
+            cout << "\n" << sample << ":\n" << "   nodes affected directly: ";
+
+            for (const auto& nodeNum : nodesDirectlyAffected) {
+                cout << nodeNum << " ";
+            }
+
+            cout << endl;
+            cout << "   nodes affected through probabilistic generalization:" << endl;
+
+            for (const auto& nodeSerialNum : nodesDirectlyAffected) {
+                vector<int> nodesAlreadyAccountedFor = nodesDirectlyAffected;
+                recursiveDescentForSampleToNodeInfluence(nodeSerialNum, nodesAlreadyAccountedFor, 4);
+            }
+        }
+    }
 }
 
 
