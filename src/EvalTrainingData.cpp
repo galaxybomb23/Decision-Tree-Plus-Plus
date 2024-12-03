@@ -58,8 +58,8 @@ double EvalTrainingData::evaluateTrainingData()
         std::cout << "\nStarting the iteration indexed " << foldIndex << " of the 10-fold cross-validation test\n";
 
         // Define testing and training samples
-        auto testingSamplesStart = allSampleNames.begin() + foldSize * foldIndex;
-        auto testingSamplesEnd   = allSampleNames.begin() + foldSize * (foldIndex + 1);
+        auto testingSamplesStart = allSampleNames.begin() + static_cast<long>(foldSize) * foldIndex;
+        auto testingSamplesEnd   = allSampleNames.begin() + static_cast<long>(foldSize) * (foldIndex + 1);
         std::vector<std::string> testingSamples(testingSamplesStart, testingSamplesEnd);
 
         std::vector<std::string> trainingSamples(allSampleNames.begin(), testingSamplesStart);
