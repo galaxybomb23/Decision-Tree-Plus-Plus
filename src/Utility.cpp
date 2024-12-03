@@ -25,6 +25,22 @@ double convert(const string &str)
     }
 }
 
+/**
+ * @brief Cleans up a CSV string by removing unwanted characters, handling double-quoted text,
+ *        and normalizing whitespace.
+ *
+ * This function performs the following operations on the input CSV string:
+ * 1. Translates unwanted characters (":?/()[]{}'") to spaces.
+ * 2. Handles double-quoted text by removing commas within quotes and replacing whitespace with underscores.
+ * 3. Normalizes whitespace between commas by replacing it with underscores.
+ * 4. Splits the string by commas and trims leading/trailing whitespace or underscores from each field.
+ * 5. Replaces empty fields with "NA".
+ * 6. Joins the cleaned fields back together with commas.
+ *
+ * @param line The input CSV string to be cleaned.
+ * @return A cleaned CSV string with unwanted characters removed, double-quoted text handled,
+ *         and whitespace normalized.
+ */
 string CleanupCsvString(const string &line)
 {
     // cout << "\nOriginal: " << line << endl;

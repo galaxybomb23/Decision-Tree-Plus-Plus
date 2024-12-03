@@ -8,6 +8,19 @@ EvalTrainingData::~EvalTrainingData()
 }
 
 // Method to evaluate training data
+/**
+ * @brief Evaluates the training data using 10-fold cross-validation.
+ *
+ * This function performs a 10-fold cross-validation on the training data to evaluate
+ * the performance of a decision tree classifier. It checks if the training data file
+ * is in CSV format, splits the data into training and testing sets, trains the decision
+ * tree, and evaluates its performance on the testing set. The results are stored in a
+ * confusion matrix, which is used to calculate and display the data quality index.
+ *
+ * @return double The data quality index calculated from the confusion matrix.
+ *
+ * @throws std::runtime_error If the training data file is not a CSV file.
+ */
 double EvalTrainingData::evaluateTrainingData()
 {
     bool evalDebug = true;
@@ -186,7 +199,18 @@ double EvalTrainingData::evaluateTrainingData()
     return idx;
 }
 
-// methods to print information << NEEDS TO BE IMPLEMENTED >>
+/**
+ * @brief Prints debug information for the training and testing data.
+ *
+ * This function outputs various debug information to the standard output, including:
+ * - The samples in the testing set.
+ * - The features and their values in the training set.
+ * - The unique values for each feature.
+ * - The unique value ranges for numeric features.
+ *
+ * @param trainingDT A reference to the DecisionTree object used for training.
+ * @param testing_samples A vector of strings containing the testing samples.
+ */
 void EvalTrainingData::printDebugInformation(DecisionTree &trainingDT, const std::vector<std::string> &testing_samples)
 {
     std::cout << "\n\nPrinting samples in the testing set:";
@@ -246,6 +270,19 @@ void EvalTrainingData::displayConfusionMatrix(const std::map<int, std::map<std::
         std::cout << row_display << "\n";
     }
 }
+/**
+ * @brief Calculates the Data Quality Index (DQI) based on the provided confusion matrix.
+ *
+ * This function evaluates the quality of the training data by analyzing the confusion matrix,
+ * which contains the counts of true positives, false positives, true negatives, and false negatives
+ * for each class.
+ *
+ * @param confusion_matrix A nested map where the outer map's key is the class label (int) and the value
+ *                         is another map. The inner map's key is a string representing the type of count
+ *                         ("TP" for true positives, "FP" for false positives, "TN" for true negatives,
+ *                         "FN" for false negatives) and the value is the count (int).
+ * @return double The calculated Data Quality Index (DQI) as a double.
+ */
 double EvalTrainingData::calculateDataQualityIndex(const std::map<int, std::map<std::string, int>> &confusion_matrix)
 {
     int diagonal_sum = 0, off_diagonal_sum = 0;

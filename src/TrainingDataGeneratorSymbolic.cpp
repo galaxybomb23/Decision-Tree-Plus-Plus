@@ -1,5 +1,18 @@
 #include "TrainingDataGeneratorSymbolic.hpp"
 
+/**
+ * @brief Constructs a new TrainingDataGeneratorSymbolic object with the given keyword arguments.
+ *
+ * @param kwargs A map containing the keyword arguments for initialization. The allowed keys are:
+ * - "output_datafile": The name of the output data file.
+ * - "parameter_file": The name of the parameter file.
+ * - "number_of_training_samples": The number of training samples to generate.
+ * - "write_to_file": A flag indicating whether to write to a file (1 for true, 0 for false).
+ * - "debug1": Debug level 1 (integer value).
+ * - "debug2": Debug level 2 (integer value).
+ *
+ * @throws std::invalid_argument if the kwargs map is empty or contains invalid keys.
+ */
 TrainingDataGeneratorSymbolic::TrainingDataGeneratorSymbolic(map<string, string> kwargs)
 {
     vector<string> allowedKeys = {
@@ -91,6 +104,25 @@ vector<string> TrainingDataGeneratorSymbolic::splitByRegex(const string &input, 
     return result;
 }
 
+/**
+ * @brief Reads and parses a parameter file for symbolic data.
+ *
+ * This function reads a parameter file specified by the member variable `_parameterFile`.
+ * It extracts class names, class priors, features, and biases from the file and stores them
+ * in the corresponding member variables `_classNames`, `_classPriors`, `_featuresAndValuesDict`,
+ * and `_biasDict`.
+ *
+ * @throws std::invalid_argument if the parameter file is empty or if required patterns
+ *         (class names, class priors, features, and biases) are not found in the file.
+ *
+ * The function performs the following steps:
+ * 1. Reads the entire content of the parameter file into a string.
+ * 2. Splits the content by newlines and filters out comments and empty lines.
+ * 3. Matches and extracts class names and class priors using regular expressions.
+ * 4. Matches and extracts features and their possible values using regular expressions.
+ * 5. Matches and extracts biases for each class using regular expressions.
+ * 6. If `_debug1` is set, prints the parsed information to the console.
+ */
 void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
 {
     int debug1                  = _debug1;
@@ -264,6 +296,25 @@ void TrainingDataGeneratorSymbolic::ReadParameterFileSymbolic()
     }
 }
 
+/**
+ * @brief Generates symbolic training data based on class priors and feature biases.
+ *
+ * This function generates a specified number of training samples, each consisting of a class label
+ * and feature values. The class labels and feature values are generated based on predefined class
+ * priors and feature biases. The generated training samples are stored in the `_trainingSampleRecords` member.
+ *
+ * The function performs the following steps:
+ * 1. Initializes random seed.
+ * 2. Maps class priors to unit intervals.
+ * 3. Initializes maps for each class and feature.
+ * 4. Processes bias for each class and feature, mapping feature value priors to unit intervals.
+ * 5. Generates training samples by randomly selecting class labels and feature values based on the mapped intervals.
+ * 6. Stores the generated training samples in `_trainingSampleRecords`.
+ *
+ * Debugging output is provided if `_debug1` or `_debug2` flags are set.
+ *
+ * @note This function assumes that the class priors sum to 1 and that the feature biases are properly formatted.
+ */
 void TrainingDataGeneratorSymbolic::GenerateTrainingDataSymbolic()
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
