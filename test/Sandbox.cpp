@@ -29,7 +29,7 @@ int main() {
     dtSI->initialize();
 
     // Playing in the sand :)
-    dtSI->explainClassificationAtOneNode(1);
+    dtSI->explainClassificationsAtMultipleNodesInteractively();
 
     return 0;
 }

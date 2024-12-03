@@ -229,8 +229,65 @@ void DTIntrospection::displayTrainingSamplesToNodesInfluencePropagation() {
 //--------------- Explanation ----------------//
 
 void DTIntrospection::explainClassificationsAtMultipleNodesInteractively() {
+    using namespace ConsoleColors;
 
+    if (_samplesAtNodesDict.empty()) {
+        throw std::runtime_error("You called explainClassificationsAtMultipleNodesInteractively() without first initializing the DTIntrospection instance in your code. Aborting.");
+    }
+
+    cout << BOLD_BLUE + "\n\nIn order for the decision tree to introspect\n" + RESET;
+    string msg = BOLD + "  DO YOU ACCEPT the fact that, in general, a region of the feature space\n"
+                      "  that corresponds to a node may have NON-ZERO probabilities associated\n"
+                      "  with it even when there are NO training data points in that region?\n" + RESET
+                      + BOLD + "\n    Enter " + BOLD_GREEN + "'y' for yes" + RESET + BOLD + " or any " + BOLD_RED + "other character for no:  " + RESET;
+    cout << msg;
+
+    string ans;
+    std::getline(std::cin, ans);
+    ans.erase(ans.find_last_not_of(" \n\r\t") + 1);
+
+    if (ans != "y" && ans != "yes") {
+        throw std::runtime_error(BOLD_RED + "\n\n  Since you answered 'no' to a very real theoretical possibility, no explanations possible for the classification decisions in the decision tree. Aborting." + RESET);
+    }
+
+    _awarenessRaisingMessageShown = 1;
+
+    while (true) {
+        int nodeId = -1;
+
+        while (true) {
+            cout << BOLD_BLUE + "\nEnter the integer ID of a node (1 to " + std::to_string(_nodeSerialNumToNodeDict.size() - 1) + ") or type 'exit' to stop: " + RESET;
+            std::getline(std::cin, ans);
+            ans.erase(ans.find_last_not_of(" \n\r\t") + 1);
+
+            if (ans == "exit") {
+                return;
+            }
+
+            try {
+                nodeId = std::stoi(ans);
+            } catch (const std::invalid_argument&) {
+                cout << BOLD_RED + "\nWhat you entered does not look like an integer ID for a node. Aborting!" + RESET << endl;
+                return;
+            } catch (const std::out_of_range&) {
+                cout << BOLD_RED + "\nThe number you entered is out of range. Aborting!" + RESET << endl;
+                return;
+            }
+
+            if (_samplesAtNodesDict.find(nodeId) != _samplesAtNodesDict.end()) {
+                break;
+            }
+            else if (nodeId == 0) {
+                cout << BOLD_RED + "\nNode 0 is the root node. It has no samples. Try again or enter 'exit'." + RESET << endl;
+            } else {
+                cout << BOLD_RED + "\nYour answer must be an integer ID of a node. Try again or enter 'exit'." + RESET << endl;
+            }
+        }
+
+        explainClassificationAtOneNode(nodeId);
+    }
 }
+
 
 void DTIntrospection::explainClassificationAtOneNode(int nodeId) {
     using namespace ConsoleColors;
