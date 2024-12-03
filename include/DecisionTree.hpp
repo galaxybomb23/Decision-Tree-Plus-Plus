@@ -32,7 +32,6 @@ struct BestFeatureResult {
 class DecisionTreeNode;
 class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
   public:
-
     // MARK: Discuss if these need to be private or can stay public
     int _nodesCreated;
     string _classLabel; // The class label for the training data currently unused
@@ -52,8 +51,8 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     //--------------- Classify ----------------//
     map<string, string> classify(DecisionTreeNode* rootNode, const vector<string> &featuresAndValues);
     void recursiveDescentForClassification(DecisionTreeNode* node,
-                                                     const vector<string>& featureAndValues,
-                                                     ClassificationAnswer& answer);
+                                           const vector<string> &featureAndValues,
+                                           ClassificationAnswer &answer);
 
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();
@@ -97,6 +96,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
         const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds);
 
     //--------------- Class Based Utilities ----------------//
+    void determineDataCondition();
     bool checkNamesUsed(const vector<string> &featuresAndValues);
     DecisionTree &operator=(const DecisionTree &dt);
     vector<vector<string>> findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes);
@@ -107,6 +107,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     double getEntropyThreshold() const;
     int getMaxDepthDesired() const;
     int getNumberOfHistogramBins() const;
+    vector<string> getClassNames() const;
     int getCsvClassColumnIndex() const;
     vector<int> getCsvColumnsForFeatures() const;
     int getSymbolicToNumericCardinalityThreshold() const;
@@ -117,6 +118,10 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     int getHowManyTotalTrainingSamples() const;
     vector<string> getFeatureNames() const;
     map<string, vector<string>> getFeaturesAndValuesDict() const;
+    map<int, string> getSamplesClassLabelDict() const;
+    map<string, std::set<string>> getFeaturesAndUniqueValuesDict() const;
+    map<string, vector<double>> getNumericFeaturesValueRangeDict() const;
+
     map<int, vector<string>> getTrainingDataDict() const;
     vector<string> getClassNames() const;
     DecisionTreeNode* getRootNode() const;
@@ -137,7 +142,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     void setRootNode(unique_ptr<DecisionTreeNode> rootNode);
     void setClassNames(const vector<string> &classNames);
 
-  private:
+  public:
     string _trainingDatafile;
     double _entropyThreshold;
     int _maxDepthDesired;

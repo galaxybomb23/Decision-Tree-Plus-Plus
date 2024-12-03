@@ -20,16 +20,15 @@ dtreeS.calculate_first_order_probabilities()
 root_node = dtreeS.construct_decision_tree_classifier()
 # root_node.display_decision_tree("  ")
 
-# <============== NUMERIC TREE ===============>
-# print(f"NUMERIC TREE")
-dtreeN = dt.DecisionTree(
-    training_datafile="test/resources/stage3cancer.csv",
-    csv_class_column_index=2,
-    csv_columns_for_features=[3, 4, 5, 6, 7, 8],
-    max_depth_desired=8,
-    entropy_threshold=0.01
-    # , debug2=True
-)
+# # NUMERIC TREE #
+# dtreeN = dt.DecisionTree(
+#     training_datafile="test/resources/stage3cancer.csv",
+#     csv_class_column_index=2,
+#     csv_columns_for_features=[3, 4, 5, 6, 7, 8],
+#     max_depth_desired=8,
+#     entropy_threshold=0.01
+#     # , debug2=True
+# )
 
 dtreeN.get_training_data()
 dtreeN.calculate_class_priors()
