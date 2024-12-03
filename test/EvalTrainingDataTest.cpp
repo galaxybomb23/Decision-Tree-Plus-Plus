@@ -3,6 +3,7 @@
 #include "DecisionTree.hpp"
 
 #include <gtest/gtest.h>
+#include <unordered_set>
 
 class EvalTrainingDataTest : public ::testing::Test {
   protected:
@@ -29,7 +30,7 @@ class EvalTrainingDataTest : public ::testing::Test {
     void TearDown() override { evalData.reset(); }
 };
 
-TEST_F(EvalTrainingDataTest, testEvaluateTrainingData)
+TEST_F(EvalTrainingDataTest, testEvaluateTrainingDataDiscrimination)
 {
     std::cout << "testEvaluateTrainingData" << std::endl;
 
@@ -38,6 +39,5 @@ TEST_F(EvalTrainingDataTest, testEvaluateTrainingData)
     double idx = evalData->evaluateTrainingData();
 
     // assert within ~5 points
-    // TODO: Fix evaluate to get exact value
-    ASSERT_NEAR(idx, 64.3, 5.0);
+    ASSERT_NEAR(idx, 60.71, 0.1);
 }
