@@ -18,6 +18,11 @@
 Logger logger("../logs/decisionTree.log");
 
 //--------------- Constructors and Destructors ----------------//
+DecisionTree::DecisionTree()
+{
+    throw std::runtime_error("Decision Tree has no default constructor");
+};
+
 DecisionTree::DecisionTree(map<string, string> kwargs)
 {
     if (kwargs.empty()) {
@@ -582,16 +587,16 @@ void DecisionTree::recursiveDescentForClassification(DecisionTreeNode* node,
 }
 
 // DONT MOVE THIS FOR NOW
-std::ostream &operator<<(std::ostream &os, const ClassificationAnswer &answer) {
+std::ostream &operator<<(std::ostream &os, const ClassificationAnswer &answer)
+{
     os << answer.classProbabilities << answer.solutionPath << endl;
 
     return os;
 }
 
-void DecisionTree::interactiveRecursiveDescentForClassification(
-    DecisionTreeNode* node,
-    ClassificationAnswer& answer,
-    map<string, optional<double>>& scratchpadForNumerics)
+void DecisionTree::interactiveRecursiveDescentForClassification(DecisionTreeNode* node,
+                                                                ClassificationAnswer &answer,
+                                                                map<string, optional<double>> &scratchpadForNumerics)
 {
     // Define regex patterns
     std::regex pattern1("(.+)<(.+)");
@@ -601,7 +606,7 @@ void DecisionTree::interactiveRecursiveDescentForClassification(
     bool pathFound = false;
 
     // Get children of the node
-    const auto& children = node->GetChildren();
+    const auto &children = node->GetChildren();
     if (children.empty()) {
         // Leaf node
         auto leafNodeClassProbabilities = node->GetClassProbabilities();
@@ -615,7 +620,7 @@ void DecisionTree::interactiveRecursiveDescentForClassification(
     // Build list of branch attributes to children
     vector<string> listOfBranchAttributesToChildren;
     for (auto child : children) {
-        auto branchFeaturesAndValues = child->GetBranchFeaturesAndValuesOrThresholds();
+        auto branchFeaturesAndValues   = child->GetBranchFeaturesAndValuesOrThresholds();
         string featureAndValueOnBranch = branchFeaturesAndValues.back();
         listOfBranchAttributesToChildren.push_back(featureAndValueOnBranch);
     }
@@ -626,7 +631,8 @@ void DecisionTree::interactiveRecursiveDescentForClassification(
         // Numeric feature
         if (scratchpadForNumerics[featureTestedAtNode]) {
             userValueForFeatureNumeric = scratchpadForNumerics[featureTestedAtNode].value();
-        } else {
+        }
+        else {
             // Ask user for input
             auto valueRange = _numericFeaturesValueRangeDict[featureTestedAtNode];
             while (true) {
@@ -639,10 +645,12 @@ void DecisionTree::interactiveRecursiveDescentForClassification(
                     if (userValue >= valueRange[0] && userValue <= valueRange[1]) {
                         userValueForFeatureNumeric = userValue;
                         break;
-                    } else {
+                    }
+                    else {
                         cout << "You entered an illegal value. Let's try again.\n";
                     }
-                } catch (const std::exception& e) {
+                }
+                catch (const std::exception &e) {
                     cout << "Invalid input. Please enter a numeric value.\n";
                 }
             }
@@ -655,7 +663,7 @@ void DecisionTree::interactiveRecursiveDescentForClassification(
             std::smatch match;
             if (std::regex_match(branchAttribute, match, pattern1)) {
                 // Match pattern 'feature<threshold'
-                string feature = match[1];
+                string feature   = match[1];
                 double threshold = stod(match[2]);
                 if (userValueForFeatureNumeric <= threshold) {
                     interactiveRecursiveDescentForClassification(children[i], answer, scratchpadForNumerics);
@@ -663,9 +671,10 @@ void DecisionTree::interactiveRecursiveDescentForClassification(
                     answer.solutionPath.push_back(node->GetSerialNum());
                     break;
                 }
-            } else if (std::regex_match(branchAttribute, match, pattern2)) {
+            }
+            else if (std::regex_match(branchAttribute, match, pattern2)) {
                 // Match pattern 'feature>threshold'
-                string feature = match[1];
+                string feature   = match[1];
                 double threshold = stod(match[2]);
                 if (userValueForFeatureNumeric > threshold) {
                     interactiveRecursiveDescentForClassification(children[i], answer, scratchpadForNumerics);
@@ -674,14 +683,16 @@ void DecisionTree::interactiveRecursiveDescentForClassification(
                 }
             }
         }
-        if (pathFound) return;
-    } else {
+        if (pathFound)
+            return;
+    }
+    else {
         // Symbolic feature
         auto possibleValuesForFeature = _featuresAndUniqueValuesDict[featureTestedAtNode];
         while (true) {
             cout << "\nWhat is the value for the feature '" << featureTestedAtNode << "'?\n";
             cout << "Enter one of: ";
-            for (const auto& val : possibleValuesForFeature) {
+            for (const auto &val : possibleValuesForFeature) {
                 cout << val << " ";
             }
             cout << "\n=> ";
@@ -689,7 +700,8 @@ void DecisionTree::interactiveRecursiveDescentForClassification(
             userValueForFeatureSymbolic = trim(userValueForFeatureSymbolic);
             if (possibleValuesForFeature.find(userValueForFeatureSymbolic) != possibleValuesForFeature.end()) {
                 break;
-            } else {
+            }
+            else {
                 cout << "You entered an illegal value. Let's try again.\n";
             }
         }
@@ -703,7 +715,8 @@ void DecisionTree::interactiveRecursiveDescentForClassification(
                 break;
             }
         }
-        if (pathFound) return;
+        if (pathFound)
+            return;
     }
 
     // If no path found, get class probabilities from current node
@@ -716,12 +729,13 @@ void DecisionTree::interactiveRecursiveDescentForClassification(
     }
 }
 
-ClassificationAnswer DecisionTree::classifyByAskingQuestions(DecisionTreeNode* rootNode) {
+ClassificationAnswer DecisionTree::classifyByAskingQuestions(DecisionTreeNode* rootNode)
+{
     // Initialize answer
     ClassificationAnswer answer;
 
     // Initialize class probabilities with class names set to 0.0
-    for (const auto& className : _classNames) {
+    for (const auto &className : _classNames) {
         answer.classProbabilities[className] = 0.0;
     }
 
@@ -730,7 +744,7 @@ ClassificationAnswer DecisionTree::classifyByAskingQuestions(DecisionTreeNode* r
 
     // Initialize scratchpad for numeric answers
     map<string, optional<double>> scratchpadForNumericAnswers;
-    for (const auto& featurePair : _probDistributionNumericFeaturesDict) {
+    for (const auto &featurePair : _probDistributionNumericFeaturesDict) {
         scratchpadForNumericAnswers[featurePair.first] = nullopt;
     }
 
@@ -3139,7 +3153,7 @@ vector<string> DecisionTree::getClassNames() const
     return _classNames;
 }
 
-DecisionTreeNode *DecisionTree::getRootNode() const
+DecisionTreeNode* DecisionTree::getRootNode() const
 {
     return _rootNode.get();
 }

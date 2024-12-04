@@ -2,6 +2,12 @@
 
 #include "DecisionTree.hpp"
 
+DecisionTreeNode::DecisionTreeNode()
+{
+
+    throw std::runtime_error("DecisionTreeNode has no Default constructor");
+}
+
 DecisionTreeNode::DecisionTreeNode(const string &feature,
                                    double entropy,
                                    const vector<double> &class_probabilities,

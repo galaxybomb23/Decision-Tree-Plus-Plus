@@ -25,8 +25,8 @@ using namespace std;
  */
 class DecisionTreeNode {
   public:
+    DecisionTreeNode();                                     // Constructor
     explicit DecisionTreeNode(shared_ptr<DecisionTree> dt); // Constructor
-
     DecisionTreeNode(const string &feature,
                      double entropy,
                      const vector<double> &class_probabilities,
