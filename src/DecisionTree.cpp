@@ -113,6 +113,22 @@ DecisionTree::~DecisionTree() {}
 //--------------- Class Functions ----------------//
 
 // Get the training data from the CSV file
+/**
+ * @brief Reads and processes training data from a CSV file.
+ *
+ * This function performs the following steps:
+ * 1. Checks if the training data file is a CSV file.
+ * 2. Opens the CSV file and reads the header to extract feature names.
+ * 3. Reads the data rows, extracting unique IDs, class labels, and feature values.
+ * 4. Stores the training data in dictionaries for further processing.
+ * 5. Extracts unique class labels and counts the number of unique class labels.
+ * 6. Counts the total number of training samples.
+ * 7. Extracts all values and unique values for each feature.
+ * 8. Counts the number of unique values for each feature.
+ * 9. Calculates the min and max values for numeric features and stores them.
+ *
+ * @throws std::invalid_argument if the file is not a CSV file or cannot be opened.
+ */
 void DecisionTree::getTrainingData()
 {
     // Check if training data file is a CSV file
@@ -240,6 +256,26 @@ void DecisionTree::getTrainingData()
 }
 
 // Calculate first order probabilities
+/**
+ * @brief Calculates the first-order probabilities for each feature in the decision tree.
+ *
+ * This function iterates over all feature names stored in the `_featureNames` member variable
+ * and calculates the probability for each feature's value using the `probabilityOfFeatureValue` method.
+ * If the `_debug2` flag is enabled, it outputs the probability distributions for each feature.
+ *
+ * For numeric features, it presents the sorted sampling points and their corresponding probabilities.
+ * For symbolic features, it presents the probabilities for each unique value of the feature.
+ *
+ * The function utilizes the following member variables:
+ * - `_featureNames`: A list of feature names.
+ * - `_debug2`: A flag indicating whether debug output is enabled.
+ * - `_probDistributionNumericFeaturesDict`: A dictionary containing probability distributions for numeric features.
+ * - `_featuresAndUniqueValuesDict`: A dictionary containing unique values for each feature.
+ *
+ * The function calls the following member function:
+ * - `probabilityOfFeatureValue(const std::string &feature, const std::string &value)`: Calculates the probability of a
+ * feature's value.
+ */
 void DecisionTree::calculateFirstOrderProbabilities()
 {
     for (const auto &feature : _featureNames) {
@@ -290,6 +326,24 @@ void DecisionTree::showTrainingData() const
 
 //--------------- Classify ----------------//
 
+/**
+ * @brief Classifies a test sample using the decision tree.
+ *
+ * This function classifies one test sample at a time using the decision tree
+ * constructed from the training file. The data record for the test sample must
+ * be supplied in the format shown in the scripts in the `Examples` subdirectory.
+ * See the scripts construct_dt_and_classify_one_sample_caseX.py in that subdirectory.
+ *
+ * @param rootNode Pointer to the root node of the decision tree.
+ * @param featuresAndValues A vector of strings representing the features and their values
+ *                          in the format "feature=value".
+ * @return A map where the keys are class names and the values are the corresponding
+ *         probabilities as strings. Additionally, the map contains the solution path
+ *         under the key "solution_path".
+ *
+ * @throws std::runtime_error if there is an error in the names used for features and/or values,
+ *                            or if there is an error in the format of the feature and value pairs.
+ */
 map<string, string> DecisionTree::classify(DecisionTreeNode* rootNode, const vector<string> &featuresAndValues)
 {
     /*
@@ -374,6 +428,17 @@ map<string, string> DecisionTree::classify(DecisionTreeNode* rootNode, const vec
     return classificationForDisplay;
 }
 
+/**
+ * @brief Recursively descends the decision tree to classify an instance.
+ *
+ * This function navigates through the decision tree based on the provided feature values
+ * to classify an instance. It updates the classification answer with class probabilities
+ * and the solution path.
+ *
+ * @param node Pointer to the current node in the decision tree.
+ * @param featureAndValues Vector of strings representing the feature-value pairs of the instance.
+ * @param answer Reference to the ClassificationAnswer object to store the classification result.
+ */
 void DecisionTree::recursiveDescentForClassification(DecisionTreeNode* node,
                                                      const vector<string> &featureAndValues,
                                                      ClassificationAnswer &answer)
@@ -518,6 +583,17 @@ void DecisionTree::recursiveDescentForClassification(DecisionTreeNode* node,
 
 //--------------- Construct Tree ----------------//
 
+/**
+ * @brief Constructs a decision tree classifier.
+ *
+ * This function initializes the root node of the decision tree and sets its entropy value
+ * based on the prior probabilities of the different classes. It then starts the recursive
+ * descent to build the rest of the tree.
+ *
+ * @return DecisionTreeNode* Pointer to the root node of the constructed decision tree.
+ *
+ * @throws std::runtime_error If the root node is null after creation.
+ */
 DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
 {
     /*
@@ -561,17 +637,40 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
     return _rootNode.get();
 }
 
+/**
+ * @brief Recursively constructs the decision tree by finding the best feature that
+ *        yields the greatest reduction in class entropy and creating child nodes.
+ *
+ * This method is invoked after the root node of the decision tree is constructed.
+ * It finds the feature that yields the greatest reduction in class entropy from the
+ * entropy based on just the class priors. The logic for finding this feature is
+ * different for symbolic features and numeric features. The method then recursively
+ * creates the rest of the tree.
+ *
+ * @param node Pointer to the current node in the decision tree.
+ *
+ * The method performs the following steps:
+ * - Checks if the node is null and returns an error message if it is.
+ * - Retrieves the serial number, branch features and values or thresholds, and
+ *   existing node entropy.
+ * - If the existing node entropy is below a threshold, it returns.
+ * - Gets the best feature information using the best feature calculator.
+ * - Sets the best feature and its entropy for the current node.
+ * - Checks if the maximum depth desired is reached and returns if it is.
+ * - If the best feature is "None", it returns.
+ * - Calculates the entropy gain.
+ * - If the entropy gain is greater than a threshold, it creates child nodes based on
+ *   whether the feature is numeric or symbolic.
+ * - For numeric features, it creates child nodes for values less than and greater
+ *   than the best threshold.
+ * - For symbolic features, it creates child nodes for each unique value of the best
+ *   feature.
+ * - Recursively calls itself for each child node created.
+ *
+ * Debugging information is printed at various steps if the _debug3 flag is set.
+ */
 void DecisionTree::recursiveDescent(DecisionTreeNode* node)
 {
-    /*
-    After the root node of the decision tree is constructed by the previous method, we
-    find  at that node the feature that yields the greatest reduction in class entropy
-    from the entropy based on just the class priors. The logic for finding this
-    feature is different for symbolic features and for numeric features (that logic is
-    built into the best feature calculator). We then invoke this method recursively to
-    create the rest of the tree.
-    */
-
     if (_debug3) {
         cout << "\n==================== ENTERING RECURSIVE DESCENT ==========================" << endl;
     }
@@ -823,6 +922,18 @@ void DecisionTree::recursiveDescent(DecisionTreeNode* node)
     }
 }
 
+/**
+ * @brief Calculates the best feature to split on for a decision tree node.
+ *
+ * This function evaluates all features to determine the best feature to split on, based on entropy calculations.
+ * It considers both symbolic and numeric features, and handles features that have already been used in the branch.
+ *
+ * @param featuresAndValuesOrThresholdsOnBranch A vector of strings representing the features and their values or
+ * thresholds used in the current branch.
+ * @param existingNodeEntropy The entropy of the existing node.
+ * @return BestFeatureResult A struct containing the best feature name, its entropy, optional value-based entropies, and
+ * optional decision value.
+ */
 BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &featuresAndValuesOrThresholdsOnBranch,
                                                       double existingNodeEntropy)
 {
@@ -1408,6 +1519,16 @@ double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThreshold
 }
 
 //--------------- Probability Calculators ----------------//
+/**
+ * @brief Calculates the prior probability for a given class.
+ *
+ * This function calculates the prior probability of a specific class by checking if the probability
+ * is already cached. If not, it calculates the prior probabilities for all classes and stores them
+ * in the cache for future use.
+ *
+ * @param className The name of the class for which the prior probability is to be calculated.
+ * @return The prior probability of the specified class.
+ */
 double DecisionTree::priorProbabilityForClass(const string &className)
 {
     // Generate a cache key for prior probability of a specific class
@@ -1451,6 +1572,20 @@ double DecisionTree::priorProbabilityForClass(const string &className)
     return _probabilityCache[classNameCacheKey];
 }
 
+/**
+ * @brief Calculates the prior probabilities for each class in the decision tree.
+ *
+ * This function computes the prior probabilities for each class based on the
+ * samples provided. It first checks if the class priors have already been
+ * calculated and returns if they have. Otherwise, it iterates through the
+ * class names, counts the number of samples for each class, and calculates
+ * the prior probability as the ratio of the number of samples for the class
+ * to the total number of samples. The calculated prior probabilities are
+ * stored in the _classPriorsDict and _probabilityCache.
+ *
+ * If debugging is enabled (_debug2), the function prints the calculated class
+ * priors to the standard output.
+ */
 void DecisionTree::calculateClassPriors()
 {
 
@@ -1481,6 +1616,19 @@ void DecisionTree::calculateClassPriors()
     }
 }
 
+/**
+ * @brief Calculates the probability of a given feature having a specific value.
+ *
+ * This function computes the probability of a feature having a specific value
+ * based on the training data. It handles both numeric and symbolic features.
+ * For numeric features, it uses histogram-based calculations if the number of
+ * unique values exceeds a certain threshold. For symbolic features, it counts
+ * occurrences directly.
+ *
+ * @param feature The name of the feature.
+ * @param value The value of the feature.
+ * @return The probability of the feature having the specified value.
+ */
 double DecisionTree::probabilityOfFeatureValue(const string &feature, const string &value)
 {
     // Prepare feature value and initialize variables
@@ -1728,6 +1876,19 @@ double DecisionTree::probabilityOfFeatureValue(const string &feature, const stri
     return 0.0;
 }
 
+/**
+ * @brief Computes the probability of a feature value given a class.
+ *
+ * This function calculates the probability of a specific feature value given a class label.
+ * It handles both numeric and symbolic features, caching the results for efficiency.
+ *
+ * @param feature The name of the feature.
+ * @param value The value of the feature.
+ * @param className The name of the class.
+ * @return The probability of the feature value given the class.
+ *
+ * @throws std::runtime_error If there are no training samples for the given class and feature.
+ */
 double
 DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const string &value, const string &className)
 {
@@ -1955,6 +2116,20 @@ DecisionTree::probabilityOfFeatureValueGivenClass(const string &feature, const s
 }
 
 // This is used for NUMERIC features only, threshold is a string, but should be a double
+/**
+ * @brief Calculates the probability that the values of a given feature are less than a specified threshold.
+ *
+ * This function computes the probability that the values associated with a given feature name are less than
+ * a specified threshold. It first checks if the probability is already cached to avoid redundant calculations.
+ * If not cached, it retrieves all values for the feature, filters out "NA" values, converts the remaining values
+ * to doubles, and then counts how many of these values are less than or equal to the threshold. The probability
+ * is then calculated as the ratio of the count of values less than or equal to the threshold to the total number
+ * of valid values for the feature. The result is cached for future use.
+ *
+ * @param featureName The name of the feature for which the probability is to be calculated.
+ * @param threshold The threshold value as a string.
+ * @return The probability that the values of the feature are less than or equal to the threshold.
+ */
 double DecisionTree::probabilityOfFeatureLessThanThreshold(const string &featureName, const string &threshold)
 {
     double thresholdAsDouble     = convert(threshold);
@@ -1993,6 +2168,18 @@ double DecisionTree::probabilityOfFeatureLessThanThreshold(const string &feature
     return probability;
 }
 
+/**
+ * @brief Calculates the probability that a given feature's value is less than or equal to a specified threshold, given
+ * a class.
+ *
+ * This function computes the probability that the value of a specified feature is less than or equal to a given
+ * threshold for samples belonging to a specified class. The result is cached to optimize repeated queries.
+ *
+ * @param featureName The name of the feature to evaluate.
+ * @param threshold The threshold value to compare the feature's value against.
+ * @param className The class for which the probability is being calculated.
+ * @return The probability that the feature's value is less than or equal to the threshold for the given class.
+ */
 double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const string &featureName,
                                                                      const string &threshold,
                                                                      const string &className)
@@ -2041,6 +2228,19 @@ double DecisionTree::probabilityOfFeatureLessThanThresholdGivenClass(const strin
     return probability;
 }
 
+/**
+ * @brief Calculates the probability of a sequence of features and values or thresholds.
+ *
+ * This method computes the probability of a given sequence of features and values or thresholds.
+ * It requires that all truly numeric types be expressed as '<' or '>' constructs in the array
+ * of branch features and thresholds. The symbolic types should be expressed as 'feature=value' constructs.
+ *
+ * @param arrayOfFeaturesAndValuesOrThresholds A vector of strings representing the sequence of features and values or
+ * thresholds.
+ * @return The probability of the given sequence. Returns NaN if the input array is empty.
+ *
+ * @throws std::runtime_error If the call to the method is ill-formatted.
+ */
 double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
     const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
@@ -2195,6 +2395,18 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholds(
     return probability;
 }
 
+/**
+ * @brief Calculates the probability of a sequence of features and values or thresholds given a class.
+ *
+ * This method requires that all truly numeric types only be expressed as '<' or '>' constructs in the array
+ * of branch features and thresholds. The symbolic types should be expressed as 'feature=value' constructs.
+ *
+ * @param arrayOfFeaturesAndValuesOrThresholds A vector of strings representing the features and values or thresholds.
+ * @param className The name of the class for which the probability is being calculated.
+ * @return The probability of the sequence of features and values or thresholds given the class.
+ *
+ * @throws std::runtime_error If the call to the method is ill-formatted.
+ */
 double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenClass(
     const vector<string> &arrayOfFeaturesAndValuesOrThresholds, const string &className)
 {
@@ -2357,6 +2569,19 @@ double DecisionTree::probabilityOfASequenceOfFeaturesAndValuesOrThresholdsGivenC
     return probability;
 }
 
+/**
+ * @brief Calculates the probability of a given class given a sequence of features and values or thresholds.
+ *
+ * This function computes the probability of a specified class based on a sequence of features and their corresponding
+ * values or thresholds. It first checks if the probability is already cached to avoid redundant calculations. If not,
+ * it calculates the probability using the provided features and values or thresholds, normalizes the probabilities,
+ * caches the results, and then returns the probability for the specified class.
+ *
+ * @param className The name of the class for which the probability is to be calculated.
+ * @param arrayOfFeaturesAndValuesOrThresholds A vector of strings representing the sequence of features and their
+ *        corresponding values or thresholds.
+ * @return The probability of the specified class given the sequence of features and values or thresholds.
+ */
 double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds(
     const string &className, const vector<string> &arrayOfFeaturesAndValuesOrThresholds)
 {
@@ -2425,6 +2650,17 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
 
 //--------------- Class Based Utilities ----------------//
 
+/**
+ * @brief Estimates the worst-case fan-out of the decision tree.
+ *
+ * This method calculates the worst-case scenario for the number of nodes in the decision tree
+ * by considering the number of unique values for symbolic features. It prints the number of features,
+ * the largest number of values for symbolic features, and the estimated number of nodes in the worst-case scenario.
+ * If the estimated number of nodes exceeds 10,000, it warns the user and prompts for confirmation to continue.
+ *
+ * @note The exact number of nodes created depends on the entropy_threshold used for node expansion
+ * (default value is 0.01) and the value set for max_depth_desired for the depth of the tree.
+ */
 void DecisionTree::determineDataCondition()
 {
     /*
@@ -2491,6 +2727,15 @@ void DecisionTree::determineDataCondition()
     }
 }
 
+/**
+ * @brief Checks if the names in the provided vector of features and values are used.
+ *
+ * This function iterates through the given vector of feature and value names and
+ * determines if they are already used within the decision tree.
+ *
+ * @param featuresAndValues A vector of strings containing the names of features and values to check.
+ * @return true if all names in the vector are used, false otherwise.
+ */
 bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)
 {
     for (const auto &featureAndValue : featuresAndValues) {
@@ -2519,11 +2764,26 @@ bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)
 }
 
 
+// operator overloads
 DecisionTree &DecisionTree::operator=(const DecisionTree &dt)
 {
     return *this;
 }
 
+/**
+ * @brief Finds bounded intervals for numeric features based on given conditions.
+ *
+ * This function takes a vector of strings representing conditions on numeric features
+ * and returns a vector of vectors containing the feature name, operator, and value
+ * representing the bounded intervals.
+ *
+ * @param trueNumericTypes A vector of strings where each string represents a condition
+ *                         on a numeric feature in the format "featureName<value" or "featureName>value".
+ * @return A vector of vectors where each inner vector contains three strings:
+ *         - The feature name
+ *         - The operator ("<" or ">")
+ *         - The value as a string
+ */
 vector<vector<string>> DecisionTree::findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes)
 {
     std::unordered_map<string, pair<double, double>> featureBounds; // Stores {featureName, {min < value, max > value}}

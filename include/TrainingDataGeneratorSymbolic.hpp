@@ -9,6 +9,10 @@
 #include <sstream>
 #include <stdexcept>
 
+/**
+ * @class TrainingDataGeneratorSymbolic
+ * @brief A class to generate training data for symbolic data.
+ */
 class TrainingDataGeneratorSymbolic {
   private:
     string _outputDatafile;

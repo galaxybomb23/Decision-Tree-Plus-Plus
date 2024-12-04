@@ -28,6 +28,19 @@ DecisionTreeNode::DecisionTreeNode(const string &feature,
 }
 
 
+/**
+ * @brief Constructs a new DecisionTreeNode object.
+ *
+ * @param dt A shared pointer to the DecisionTree object associated with this node.
+ *
+ * This constructor initializes the following member variables:
+ * - _feature: An empty string representing the feature associated with this node.
+ * - _nodeCreationEntropy: A double initialized to 0, representing the entropy at the time of node creation.
+ * - _classProbabilities: An empty map representing the class probabilities for this node.
+ * - _branchFeaturesAndValuesOrThresholds: An empty map representing the features and values or thresholds for the
+ * branches of this node.
+ * - _serialNumber: A unique serial number for this node, obtained by calling GetNextSerialNum().
+ */
 DecisionTreeNode::DecisionTreeNode(shared_ptr<DecisionTree> dt) : _dt((dt))
 {
     _feature                             = "";
@@ -37,6 +50,14 @@ DecisionTreeNode::DecisionTreeNode(shared_ptr<DecisionTree> dt) : _dt((dt))
     _serialNumber                        = GetNextSerialNum();
 }
 
+/**
+ * @brief Copy constructor for DecisionTreeNode.
+ *
+ * This constructor creates a deep copy of the given DecisionTreeNode object.
+ * It copies all member variables and performs a deep copy of the children nodes.
+ *
+ * @param other The DecisionTreeNode object to copy from.
+ */
 DecisionTreeNode::DecisionTreeNode(const DecisionTreeNode &other)
     : _feature(other._feature),
       _nodeCreationEntropy(other._nodeCreationEntropy),
@@ -60,6 +81,16 @@ DecisionTreeNode::DecisionTreeNode(const DecisionTreeNode &other)
     _serialNumber = GetNextSerialNum();
 }
 
+/**
+ * @brief Assignment operator for DecisionTreeNode.
+ *
+ * This operator handles the assignment of one DecisionTreeNode to another.
+ * It performs a deep copy of the _linkedTo member to ensure that each node
+ * has its own unique children, while copying other member variables directly.
+ *
+ * @param other The other DecisionTreeNode to assign from.
+ * @return A reference to this DecisionTreeNode.
+ */
 DecisionTreeNode &DecisionTreeNode::operator=(const DecisionTreeNode &other)
 {
     if (this == &other) {

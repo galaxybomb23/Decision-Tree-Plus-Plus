@@ -8,6 +8,19 @@ EvalTrainingData::~EvalTrainingData()
 }
 
 // Method to evaluate training data
+/**
+ * @brief Evaluates the training data using 10-fold cross-validation.
+ *
+ * This function performs a 10-fold cross-validation on the training data to evaluate
+ * the performance of a decision tree classifier. It checks if the training data file
+ * is in CSV format, splits the data into training and testing sets, trains the decision
+ * tree, and evaluates its performance on the testing set. The results are stored in a
+ * confusion matrix, which is used to calculate and display the data quality index.
+ *
+ * @return double The data quality index calculated from the confusion matrix.
+ *
+ * @throws std::runtime_error If the training data file is not a CSV file.
+ */
 double EvalTrainingData::evaluateTrainingData()
 {
     bool evalDebug = true;
@@ -186,7 +199,18 @@ double EvalTrainingData::evaluateTrainingData()
     return idx;
 }
 
-// methods to print information << NEEDS TO BE IMPLEMENTED >>
+/**
+ * @brief Prints debug information for the training and testing data.
+ *
+ * This function outputs various debug information to the standard output, including:
+ * - The samples in the testing set.
+ * - The features and their values in the training set.
+ * - The unique values for each feature.
+ * - The unique value ranges for numeric features.
+ *
+ * @param trainingDT A reference to the DecisionTree object used for training.
+ * @param testing_samples A vector of strings containing the testing samples.
+ */
 void EvalTrainingData::printDebugInformation(DecisionTree &trainingDT, const std::vector<std::string> &testing_samples)
 {
     std::cout << "\n\nPrinting samples in the testing set:";
@@ -211,6 +235,17 @@ void EvalTrainingData::printDebugInformation(DecisionTree &trainingDT, const std
     }
 }
 
+/**
+ * @brief Prints classification information for a given sample.
+ *
+ * This function outputs the classification information for a sample, including the class names,
+ * their associated probabilities, the solution path in the decision tree, and the number of nodes created.
+ *
+ * @param which_classes A vector of strings representing the class names to be printed.
+ * @param classification A map where the key is the class name and the value is the classification result.
+ * @param solution_path A string representing the path to the solution.
+ * @param root_node A pointer to the root node of the decision tree.
+ */
 void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &which_classes,
                                                const std::map<std::string, std::string> &classification,
                                                const std::string &solution_path,
@@ -228,6 +263,20 @@ void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &w
     std::cout << "\nSolution path in the decision tree: " << classification.at("solution_path") << "\n";
     std::cout << "\nNumber of nodes created: " << root_node->HowManyNodes() << "\n";
 }
+
+/**
+ * @brief Displays the confusion matrix.
+ *
+ * This function takes a confusion matrix as input and displays it. The confusion matrix
+ * is represented as a nested map where the outer map's key is an integer representing
+ * the actual class, and the inner map's key is a string representing the predicted class.
+ * The value in the inner map is the count of occurrences for the actual-predicted class pair.
+ *
+ * @param confusion_matrix A nested map representing the confusion matrix.
+ *                         The outer map's key is an integer (actual class),
+ *                         and the inner map's key is a string (predicted class).
+ *                         The value is the count of occurrences.
+ */
 void EvalTrainingData::displayConfusionMatrix(const std::map<int, std::map<std::string, int>> &confusion_matrix)
 {
     std::cout << "\n\n       DISPLAYING THE CONFUSION MATRIX FOR THE 10-FOLD "
@@ -246,6 +295,20 @@ void EvalTrainingData::displayConfusionMatrix(const std::map<int, std::map<std::
         std::cout << row_display << "\n";
     }
 }
+
+/**
+ * @brief Calculates the Data Quality Index (DQI) based on the provided confusion matrix.
+ *
+ * This function evaluates the quality of the training data by analyzing the confusion matrix,
+ * which contains the counts of true positives, false positives, true negatives, and false negatives
+ * for each class.
+ *
+ * @param confusion_matrix A nested map where the outer map's key is the class label (int) and the value
+ *                         is another map. The inner map's key is a string representing the type of count
+ *                         ("TP" for true positives, "FP" for false positives, "TN" for true negatives,
+ *                         "FN" for false negatives) and the value is the count (int).
+ * @return double The calculated Data Quality Index (DQI) as a double.
+ */
 double EvalTrainingData::calculateDataQualityIndex(const std::map<int, std::map<std::string, int>> &confusion_matrix)
 {
     int diagonal_sum = 0, off_diagonal_sum = 0;
@@ -262,6 +325,24 @@ double EvalTrainingData::calculateDataQualityIndex(const std::map<int, std::map<
     return 100.0 * diagonal_sum / (diagonal_sum + off_diagonal_sum);
 }
 
+/**
+ * @brief Prints the evaluation of the training data quality based on the provided index.
+ *
+ * This function outputs a message to the standard output stream that describes the quality
+ * of the training data based on the given data quality index. The index is expected to be
+ * a value between 0 and 100.
+ *
+ * @param data_quality_index A double representing the quality index of the training data.
+ *                           The value should be between 0 and 100.
+ *
+ * The function provides different messages based on the range in which the data quality
+ * index falls:
+ * - If the index is less than or equal to 80, it indicates poor class discriminatory information.
+ * - If the index is between 80 and 90, it indicates some class discriminatory information but may not be sufficient.
+ * - If the index is between 90 and 95, it indicates good class discriminatory information.
+ * - If the index is between 95 and 98, it indicates very high-quality training data.
+ * - If the index is greater than or equal to 98, it indicates excellent training data.
+ */
 void EvalTrainingData::printDataQualityEvaluation(double data_quality_index)
 {
     std::cout << "\nTraining Data Quality Index: " << data_quality_index << "   (out of a possible maximum of 100)\n";

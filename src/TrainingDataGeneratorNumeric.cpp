@@ -1,5 +1,21 @@
 #include "TrainingDataGeneratorNumeric.hpp"
 
+/**
+ * @brief Constructor for TrainingDataGeneratorNumeric class.
+ *
+ * This constructor initializes the TrainingDataGeneratorNumeric object with the provided keyword arguments.
+ * It validates the keys in the provided map and sets the corresponding member variables.
+ *
+ * @param kwargs A map containing the keyword arguments for initialization.
+ *               Allowed keys are:
+ *               - "output_csv_file": Path to the output CSV file.
+ *               - "parameter_file": Path to the parameter file.
+ *               - "number_of_samples_per_class": Number of samples per class (as a string, will be converted to an
+ * integer).
+ *               - "debug": Debug flag (as a string, will be converted to an integer).
+ *
+ * @throws std::invalid_argument if the kwargs map is empty or contains invalid keys.
+ */
 TrainingDataGeneratorNumeric::TrainingDataGeneratorNumeric(map<string, string> kwargs)
 {
     vector<string> allowedKeys = {"output_csv_file", "parameter_file", "number_of_samples_per_class", "debug"};
@@ -41,6 +57,23 @@ TrainingDataGeneratorNumeric::TrainingDataGeneratorNumeric(map<string, string> k
 
 TrainingDataGeneratorNumeric::~TrainingDataGeneratorNumeric() {}
 
+/**
+ * @brief Reads and parses a parameter file for numeric data.
+ *
+ * This function reads a parameter file specified by `_parameterFile` and extracts
+ * class names, class priors, feature names, feature value ranges, and class parameter values
+ * (mean and covariance). The extracted data is stored in the corresponding class attributes.
+ *
+ * @throws std::invalid_argument if the parameter file is empty.
+ * @throws std::runtime_error if the required information (class names and priors) is not found in the parameter file.
+ *
+ * The extracted data is stored in the following class attributes:
+ * - `_classNames`: A vector of class names.
+ * - `_classNamesAndPriors`: A map of class names to their corresponding priors.
+ * - `_featuresWithValueRange`: A map of feature names to their value ranges (min and max values).
+ * - `_classesAndTheirParamValues`: A map of class names to their parameter values (mean and covariance).
+ * - `_featuresOrdered`: A vector of feature names in the order they appear in the parameter file.
+ */
 void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
 {
     vector<string> classNames;
@@ -231,9 +264,17 @@ void TrainingDataGeneratorNumeric::ReadParameterFileNumeric()
     _featuresOrdered            = featuresOrdered;
 }
 
-// Function to generate multivariate normal samples, since Eigen does not have a built-in function for this
-// Original Python implementation uses numpy.random.multivariate_normal, but this is not available in cpp
-// We will use the Cholesky decomposition method to generate multivariate normal samples
+/**
+ * @brief Generates multivariate normal samples.
+ *
+ * This function generates a specified number of samples from a multivariate normal distribution
+ * with a given mean vector and covariance matrix.
+ *
+ * @param mean A vector of doubles representing the mean of the multivariate normal distribution.
+ * @param cov A MatrixXd representing the covariance matrix of the multivariate normal distribution.
+ * @param numSamples An integer specifying the number of samples to generate.
+ * @return A vector of VectorXd, where each VectorXd is a sample from the multivariate normal distribution.
+ */
 vector<VectorXd> TrainingDataGeneratorNumeric::GenerateMultivariateSamples(const vector<double> &mean,
                                                                            const MatrixXd &cov,
                                                                            int numSamples)
@@ -261,6 +302,28 @@ vector<VectorXd> TrainingDataGeneratorNumeric::GenerateMultivariateSamples(const
     return samples;
 }
 
+/**
+ * @brief Generates training data for numeric features and writes it to a CSV file.
+ *
+ * This function generates multivariate normal samples for each class based on the provided
+ * mean and covariance values. It then creates data records for each sample, shuffles them,
+ * and writes them to a CSV file.
+ *
+ * The CSV file will contain a header row with feature names and subsequent rows with
+ * the generated data records.
+ *
+ * The function performs the following steps:
+ * 1. Generates samples for each class using multivariate normal distribution.
+ * 2. Creates data records for each sample.
+ * 3. Shuffles the data records randomly.
+ * 4. Writes the data records to a CSV file with a header row.
+ *
+ * @note The function assumes that the class parameters (_classesAndTheirParamValues) contain
+ *       mean and covariance values for each class.
+ *
+ * @param None
+ * @return void
+ */
 void TrainingDataGeneratorNumeric::GenerateTrainingDataNumeric()
 {
     map<string, vector<VectorXd>> samplesForClass;
