@@ -1,26 +1,26 @@
 import DecisionTree as dt
+from DecisionTree import DTIntrospection as dtI
+
 print("SandBox...")
 
-# # SYMBOLIC TREE #
-# dtree = dt.DecisionTree(training_datafile="test/resources/training_symbolic.csv",
-#                         csv_class_column_index=1,
-#                         csv_columns_for_features=[2, 3, 4, 5],
-#                         max_depth_desired=5,
-#                         entropy_threshold=0.1,
-#                         )
+# <============== SYMBOLIC TREE ===============>
+dtreeS = dt.DecisionTree(training_datafile="test/resources/training_symbolic.csv",
+                        csv_class_column_index=1,
+                        csv_columns_for_features=[2, 3, 4, 5],
+                        max_depth_desired=5,
+                        entropy_threshold=0.1,
+                        debug3=False
+                        )
 
-# dtree.get_training_data()
-# dtree.calculate_class_priors()
-# dtree.calculate_first_order_probabilities()
-# # dtree.determine_data_condition()
+dtreeS.get_training_data()
+dtreeS.calculate_class_priors()
+dtreeS.calculate_first_order_probabilities()
+# dtree.determine_data_condition()
 
-# root_node = dtree.construct_decision_tree_classifier()
+root_node = dtreeS.construct_decision_tree_classifier()
+# root_node.display_decision_tree("  ")
 
-# # test_sample = ['exercising=never', 'smoking=heavy', 'fatIntake=heavy', 'videoAddiction=heavy']
-# # classification = dtree.classify(root_node, test_sample)
-# # print("Classification: " + str(classification))
-
-# # NUMERIC TREE #
+# <============== NUMERIC TREE ===============>
 # dtreeN = dt.DecisionTree(
 #     training_datafile="test/resources/stage3cancer.csv",
 #     csv_class_column_index=2,
@@ -31,31 +31,36 @@ print("SandBox...")
 # )
 
 # dtreeN.get_training_data()
-
-# dtreeN.calculate_first_order_probabilities()
 # dtreeN.calculate_class_priors()
-
-training_datafile = "test/resources/stage3cancer.csv"
-eval_data = dt.EvalTrainingData( 
-                               training_datafile = training_datafile,
-                               csv_class_column_index = 2,
-                               csv_columns_for_features = [3,4,5,6,7,8],
-                               entropy_threshold = 0.01,
-                               max_depth_desired = 5,
-                               symbolic_to_numeric_cardinality_threshold = 10,
-                               csv_cleanup_needed = 1,
-            )
-
-eval_data.get_training_data()
-eval_data.evaluate_training_data()
+# dtreeN.calculate_first_order_probabilities()
 
 # root_nodeN = dtreeN.construct_decision_tree_classifier()
+# root_nodeN.display_decision_tree("  ")
 
-# test_sampleN = ["pgtime=6.1","pgstat=1","age=70","eet=1","g2=11.7","grade=3","gleason=8","ploidy=diplooid"]
-# classificationN = dtreeN.classify(root_nodeN, test_sampleN)
-# print("Classification: " + str(classificationN))
 
-# /***************************/ ENTROPY /***************************/
+# /***************************/ Classify /***************************/
+# SYMBOLIC
+# test_sample = ['exercising=never', 'smoking=never', 'fatIntake=heavy', 'videoAddiction=heavy']
+# classification = dtreeS.classify(root_node, test_sample)
+# print("Classification: " + str(classification))
+
+# NUMERIC
+# test_sample = ['"age"=65', '"eet"=2', '"g2"=6.2', '"grade"=2', '"gleason"=5', '"ploidy"=tetraploid']
+# classification = dtreeN.classify(root_nodeN, test_sample)
+# print("Classification:", str(classification))
+
+# /***************************/ Introspection /***************************/
+# SYMBOLIC
+dtreeSI = dtI(dtreeS)
+dtreeSI.initialize()
+
+dtreeSI.explain_classification_at_one_node(1)
+
+# NUMERIC
+# dtreeNI = dtI(dtreeN)
+# dtreeNI.initialize()
+
+# /***************************/ Entropy /***************************/
 # SYMBOLIC
 # ----- classEntropyOnPriors -----
 # print(dtree.class_entropy_on_priors())
@@ -68,7 +73,6 @@ eval_data.evaluate_training_data()
 
 # ----- ClassEntropyForLessThanThresholdForFeature -----
 # print(dtree.class_entropy_for_less_than_threshold_for_feature([ "grade=2.0", "gleason=5.0" ], "gleason", 5.0))
-
 
 # NUMERIC
 # ----- classEntropyOnPriors -----
@@ -119,7 +123,7 @@ eval_data.evaluate_training_data()
 #     ['"grade"=2', '"gleason"=5.0', '"g2">25.0', '"age"=65',  '"g2"<28.0']))
 
 
-# /***************************/ PROBABILITY /***************************/
+# /***************************/ Probability /***************************/
 # SYMBOLIC
 # ----- ProbOfFeatureValue -----
 # print(dtree.probability_of_feature_value( 'smoking', 'never' ))
@@ -148,7 +152,6 @@ eval_data.evaluate_training_data()
 # print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['fatIntake=heavy', 'videoAddiction=medium'], 'class=malignant' ))
 # print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['fatIntake=heavy', 'smoking=heavy', 'videoAddiction=none'], 'class=benign' ))
 # print(dtree.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['fatIntake=heavy', 'smoking=heavy', 'videoAddiction=heavy', 'exercising=regularly'], 'class=benign' ))
-
 
 # NUMERIC
 # ----- PriorProbabilityForClass -----
@@ -233,7 +236,7 @@ eval_data.evaluate_training_data()
 # print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class( ['"grade"=2.0', '"g2">42.00000000000033'], '"pgstat"=0' ))
 # print(dtreeN.probability_of_a_sequence_of_features_and_values_or_thresholds_given_class(
     # ['"grade"=2', '"gleason"=5.0', '"g2">25.0', '"age"=62',  '"g2"<28.0'], '"pgstat"=1'))
-
+    
 # ----- ProbOfAClassGivenSequenceOfFeaturesAndValuesOrThresholds -----
 # print(dtreeN.probability_of_a_class_given_sequence_of_features_and_values_or_thresholds(
 #     '"pgstat"=0', ['"age">47.0']), end='\n\n')

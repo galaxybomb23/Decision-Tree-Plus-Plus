@@ -108,7 +108,6 @@ std::string roundDouble(double value, int precision = 3);
 std::string join(const std::vector<std::string> &elements, const std::string &delimiter);
 std::string normalizeString(const std::string &input);
 
-// Function to trim a string when classifying
-std::string trim(const std::string &str);
+std::string trim(const std::string& str);
 
 #endif // UTILITY_HPP

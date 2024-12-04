@@ -3,7 +3,6 @@
 These instructions will help you set up, build, and run the Decision Tree++ project, a C++ and Python-compatible decision tree library. With bindings provided via Pybind11, you can seamlessly use the library in both C++ and Python environments.
 
 ## Requirements
-
 - **[CMake](https://cmake.org/download/)**: Version 3.10 or higher
 - **[Python](https://www.python.org/downloads/)**: Python 3 with  `setuptools` and `pybind11`  for Python code compilation
 - **[GTest](https://github.com/google/googletest)**: For unit testing (optional)
@@ -15,16 +14,20 @@ git clone https://github.com/galaxybomb23/Decision-Tree-Plus-Plus.git
 ```
 
 ## Usage
-
 Run the script with one of the following options:
 ```bash
-./run.sh {build|clean|test|install|build-python|install-python|demo}
+./run.sh {build|sandbox|clean|test|install|build-python|install-python|demo}
 ``` 
 
 ### Options
 -   **build**: Compiles the project by creating a  `build`  directory (if not already present), configuring with CMake, and running  `make`.
 ```bash
 ./run.sh build
+``` 
+
+-   **sandbox**: Compiles and runs the `Sandbox.cpp` file found in `/tests`. Used to test the interactive components of the project. Also an example on how to use the library in C++.
+```bash
+./run.sh sandbox
 ``` 
     
 -   **clean**: Removes the  `build`  directory, cleaning up any previously compiled files.
@@ -82,11 +85,15 @@ ctest --output-on-failure
 The Decision Tree++ library can be called directly in C++ or imported into Python.
 To use it in C++ you have to include the library in your `.cpp` file like the following:
 ```c++
-#include "DecisionTree.h"
+#include "DecisionTree.hpp"
 ```
 And then link it to your project during compilation.
 ```bash
 g++ your_program.cpp -L/path/to/DecisionTree/build -lDecisionTree -o your_program
+```
+To use the Introspection module in C++ you must include the DTIntrospection header.
+```c++
+#include "DTIntrospection.hpp"
 ```
 
 To use it in Python, you’ll need to install it with the Python bindings and then import it as follows:
@@ -95,7 +102,7 @@ import DecisionTreePP
 ```
 
 ## Examples
-Training data is supplied via text files, which are read into the `DecisionTree` constructur:
+Training data is supplied via text files, which are read into the `DecisionTree` constructor:
 
 ```cpp
 std::map<std::string, std::string> kwargs = {
@@ -139,3 +146,5 @@ auto classification = dt.classify(root_node, test_sample)
 This will return reference to a hash map where the keys represent the class names and the values indicate the corresponding classification probabilities. Additionally, this hash map contains an extra key-value pair detailing the solution path from the root node to the leaf node where the final classification was determined.
 
 For more examples on usage and details on library functionality, check the  `demo.py`  script in the  `Python-build`  directory. You can also check the test cases located in the `test` directory for more examples on how to use the code.
+
+Example usage can also be seen in the Sandbox files for both Python and C++. These files are located in `test/Sandbox.py` and `test/Sandbox.cpp` respectively.

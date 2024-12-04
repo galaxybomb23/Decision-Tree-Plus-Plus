@@ -32,7 +32,6 @@ struct BestFeatureResult {
 class DecisionTreeNode;
 class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
   public:
-    // MARK: Discuss if these need to be private or can stay public
     int _nodesCreated;
     string _classLabel; // The class label for the training data currently unused
     vector<string> _classNames;
@@ -121,8 +120,8 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     map<int, string> getSamplesClassLabelDict() const;
     map<string, std::set<string>> getFeaturesAndUniqueValuesDict() const;
     map<string, vector<double>> getNumericFeaturesValueRangeDict() const;
-
     map<int, vector<string>> getTrainingDataDict() const;
+    DecisionTreeNode* getRootNode() const;
 
     //---------------- Setters ----------------//
     void setTrainingDatafile(const string &trainingDatafile);

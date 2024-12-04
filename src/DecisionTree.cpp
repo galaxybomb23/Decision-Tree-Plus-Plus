@@ -1,10 +1,8 @@
 // Include
 #include "DecisionTree.hpp"
 
-#include "Utility.hpp"
 #include "logger.cpp"
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <fstream>
@@ -12,12 +10,9 @@
 #include <iterator>
 #include <numeric>
 #include <regex>
-#include <set>
 #include <sstream>
 #include <stdexcept>
-#include <string>
 #include <unordered_map>
-#include <vector>
 
 // --------------- Logger --------------- //
 Logger logger("../logs/decisionTree.log");
@@ -2503,7 +2498,7 @@ bool DecisionTree::checkNamesUsed(const vector<string> &featuresAndValues)
         auto pos = featureAndValue.find('=');
 
         if (pos == string::npos) {
-            throw runtime_error("Your test data has a formatting error: Missing '=' in feature-value pair.");
+            throw std::runtime_error("Your test data has a formatting error: Missing '=' in feature-value pair.");
         }
 
         // Split into feature and value
@@ -2710,6 +2705,11 @@ map<string, vector<string>> DecisionTree::getFeaturesAndValuesDict() const
 vector<string> DecisionTree::getClassNames() const
 {
     return _classNames;
+}
+
+DecisionTreeNode *DecisionTree::getRootNode() const
+{
+    return _rootNode.get();
 }
 
 //--------------- Setters ----------------//

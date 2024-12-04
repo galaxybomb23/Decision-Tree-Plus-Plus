@@ -12,6 +12,10 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 # Gather source files for the library
 file(GLOB_RECURSE LIB_SOURCES "src/*.cpp")
+
+# Exclude test files and from the library sources
+list(FILTER LIB_SOURCES EXCLUDE REGEX ".*test/.*")
+
 add_library(DecisionTreeLibrary STATIC ${LIB_SOURCES})
 
 # Make the library exportable for use in other projects
@@ -20,7 +24,6 @@ target_include_directories(DecisionTreeLibrary
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
-
 
 # Link Eigen to the library
 target_link_libraries(DecisionTreeLibrary PUBLIC Eigen3::Eigen)
@@ -50,3 +53,10 @@ add_executable(DecisionTreeTests ${TEST_SOURCES})
 # Link the test executable to the library, Google Test, and Eigen
 target_link_libraries(DecisionTreeTests DecisionTreeLibrary GTest::gtest_main Eigen3::Eigen)
 add_test(NAME DecisionTreeTests COMMAND DecisionTreeTests)
+
+# **Add the Sandbox executable**
+add_executable(Sandbox test/Sandbox.cpp)
+
+# Link the Sandbox executable to the library and Eigen
+target_link_libraries(Sandbox DecisionTreeLibrary Eigen3::Eigen)
+
