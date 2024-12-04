@@ -43,12 +43,13 @@ root_nodeN = dtreeN.construct_decision_tree_classifier()
 # test_sample = ['exercising=never', 'smoking=never', 'fatIntake=heavy', 'videoAddiction=heavy']
 # classification = dtreeS.classify(root_node, test_sample)
 # print("Classification: " + str(classification))
-print(dtreeS.classify_by_asking_questions(root_node))
+# print(dtreeS.classify_by_asking_questions(root_node))
 
 # NUMERIC
 # test_sample = ['"age"=65', '"eet"=2', '"g2"=6.2', '"grade"=2', '"gleason"=5', '"ploidy"=tetraploid']
 # classification = dtreeN.classify(root_nodeN, test_sample)
 # print("Classification:", str(classification))
+print(dtreeN.classify_by_asking_questions(root_nodeN))
 
 # /***************************/ Introspection /***************************/
 # SYMBOLIC
