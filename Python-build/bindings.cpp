@@ -270,7 +270,6 @@ PYBIND11_MODULE(DecisionTreePP, m)
         // --------------- Getters ----------------//
 
 
-        // Bind EvalTrainingData class
         .def("getTrainingDatafile", &DecisionTree::getTrainingDatafile, "Get the training data file")
         .def("getEntropyThreshold", &DecisionTree::getEntropyThreshold, "Get the entropy threshold")
         .def("getMaxDepthDesired", &DecisionTree::getMaxDepthDesired, "Get the maximum desired depth")
@@ -411,42 +410,9 @@ PYBIND11_MODULE(DecisionTreePP, m)
              "Get training sample records");
 
     //========= EvalTrainingData Class =========//
-    // =========== EvalTrainingData Class ===========
     py::class_<EvalTrainingData, DecisionTree, std::shared_ptr<EvalTrainingData>>(m, "EvalTrainingData")
         .def(py::init<std::map<std::string, std::string>>(), "Constructor with parameters")
         .def("evaluateTrainingData", &EvalTrainingData::evaluateTrainingData, "Evaluate the training data")
-        .def("evaluationResults",
-             &EvalTrainingData::evaluationResults,
-             py::arg("testing_samples"),
-             py::arg("allTrainingData"),
-             py::arg("root_node"),
-             py::arg("confusion_matrix"),
-             py::arg("evalDebug"),
-             "Process evaluation results")
-        .def("printDebugInformation",
-             &EvalTrainingData::printDebugInformation,
-             py::arg("trainingDT"),
-             py::arg("testing_samples"),
-             "Print debug information")
-        .def("printClassificationInfo",
-             &EvalTrainingData::printClassificationInfo,
-             py::arg("which_classes"),
-             py::arg("classification"),
-             py::arg("most_likely_class_label"),
-             py::arg("root_node"),
-             "Print classification information")
-        .def("displayConfusionMatrix",
-             &EvalTrainingData::displayConfusionMatrix,
-             py::arg("confusion_matrix"),
-             "Display the confusion matrix")
-        .def("calculateDataQualityIndex",
-             &EvalTrainingData::calculateDataQualityIndex,
-             py::arg("confusion_matrix"),
-             "Calculate data quality index")
-        .def("printDataQualityEvaluation",
-             &EvalTrainingData::printDataQualityEvaluation,
-             py::arg("data_quality_index"),
-             "Print data quality evaluation results")
         .def_readwrite("_dataQualityIndex", &EvalTrainingData::_dataQualityIndex)
         .def_readwrite("_csvClassColumnIndex", &EvalTrainingData::_csvClassColumnIndex);
 

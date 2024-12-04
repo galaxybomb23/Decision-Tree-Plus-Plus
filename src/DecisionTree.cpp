@@ -3158,6 +3158,21 @@ DecisionTreeNode* DecisionTree::getRootNode() const
     return _rootNode.get();
 }
 
+map<int, string> DecisionTree::getSamplesClassLabelDict() const
+{
+    return _samplesClassLabelDict;
+}
+
+map<string, set<string>> DecisionTree::getFeaturesAndUniqueValuesDict() const
+{
+    return _featuresAndUniqueValuesDict;
+}
+
+map<string, vector<double>> DecisionTree::getNumericFeaturesValueRangeDict() const
+{
+    return _numericFeaturesValueRangeDict;
+}
+
 //--------------- Setters ----------------//
 void DecisionTree::setTrainingDatafile(const string &trainingDatafile)
 {
@@ -3212,6 +3227,11 @@ void DecisionTree::setDebug2(int debug2)
 void DecisionTree::setDebug3(int debug3)
 {
     _debug3 = debug3;
+}
+
+void DecisionTree::setHowManyTotalTrainingSamples(int howManyTotalTrainingSamples)
+{
+    _howManyTotalTrainingSamples = howManyTotalTrainingSamples;
 }
 
 void DecisionTree::setRootNode(unique_ptr<DecisionTreeNode> rootNode)

@@ -75,6 +75,11 @@ build_python() {
     python3 Python-build/setup.py build_ext --inplace
 }
 
+demo() {
+  clear
+  build_python
+  python3 Python-build/demo.py
+}
 # Main script execution
 case $1 in
   demo)
@@ -102,6 +107,9 @@ case $1 in
     ;;
   sandbox)
     run_sandbox
+    ;;
+  demo)
+    demo
     ;;
   *)
     asciiquarium
