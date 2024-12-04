@@ -14,10 +14,14 @@
 #include <stdexcept>
 #include <unordered_map>
 
+
 // --------------- Logger --------------- //
+
 Logger logger("../logs/decisionTree.log");
 
+
 //--------------- Constructors and Destructors ----------------//
+
 DecisionTree::DecisionTree(map<string, string> kwargs)
 {
     if (kwargs.empty()) {
@@ -110,6 +114,7 @@ DecisionTree::DecisionTree(map<string, string> kwargs)
 
 DecisionTree::~DecisionTree() {}
 
+
 //--------------- Class Functions ----------------//
 
 // Get the training data from the CSV file
@@ -158,6 +163,9 @@ void DecisionTree::getTrainingData()
             if (std::find(_csvColumnsForFeatures.begin(), _csvColumnsForFeatures.end(), columnIdx) !=
                 _csvColumnsForFeatures.end()) {
                 _featureNames.push_back(token); // Get the feature names
+            }
+            else {
+                _classLabel = token; // Get the class label
             }
             columnIdx++;
         }
@@ -323,6 +331,7 @@ void DecisionTree::showTrainingData() const
         cout << endl;
     }
 }
+
 
 //--------------- Classify ----------------//
 
@@ -581,6 +590,223 @@ void DecisionTree::recursiveDescentForClassification(DecisionTreeNode* node,
     }
 }
 
+/**
+ * @brief Classifies an instance by engaging a human user in a question-answer session.
+ *
+ * This method is used to classify an instance by asking the user a series of questions.
+ * The questions are based on the decision tree structure, and the user's answers guide
+ * the traversal of the tree to reach a classification decision.
+ *
+ * @param rootNode The root node of the decision tree.
+ * @return A ClassificationAnswer object containing the classification result, including
+ *         class probabilities and the solution path taken during the classification process.
+ */
+ClassificationAnswer DecisionTree::classifyByAskingQuestions(DecisionTreeNode* rootNode) {
+    /*
+    If you want classification to be carried out by engaging a human user in a
+    question-answer session, this is the method to use for that purpose.  See the
+    script classify_by_asking_questions.py in the Examples subdirectory for an
+    illustration of how to do that.
+    */
+    
+    // Initialize answer
+    ClassificationAnswer answer;
+
+    // Initialize class probabilities with class names set to 0.0
+    for (const auto& className : _classNames) {
+        answer.classProbabilities[className] = 0.0;
+    }
+
+    // Initialize solution path
+    answer.solutionPath.clear();
+
+    // Initialize scratchpad for numeric answers
+    map<string, optional<double>> scratchpadForNumericAnswers;
+    for (const auto& featurePair : _probDistributionNumericFeaturesDict) {
+        scratchpadForNumericAnswers[featurePair.first] = nullopt;
+    }
+
+    // Call the recursive descent function
+    interactiveRecursiveDescentForClassification(rootNode, answer, scratchpadForNumericAnswers);
+
+    // Reverse the solution path
+    std::reverse(answer.solutionPath.begin(), answer.solutionPath.end());
+
+    // Return the classification result
+    return answer;
+}
+
+/**
+ * @brief Interactively performs a recursive descent for classification on a decision tree.
+ *
+ * This function navigates through the decision tree based on user input for feature values,
+ * either numeric or symbolic, and updates the classification answer with the class probabilities
+ * and the solution path.
+ *
+ * @param node Pointer to the current decision tree node.
+ * @param answer Reference to the ClassificationAnswer object to store the result.
+ * @param scratchpadForNumerics A map to store user-provided numeric feature values for reuse.
+ */
+void DecisionTree::interactiveRecursiveDescentForClassification(
+    DecisionTreeNode* node,
+    ClassificationAnswer& answer,
+    map<string, optional<double>>& scratchpadForNumerics)
+{
+    using namespace ConsoleColors;
+
+    std::regex pattern1("(.+)<(.+)");
+    std::regex pattern2("(.+)>(.+)");
+    double userValueForFeatureNumeric;
+    string userValueForFeatureSymbolic;
+    bool pathFound = false;
+
+    // Get children of the node
+    const auto& children = node->GetChildren();
+
+    if (children.empty()) {
+        // Leaf node
+        vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
+
+        for (size_t i = 0; i < _classNames.size(); ++i) {
+            answer.classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
+        }
+
+        answer.solutionPath.push_back(node->GetSerialNum());
+        return;
+    }
+
+    // Build list of branch attributes to children
+    vector<string> listOfBranchAttributesToChildren;
+
+    for (auto child : children) {
+        vector<string> branchFeaturesAndValues = child->GetBranchFeaturesAndValuesOrThresholds();
+        string featureAndValueOnBranch = branchFeaturesAndValues.back();
+        listOfBranchAttributesToChildren.push_back(featureAndValueOnBranch);
+    }
+
+    // Get the feature tested at the node
+    string featureTestedAtNode = node->GetFeature();
+
+    if (_probDistributionNumericFeaturesDict.find(featureTestedAtNode) != _probDistributionNumericFeaturesDict.end()) {
+        // Numeric feature
+        if (scratchpadForNumerics[featureTestedAtNode]) {
+            userValueForFeatureNumeric = scratchpadForNumerics[featureTestedAtNode].value();
+        } else {
+            // Ask user for input
+            vector<double> valueRange = _numericFeaturesValueRangeDict[featureTestedAtNode];
+            
+            while (true) {
+                cout << BLUE + "\nWhat is the value for the feature '" << RESET + BOLD_BLUE + featureTestedAtNode << RESET + BLUE << "'?\n";
+                cout << "Enter a value in the range [" + RESET << BOLD_BLUE << valueRange[0] << RESET << BLUE + ", " + RESET << BOLD_BLUE << valueRange[1] << RESET << BLUE + "]: " + RESET;
+                string userInput;
+                getline(cin, userInput);
+                try {
+                    double userValue = stod(userInput);
+
+                    if (userValue >= valueRange[0] && userValue <= valueRange[1]) {
+                        userValueForFeatureNumeric = userValue;
+                        break;
+                    } else {
+                        cout << RED + "You entered an illegal value. Let's try again.\n" + RESET;
+                    }
+                } catch (const std::exception& e) {
+                    cout << RED + "Invalid input. Please enter a numeric value.\n" + RESET;
+                }
+            }
+
+            scratchpadForNumerics[featureTestedAtNode] = userValueForFeatureNumeric;
+        }
+
+        // For each branch attribute, check patterns
+        for (size_t i = 0; i < listOfBranchAttributesToChildren.size(); ++i) {
+            string branchAttribute = listOfBranchAttributesToChildren[i];
+            std::smatch match;
+
+            if (std::regex_match(branchAttribute, match, pattern1)) {
+                // Match pattern 'feature<threshold'
+                string feature = match[1];
+                double threshold = stod(match[2]);
+
+                if (userValueForFeatureNumeric <= threshold) {
+                    interactiveRecursiveDescentForClassification(children[i], answer, scratchpadForNumerics);
+                    pathFound = true;
+                    answer.solutionPath.push_back(node->GetSerialNum());
+                    break;
+                }
+            } else if (std::regex_match(branchAttribute, match, pattern2)) {
+                // Match pattern 'feature>threshold'
+                string feature = match[1];
+                double threshold = stod(match[2]);
+
+                if (userValueForFeatureNumeric > threshold) {
+                    interactiveRecursiveDescentForClassification(children[i], answer, scratchpadForNumerics);
+                    answer.solutionPath.push_back(node->GetSerialNum());
+                    break;
+                }
+            }
+        }
+
+        if (pathFound) {
+            return;
+        }
+    } else {
+        // Symbolic feature
+        set<string> possibleValuesForFeature = _featuresAndUniqueValuesDict[featureTestedAtNode];
+        
+        while (true) {
+            cout << BLUE + "\nWhat is the value for the feature '" << RESET + BOLD_BLUE + featureTestedAtNode + RESET + BLUE << "'?\n";
+            cout << "Enter one of: ";
+
+            for (const auto& val : possibleValuesForFeature) {
+                // If the value is last do not print a comma
+                if (val == *possibleValuesForFeature.rbegin()) {
+                    cout << BOLD_BLUE + val + RESET;
+                } else {
+                    cout << BOLD_BLUE + val + RESET << ", ";
+                }
+            }
+
+            cout << BLUE + "\n=> " + RESET;
+            getline(cin, userValueForFeatureSymbolic);
+            userValueForFeatureSymbolic = trim(userValueForFeatureSymbolic);
+
+            if (possibleValuesForFeature.find(userValueForFeatureSymbolic) != possibleValuesForFeature.end()) {
+                break;
+            } else {
+                cout << RED + "You entered an illegal value. Let's try again.\n" + RESET;
+            }
+        }
+        string featureValueCombo = featureTestedAtNode + "=" + userValueForFeatureSymbolic;
+        
+        for (size_t i = 0; i < listOfBranchAttributesToChildren.size(); ++i) {
+            string branchAttribute = listOfBranchAttributesToChildren[i];
+            
+            if (branchAttribute == featureValueCombo) {
+                interactiveRecursiveDescentForClassification(children[i], answer, scratchpadForNumerics);
+                pathFound = true;
+                answer.solutionPath.push_back(node->GetSerialNum());
+                break;
+            }
+        }
+
+        if (pathFound) {
+            return;
+        }
+    }
+
+    // If no path found, get class probabilities from current node
+    if (!pathFound) {
+        vector<double> leafNodeClassProbabilities = node->GetClassProbabilities();
+        
+        for (size_t i = 0; i < _classNames.size(); ++i) {
+            answer.classProbabilities[_classNames[i]] = leafNodeClassProbabilities[i];
+        }
+
+        answer.solutionPath.push_back(node->GetSerialNum());
+    }
+}
+
+
 //--------------- Construct Tree ----------------//
 
 /**
@@ -671,6 +897,15 @@ DecisionTreeNode* DecisionTree::constructDecisionTreeClassifier()
  */
 void DecisionTree::recursiveDescent(DecisionTreeNode* node)
 {
+    /*
+    After the root node of the decision tree is constructed by the previous method, we
+    find  at that node the feature that yields the greatest reduction in class entropy
+    from the entropy based on just the class priors. The logic for finding this
+    feature is different for symbolic features and for numeric features (that logic is
+    built into the best feature calculator). We then invoke this method recursively to
+    create the rest of the tree.
+    */
+
     if (_debug3) {
         cout << "\n==================== ENTERING RECURSIVE DESCENT ==========================" << endl;
     }
@@ -1264,6 +1499,7 @@ BestFeatureResult DecisionTree::bestFeatureCalculator(const vector<string> &feat
     return {bestFeatureName, bestFeatureEntropy, valBasedEntropiesToBeReturned, decisionValToBeReturned};
 }
 
+
 //--------------- Entropy Calculators ----------------//
 
 /**
@@ -1518,7 +1754,9 @@ double DecisionTree::classEntropyForAGivenSequenceOfFeaturesAndValuesOrThreshold
     return entropy;
 }
 
+
 //--------------- Probability Calculators ----------------//
+
 /**
  * @brief Calculates the prior probability for a given class.
  *
@@ -2648,6 +2886,7 @@ double DecisionTree::probabilityOfAClassGivenSequenceOfFeaturesAndValuesOrThresh
     return _probabilityCache[classAndSequence];
 }
 
+
 //--------------- Class Based Utilities ----------------//
 
 /**
@@ -2886,7 +3125,29 @@ void DecisionTree::printStats()
     }
 }
 
+void DecisionTree::printClassificationAnswer(ClassificationAnswer answer) {
+    using namespace ConsoleColors;
+
+    cout << BOLD_WHITE + "\nClassification probabilities:\n" + RESET;
+    for (const auto &kv : answer.classProbabilities) {
+        cout << BOLD + _classLabel + " = " + kv.first << RESET + " => " << BOLD << kv.second << "\n" + RESET;
+    }
+
+    cout << BOLD_WHITE + "\nSolution path:\n" + RESET;
+    for (const auto &node : answer.solutionPath) {
+        if (node != answer.solutionPath.back()) {
+            cout << BOLD + "NODE" << node << " -> " + RESET;
+        }
+        else {
+            cout << BOLD + "NODE" + RESET << node;
+        }
+    }
+    cout << endl;
+}
+
+
 //--------------- Getters ----------------//
+
 string DecisionTree::getTrainingDatafile() const
 {
     return _trainingDatafile;
@@ -2972,7 +3233,9 @@ DecisionTreeNode *DecisionTree::getRootNode() const
     return _rootNode.get();
 }
 
+
 //--------------- Setters ----------------//
+
 void DecisionTree::setTrainingDatafile(const string &trainingDatafile)
 {
     _trainingDatafile = trainingDatafile;

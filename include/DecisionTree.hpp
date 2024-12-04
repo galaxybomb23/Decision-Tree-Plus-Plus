@@ -9,10 +9,19 @@
 #include <iostream>
 #include <memory>
 
+/**
+ * @struct ClassificationAnswer
+ * @brief Represents the result of a classification operation.
+ *
+ * This structure holds the probabilities of each class and the path taken
+ * to reach the solution in a decision tree.
+ *
+ */
 struct ClassificationAnswer {
     map<string, double> classProbabilities;
     vector<int> solutionPath;
 };
+
 
 /**
  * @struct BestFeatureResult
@@ -29,7 +38,9 @@ struct BestFeatureResult {
     optional<double> decisionValue;
 };
 
+
 class DecisionTreeNode;
+
 
 /**
  * @class DecisionTree
@@ -61,6 +72,10 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     void recursiveDescentForClassification(DecisionTreeNode* node,
                                            const vector<string> &featureAndValues,
                                            ClassificationAnswer &answer);
+    ClassificationAnswer classifyByAskingQuestions(DecisionTreeNode* rootNode);
+    void interactiveRecursiveDescentForClassification(DecisionTreeNode* node,
+                                                    ClassificationAnswer &answer,
+                                                    map<string, optional<double>>& scratchpadForNumerics);
 
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();
@@ -109,6 +124,7 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     DecisionTree &operator=(const DecisionTree &dt);
     vector<vector<string>> findBoundedIntervalsForNumericFeatures(const vector<string> &trueNumericTypes);
     void printStats();
+    void printClassificationAnswer(ClassificationAnswer answer);
 
     // --------------- Getters ----------------//
     string getTrainingDatafile() const;
