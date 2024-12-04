@@ -24,7 +24,7 @@ add_library(DecisionTreeLibrary STATIC ${LIB_SOURCES})
 
 # Make the library exportable for use in other projects
 target_include_directories(DecisionTreeLibrary
-    PUBLIC
+        PUBLIC
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
@@ -48,19 +48,33 @@ install(EXPORT DecisionTreeLibraryConfig
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/DecisionTreeLibrary
 )
 
-# Testing
 enable_testing()
 find_package(GTest REQUIRED)
-file(GLOB_RECURSE TEST_SOURCES "test/*Test.cpp")
-add_executable(DecisionTreeTests ${TEST_SOURCES})
 
-# Link the test executable to the library, Google Test, and Eigen
-target_link_libraries(DecisionTreeTests DecisionTreeLibrary GTest::gtest_main Eigen3::Eigen)
-add_test(NAME DecisionTreeTests COMMAND DecisionTreeTests)
+# Get all test files individually
+file(GLOB TEST_SOURCES "test/*Test.cpp")
+
+# Create a separate test executable for each test file
+foreach(TEST_SOURCE ${TEST_SOURCES})
+        # Get the filename without extension
+        get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
+
+        # Create executable for this test
+        add_executable(${TEST_NAME} ${TEST_SOURCE})
+
+        # Link libraries
+        target_link_libraries(${TEST_NAME}
+                DecisionTreeLibrary
+                GTest::gtest_main
+                Eigen3::Eigen
+        )
+
+        # Add the test
+        add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+endforeach()
 
 # **Add the Sandbox executable**
 add_executable(Sandbox test/Sandbox.cpp)
 
 # Link the Sandbox executable to the library and Eigen
 target_link_libraries(Sandbox DecisionTreeLibrary Eigen3::Eigen)
-
