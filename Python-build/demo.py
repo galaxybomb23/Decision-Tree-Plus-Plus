@@ -7,28 +7,33 @@ import time
 # change cwd to the directory of the file
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+kwargs = {
+    "training_datafile": "../test/resources/training_symbolic.csv",
+    "csv_class_column_index": "1",
+    "csv_columns_for_features": "{2, 3, 4, 5}",
+    "max_depth_desired": "5",
+    "entropy_threshold": "0.1"
+}
+Dtree = dtp.DecisionTree(kwargs)
+Dtree.getTrainingData()
+Dtree.calculateFirstOrderProbabilities()
+Dtree.calculateClassPriors()
+rootNode = Dtree.constructDecisionTreeClassifier()
 
 
 def construct():
-    kwargs = {
-        "training_datafile": "../test/resources/training_symbolic.csv",
-        "csv_class_column_index": "1",
-        "csv_columns_for_features": {2, 3, 4, 5},
-        "max_depth_desired": "5",
-        "entropy_threshold": "0.1"
-    }
-
-    Dtree = dtp.DecisionTree(kwargs)
-    Dtree.getTrainingData()
-    Dtree.calculateFirstOrderProbabilities()
-    Dtree.calculateClassPriors()
-
-    rootNode = Dtree.constructDecisionTreeClassifier()
-    rootNode.displayDecisionTree("  ")
+    rootNode.DisplayDecisionTree(" ")
     return
 
 
 def interactiveClassification():
+    root = Dtree.getRootNode()
+    if root is None:
+        print("Error: Decision tree not properly constructed")
+        return
+    result = Dtree.classifyByAskingQuestions(root)
+    if result is not None:
+        Dtree.printClassificationAnswer(result)
     return
 
 
@@ -50,7 +55,7 @@ def display_menu():
 
 
 def main():
-    construct()
+    # construct()
     # interactiveClassification()
     # interractiveIntrospection()
     # benchmark()

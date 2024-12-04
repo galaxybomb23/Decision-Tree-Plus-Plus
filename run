@@ -83,8 +83,7 @@ demo() {
 # Main script execution
 case $1 in
   demo)
-    compile_python
-    python3 Python-build/demo.py
+    demo
     ;;
   build-python)
     build_python
@@ -107,9 +106,6 @@ case $1 in
     ;;
   sandbox)
     run_sandbox
-    ;;
-  demo)
-    demo
     ;;
   *)
     asciiquarium

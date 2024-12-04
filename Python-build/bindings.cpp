@@ -266,6 +266,10 @@ PYBIND11_MODULE(DecisionTreePP, m)
              py::arg("trueNumericTypes"),
              "Find bounded intervals for numeric features")
         .def("printStats", &DecisionTree::printStats, "Print statistics")
+        .def("printClassificationAnswer",
+             &DecisionTree::printClassificationAnswer,
+             py::arg("ClassificationAnswer"),
+             "Print classification answer")
 
         // --------------- Getters ----------------//
 
@@ -470,4 +474,17 @@ PYBIND11_MODULE(DecisionTreePP, m)
         .def("getNodeSerialNumToNodeDict",
              &DTIntrospection::getNodeSerialNumToNodeDict,
              "Get mapping of serial numbers to nodes");
+
+
+    //======== Structs
+    py::class_<BestFeatureResult>(m, "BestFeatureResult")
+        .def(py::init<>()) // Default constructor
+        .def_readwrite("bestFeatureName", &BestFeatureResult::bestFeatureName)
+        .def_readwrite("bestFeatureEntropy", &BestFeatureResult::bestFeatureEntropy)
+        .def_readwrite("valBasedEntropies", &BestFeatureResult::valBasedEntropies)
+        .def_readwrite("decisionValue", &BestFeatureResult::decisionValue);
+    py::class_<ClassificationAnswer>(m, "ClassificationAnswer")
+        .def(py::init<>()) // Default constructor
+        .def_readwrite("classProbabilities", &ClassificationAnswer::classProbabilities)
+        .def_readwrite("solutionPath", &ClassificationAnswer::solutionPath);
 }
