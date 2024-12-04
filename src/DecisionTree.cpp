@@ -1,8 +1,6 @@
 // Include
 #include "DecisionTree.hpp"
 
-#include "logger.cpp"
-
 #include <cassert>
 #include <cmath>
 #include <fstream>
@@ -13,11 +11,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
-
-
-// --------------- Logger --------------- //
-
-Logger logger("../logs/decisionTree.log");
 
 
 //--------------- Constructors and Destructors ----------------//
@@ -1785,17 +1778,12 @@ double DecisionTree::priorProbabilityForClass(const string &className)
 {
     // Generate a cache key for prior probability of a specific class
     string classNameCacheKey = "prior::" + className;
-    // logger.log(LogLevel(0), "priorProbabilityForClass:: classNameInCache: " + classNameCacheKey);
 
     // Check if the probability is already in the cache (memoization)
     if (_probabilityCache.find(classNameCacheKey) != _probabilityCache.end()) {
-        // // logger.log(LogLevel(0),
-        //            "priorProbabilityForClass:: probability found in cache: " +
-        //                std::to_string(_probabilityCache[classNameCacheKey]));
         return _probabilityCache[classNameCacheKey];
     }
 
-    // logger.log(LogLevel(0), "priorProbabilityForClass:: probability not found in cache");
 
     // Calculate prior probability for all classes and store in cache
     size_t totalNumSamples   = _samplesClassLabelDict.size();
@@ -1817,9 +1805,6 @@ double DecisionTree::priorProbabilityForClass(const string &className)
         // Store the prior probability in the cache
         string classNamePrior             = "prior::" + className;
         _probabilityCache[classNamePrior] = priorProbability;
-        // logger.log(LogLevel(0),
-        //            "priorProbabilityForClass:: prior probability for " + className + ": " +
-        //                std::to_string(priorProbability));
     }
     return _probabilityCache[classNameCacheKey];
 }
