@@ -29,7 +29,8 @@ int main() {
     dtSI->initialize();
 
     // Playing in the sand :)
-    dtSI->explainClassificationsAtMultipleNodesInteractively();
+    // dtSI->explainClassificationsAtMultipleNodesInteractively(); // Interactive explanation
+    cout << dtS->classifyByAskingQuestions(dtS->getRootNode()) << endl; // Non-interactive explanation
 
     return 0;
 }

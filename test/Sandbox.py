@@ -21,20 +21,20 @@ root_node = dtreeS.construct_decision_tree_classifier()
 # root_node.display_decision_tree("  ")
 
 # <============== NUMERIC TREE ===============>
-# dtreeN = dt.DecisionTree(
-#     training_datafile="test/resources/stage3cancer.csv",
-#     csv_class_column_index=2,
-#     csv_columns_for_features=[3, 4, 5, 6, 7, 8],
-#     max_depth_desired=8,
-#     entropy_threshold=0.01
-#     # , debug2=True
-# )
+dtreeN = dt.DecisionTree(
+    training_datafile="test/resources/stage3cancer.csv",
+    csv_class_column_index=2,
+    csv_columns_for_features=[3, 4, 5, 6, 7, 8],
+    max_depth_desired=8,
+    entropy_threshold=0.01
+    # , debug2=True
+)
 
-# dtreeN.get_training_data()
-# dtreeN.calculate_class_priors()
-# dtreeN.calculate_first_order_probabilities()
+dtreeN.get_training_data()
+dtreeN.calculate_class_priors()
+dtreeN.calculate_first_order_probabilities()
 
-# root_nodeN = dtreeN.construct_decision_tree_classifier()
+root_nodeN = dtreeN.construct_decision_tree_classifier()
 # root_nodeN.display_decision_tree("  ")
 
 
@@ -43,6 +43,7 @@ root_node = dtreeS.construct_decision_tree_classifier()
 # test_sample = ['exercising=never', 'smoking=never', 'fatIntake=heavy', 'videoAddiction=heavy']
 # classification = dtreeS.classify(root_node, test_sample)
 # print("Classification: " + str(classification))
+print(dtreeS.classify_by_asking_questions(root_node))
 
 # NUMERIC
 # test_sample = ['"age"=65', '"eet"=2', '"g2"=6.2', '"grade"=2', '"gleason"=5', '"ploidy"=tetraploid']
@@ -51,10 +52,10 @@ root_node = dtreeS.construct_decision_tree_classifier()
 
 # /***************************/ Introspection /***************************/
 # SYMBOLIC
-dtreeSI = dtI(dtreeS)
-dtreeSI.initialize()
+# dtreeSI = dtI(dtreeS)
+# dtreeSI.initialize()
 
-dtreeSI.explain_classification_at_one_node(1)
+# dtreeSI.explain_classification_at_one_node(1)
 
 # NUMERIC
 # dtreeNI = dtI(dtreeN)

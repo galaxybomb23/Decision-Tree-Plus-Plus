@@ -12,7 +12,10 @@
 struct ClassificationAnswer {
     map<string, double> classProbabilities;
     vector<int> solutionPath;
+
+    friend std::ostream &operator<<(std::ostream &os, const ClassificationAnswer &answer);
 };
+
 
 /**
  * @struct BestFeatureResult
@@ -61,6 +64,10 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     void recursiveDescentForClassification(DecisionTreeNode* node,
                                            const vector<string> &featureAndValues,
                                            ClassificationAnswer &answer);
+    ClassificationAnswer classifyByAskingQuestions(DecisionTreeNode* rootNode);
+    void interactiveRecursiveDescentForClassification(DecisionTreeNode* node,
+                                                    ClassificationAnswer &answer,
+                                                    map<string, optional<double>>& scratchpadForNumerics);
 
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();
