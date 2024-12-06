@@ -1,14 +1,5 @@
-#include "Common.hpp"
-#include "DTIntrospection.hpp"
-#include "DecisionTree.hpp"
-#include "DecisionTreeNode.hpp"
-#include "EvalTrainingData.hpp"
-#include "TrainingDataGeneratorNumeric.hpp"
-#include "TrainingDataGeneratorSymbolic.hpp"
-#include "Utility.hpp"
+#include "DecisionTree++.hpp"
 
-#include <Eigen/Dense>
-#include <memory>
 #include <pybind11/complex.h>
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -17,6 +8,195 @@
 
 
 #define PYTHON_BUILD
+
+// Demo funcs
+double evalTraningDataDemo()
+{
+    map<string, string> kwargs = {
+        {                        "training_datafile", "../test/resources/stage3cancer.csv"},
+        {                   "csv_class_column_index",                                  "2"},
+        {                 "csv_columns_for_features",                   {3, 4, 5, 6, 7, 8}},
+        {                        "entropy_threshold",                               "0.01"},
+        {                        "max_depth_desired",                                  "5"},
+        {"symbolic_to_numeric_cardinality_threshold",                                 "10"},
+        {                       "csv_cleanup_needed",                                  "1"}
+    };
+
+    auto evalData = make_shared<EvalTrainingData>(kwargs);
+
+    // Initialize and run evaluation
+    evalData->getTrainingData();
+    double idx = evalData->evaluateTrainingData();
+    return idx;
+}
+
+void constructDemo()
+{
+    // setup
+    std::map<std::string, std::string> kwargsS = {
+        // Symbolic kwargs
+        {       "training_datafile", "../test/resources/training_symbolic.csv"},
+        {  "csv_class_column_index",                                       "1"},
+        {"csv_columns_for_features",                              {2, 3, 4, 5}},
+        {       "max_depth_desired",                                       "5"},
+        {       "entropy_threshold",                                     "0.1"},
+        {                  "debug3",                                       "0"}
+    };
+    auto dtS = std::make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
+    dtS->getTrainingData();
+    dtS->calculateFirstOrderProbabilities();
+    dtS->calculateClassPriors();
+
+    // Construct the DecisionTree
+    dtS->constructDecisionTreeClassifier();
+    auto root_Node = dtS->getRootNode();
+    root_Node->DisplayDecisionTree("  ");
+}
+
+void interactiveIntrospection()
+{
+
+    // setup
+    std::map<std::string, std::string> kwargsS = {
+        // Symbolic kwargs
+        {       "training_datafile", "../test/resources/training_symbolic.csv"},
+        {  "csv_class_column_index",                                       "1"},
+        {"csv_columns_for_features",                              {2, 3, 4, 5}},
+        {       "max_depth_desired",                                       "5"},
+        {       "entropy_threshold",                                     "0.1"},
+        {                  "debug3",                                       "0"}
+    };
+    auto dtS = std::make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
+    dtS->getTrainingData();
+    dtS->calculateFirstOrderProbabilities();
+    dtS->calculateClassPriors();
+    dtS->constructDecisionTreeClassifier();
+
+    // Constructing the introspection object
+    auto dtSI = make_shared<DTIntrospection>(dtS);
+    dtSI->initialize();
+
+    dtSI->explainClassificationsAtMultipleNodesInteractively(); // Interactive Introspection
+}
+
+void interactiveClassification()
+{
+    // setup
+    std::map<std::string, std::string> kwargsS = {
+        // Symbolic kwargs
+        {       "training_datafile", "../test/resources/training_symbolic.csv"},
+        {  "csv_class_column_index",                                       "1"},
+        {"csv_columns_for_features",                              {2, 3, 4, 5}},
+        {       "max_depth_desired",                                       "5"},
+        {       "entropy_threshold",                                     "0.1"},
+        {                  "debug3",                                       "0"}
+    };
+    auto dtS = std::make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
+    dtS->getTrainingData();
+    dtS->calculateFirstOrderProbabilities();
+    dtS->calculateClassPriors();
+    dtS->constructDecisionTreeClassifier();
+
+    // Constructing the introspection object
+    auto dtSI = make_shared<DTIntrospection>(dtS);
+    dtSI->initialize();
+
+    dtS->printClassificationAnswer(dtS->classifyByAskingQuestions(dtS->getRootNode())); // Interactive Classification
+}
+float BenchmarkConstructSmall()
+{
+    auto start                                 = std::chrono::high_resolution_clock::now();
+    std::map<std::string, std::string> kwargsS = {
+        // Symbolic kwargs
+        {       "training_datafile", "../test/resources/training_symbolic.csv"},
+        {  "csv_class_column_index",                                       "1"},
+        {"csv_columns_for_features",                              {2, 3, 4, 5}},
+        {       "max_depth_desired",                                       "5"},
+        {       "entropy_threshold",                                     "0.1"},
+        {                  "debug3",                                       "0"}
+    };
+    auto dtS = std::make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
+    dtS->getTrainingData();
+    dtS->calculateFirstOrderProbabilities();
+    dtS->calculateClassPriors();
+    dtS->constructDecisionTreeClassifier();
+    return std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::high_resolution_clock::now() - start)
+        .count();
+}
+
+float BenchmarkConstructLarge()
+{
+    auto startTime = std::chrono::high_resolution_clock::now();
+    std::cout << "BenchmarkConstructLarge" << std::endl;
+    std::map<std::string, std::string> kwargsS = {
+        // Symbolic kwargs
+        {       "training_datafile", "../test/resources/training_symbolic_large1.csv"},
+        {  "csv_class_column_index",                                              "1"},
+        {"csv_columns_for_features",                                     {2, 3, 4, 5}},
+        {       "max_depth_desired",                                              "5"},
+        {       "entropy_threshold",                                            "0.1"},
+        {                  "debug3",                                              "0"}
+    };
+    auto dtS = std::make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
+    dtS->getTrainingData();
+    dtS->calculateClassPriors();
+    dtS->calculateFirstOrderProbabilities();
+    auto root_node = dtS->constructDecisionTreeClassifier();
+
+    return std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::high_resolution_clock::now() -
+                                                                    startTime)
+        .count();
+}
+
+float BenchmarkClassifySmall()
+{
+    std::cout << "BenchmarkClassifySmall" << std::endl;
+    auto start                                 = std::chrono::high_resolution_clock::now();
+    std::map<std::string, std::string> kwargsS = {
+        // Symbolic kwargs
+        {       "training_datafile", "../test/resources/training_symbolic.csv"},
+        {  "csv_class_column_index",                                       "1"},
+        {"csv_columns_for_features",                              {2, 3, 4, 5}},
+        {       "max_depth_desired",                                       "5"},
+        {       "entropy_threshold",                                     "0.1"},
+        {                  "debug3",                                       "0"}
+    };
+    auto dtS = std::make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
+    dtS->getTrainingData();
+    dtS->calculateClassPriors();
+    dtS->calculateFirstOrderProbabilities();
+    auto root_node = dtS->constructDecisionTreeClassifier();
+    dtS->classify(root_node, {"exercising=never", "smoking=heavy", "fatIntake=heavy", "videoAddiction=heavy"});
+
+    return std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::high_resolution_clock::now() - start)
+        .count();
+}
+
+float BenchmarkClassifyLarge()
+{
+
+    cout << "BenchmarkClassifyLarge" << endl;
+    auto start                                 = std::chrono::high_resolution_clock::now();
+    std::map<std::string, std::string> kwargsS = {
+        // Symbolic kwargs
+        {       "training_datafile", "../test/resources/training_symbolic_large1.csv"},
+        {  "csv_class_column_index",                                              "1"},
+        {"csv_columns_for_features",                                     {2, 3, 4, 5}},
+        {       "max_depth_desired",                                              "5"},
+        {       "entropy_threshold",                                            "0.1"},
+        {                  "debug3",                                              "0"}
+    };
+
+    auto dtS = std::make_shared<DecisionTree>(kwargsS); // Initialize the DecisionTree
+    dtS->getTrainingData();
+    dtS->calculateClassPriors();
+    dtS->calculateFirstOrderProbabilities();
+    auto root_node = dtS->constructDecisionTreeClassifier();
+    dtS->classify(root_node, {"exercising=never", "smoking=heavy", "fatIntake=heavy", "videoAddiction=heavy"});
+
+    return std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::high_resolution_clock::now() - start)
+        .count();
+}
 
 namespace pybind11 {
 namespace detail {
@@ -487,4 +667,15 @@ PYBIND11_MODULE(DecisionTreePP, m)
         .def(py::init<>()) // Default constructor
         .def_readwrite("classProbabilities", &ClassificationAnswer::classProbabilities)
         .def_readwrite("solutionPath", &ClassificationAnswer::solutionPath);
+
+    //==== demo functions
+    m.def("constructDemo", &constructDemo, "Construct a demo decision tree");
+    m.def("interactiveIntrospectionDemo", &interactiveIntrospection, "Interactive introspection");
+    m.def("interactiveClassificationDemo", &interactiveClassification, "Interactive classification");
+    m.def("evalTrainingDataDemo", &evalTraningDataDemo, "Evaluate training data");
+
+    m.def("BenchmarkConstructSmall", &BenchmarkConstructSmall, "Benchmark the construction of a small decision tree");
+    m.def("BenchmarkConstructLarge", &BenchmarkConstructLarge, "Benchmark the construction of a large decision tree");
+    m.def("BenchmarkClassifySmall", &BenchmarkClassifySmall, "Benchmark the classification of a small decision tree");
+    m.def("BenchmarkClassifyLarge", &BenchmarkClassifyLarge, "Benchmark the classification of a large decision tree");
 }
