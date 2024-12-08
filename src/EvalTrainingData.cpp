@@ -23,7 +23,7 @@ EvalTrainingData::~EvalTrainingData()
  */
 double EvalTrainingData::evaluateTrainingData()
 {
-    bool evalDebug = true;
+    bool evalDebug = false;
 
     // Check if the training data file is a CSV
     if (_trainingDatafile.substr(_trainingDatafile.find_last_of(".") + 1) != "csv") {
