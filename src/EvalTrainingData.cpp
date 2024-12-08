@@ -172,7 +172,6 @@ double EvalTrainingData::evaluateTrainingData()
         }
 
         // Show the classification results
-        std::cout << "\nResults of the 10-fold cross-validation test for run indexed " << foldIndex + 1 << ":\n";
         for (const auto &testSampleName : testingSamples) {
             auto testSampleDataUnfiltered = allTrainingData[std::stoi(testSampleName)];
 
@@ -197,7 +196,9 @@ double EvalTrainingData::evaluateTrainingData()
             auto solutionPath   = classification["solution_path"];
 
             // print classification info and solution path
-            printClassificationInfo(trainingDT->_classNames, classification, solutionPath, rootNode);
+            if (evalDebug) {
+                printClassificationInfo(trainingDT->_classNames, classification, solutionPath, rootNode);
+            }
             classification.erase("solution_path");
 
             // Get the most likely class label
@@ -227,9 +228,7 @@ double EvalTrainingData::evaluateTrainingData()
     }
 
     // Display confusion matrix
-    if (_debug1) {
-        displayConfusionMatrix(confusion_matrix);
-    }
+    displayConfusionMatrix(confusion_matrix);
     auto idx = calculateDataQualityIndex(confusion_matrix);
     printDataQualityEvaluation(idx);
     return idx;
@@ -320,21 +319,33 @@ void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &w
 void EvalTrainingData::displayConfusionMatrix(const std::map<int, std::map<std::string, int>> &confusion_matrix)
 {
     std::cout << "\n\n       DISPLAYING THE CONFUSION MATRIX FOR THE 10-FOLD "
-                 "CROSS-VALIDATION TEST:\n";
-    std::string matrix_header = std::string(30, ' ');
+                 "CROSS-VALIDATION TEST:\n\n";
+
+    // Determine the column width
+    int column_width = 12; // Default minimum width for alignment
     for (const auto &class_name : _classNames) {
-        matrix_header += class_name;
+        column_width =
+            std::max(column_width, static_cast<int>(_classLabel.length() + class_name.length()) + 3); // Add padding
     }
-    std::cout << "\n" << matrix_header << "\n";
+
+    // Print header row with tabs for alignment
+    std::cout << "\t\t" << std::string(column_width, ' '); // Empty space for row labels
+    for (const auto &class_name : _classNames) {
+        std::cout << std::setw(column_width) << (_classLabel + "=" + class_name);
+    }
+    std::cout << "\n";
+
+    // Print each row of the confusion matrix
     for (const auto &row_class_name : _classNames) {
-        std::string row_display = std::string(30, ' ');
-        row_display += row_class_name;
+        std::cout << "\t\t" << std::setw(column_width)
+                  << (_classLabel + "=" + row_class_name); // Add tabs and row label
         for (const auto &col_class_name : _classNames) {
-            row_display += std::to_string(confusion_matrix.at(std::stoi(row_class_name)).at(col_class_name));
+            std::cout << std::setw(column_width) << confusion_matrix.at(std::stoi(row_class_name)).at(col_class_name);
         }
-        std::cout << row_display << "\n";
+        std::cout << "\n";
     }
 }
+
 
 /**
  * @brief Calculates the Data Quality Index (DQI) based on the provided confusion matrix.
