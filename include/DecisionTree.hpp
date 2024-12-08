@@ -59,8 +59,9 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
     shared_ptr<DecisionTree> getShared() { return shared_from_this(); }
 
     //--------------- Constructors and Destructors ----------------//
+    DecisionTree();                           // constructor
     DecisionTree(map<string, string> kwargs); // constructor
-    ~DecisionTree();                          // destructor
+    virtual ~DecisionTree();                  // destructor
 
     //--------------- Class Functions ----------------//
     void getTrainingData();
@@ -74,8 +75,8 @@ class DecisionTree : public std::enable_shared_from_this<DecisionTree> {
                                            ClassificationAnswer &answer);
     ClassificationAnswer classifyByAskingQuestions(DecisionTreeNode* rootNode);
     void interactiveRecursiveDescentForClassification(DecisionTreeNode* node,
-                                                    ClassificationAnswer &answer,
-                                                    map<string, optional<double>>& scratchpadForNumerics);
+                                                      ClassificationAnswer &answer,
+                                                      map<string, optional<double>> &scratchpadForNumerics);
 
     //--------------- Construct Tree ----------------//
     DecisionTreeNode* constructDecisionTreeClassifier();

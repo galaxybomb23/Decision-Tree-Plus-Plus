@@ -23,7 +23,7 @@ EvalTrainingData::~EvalTrainingData()
  */
 double EvalTrainingData::evaluateTrainingData()
 {
-    bool evalDebug = true;
+    bool evalDebug = false;
 
     // Check if the training data file is a CSV
     if (_trainingDatafile.substr(_trainingDatafile.find_last_of(".") + 1) != "csv") {
@@ -50,13 +50,16 @@ double EvalTrainingData::evaluateTrainingData()
         allSampleNames.push_back(ent);
     }
 
+    // Sort the samples
     std::sort(allSampleNames.begin(), allSampleNames.end(), [](const std::string &a, const std::string &b) {
         return std::stoi(a) < std::stoi(b);
     });
 
+    // fold size is 10% of the training data
     int foldSize = static_cast<int>(0.1 * allTrainingData.size());
     std::map<int, std::map<std::string, int>> confusion_matrix;
 
+    // Initialize confusion matrix
     for (const auto &class_name : _classNames) {
         int class_index               = std::stoi(class_name);
         confusion_matrix[class_index] = std::map<std::string, int>();
@@ -75,6 +78,7 @@ double EvalTrainingData::evaluateTrainingData()
         auto testingSamplesEnd   = allSampleNames.begin() + static_cast<long>(foldSize) * (foldIndex + 1);
         std::vector<std::string> testingSamples(testingSamplesStart, testingSamplesEnd);
 
+        // Combine the training samples
         std::vector<std::string> trainingSamples(allSampleNames.begin(), testingSamplesStart);
         trainingSamples.insert(trainingSamples.end(), testingSamplesEnd, allSampleNames.end());
 
@@ -89,7 +93,7 @@ double EvalTrainingData::evaluateTrainingData()
             trainingData[samp] = allTrainingData[samp];
         }
 
-        // Initialize DecisionTree
+        // Initialize DecisionTree and class variables
         map<string, string> kwargs = {
             {"training_datafile", _trainingDatafile}
         };
@@ -137,7 +141,7 @@ double EvalTrainingData::evaluateTrainingData()
                 try {
                     numeric_values.insert(value);
                 }
-                catch (const std::invalid_argument &e) {
+                catch (const std::invalid_argument &e) { // ignore invalid values
                     continue;
                 }
             }
@@ -149,15 +153,30 @@ double EvalTrainingData::evaluateTrainingData()
             }
         }
 
+        if (evalDebug) {
+            printDebugInformation(*trainingDT, testingSamples);
+        }
+
+        if (evalDebug) {
+            trainingDT->_debug2 = true;
+        }
+
+        // We have the training data, calculate probabilities and priors
         trainingDT->calculateFirstOrderProbabilities();
         trainingDT->calculateClassPriors();
-        auto rootNode = trainingDT->constructDecisionTreeClassifier();
 
-        std::cout << "\nResults of the 10-fold cross-validation test for run indexed " << foldIndex + 1 << ":\n";
+        // Construct the decision tree classifier
+        auto rootNode = trainingDT->constructDecisionTreeClassifier();
+        if (evalDebug) {
+            trainingDT->getRootNode()->DisplayDecisionTree("    ");
+        }
+
+        // Show the classification results
         for (const auto &testSampleName : testingSamples) {
             auto testSampleDataUnfiltered = allTrainingData[std::stoi(testSampleName)];
-            std::vector<std::string> testSampleData;
 
+            // Filter out empty and NA values from the test sample data
+            std::vector<std::string> testSampleData;
             for (size_t idx = 0; idx < testSampleDataUnfiltered.size(); ++idx) {
                 const auto &data = testSampleDataUnfiltered[idx];
                 if (!data.empty() && data != "NA") {
@@ -166,13 +185,23 @@ double EvalTrainingData::evaluateTrainingData()
                 }
             }
 
+            if (evalDebug) {
+                std::cout << "Data in test sample: ";
+                for (const auto &data : testSampleData) {
+                    std::cout << data << " ";
+                }
+            }
+
             auto classification = trainingDT->classify(rootNode, testSampleData);
             auto solutionPath   = classification["solution_path"];
 
             // print classification info and solution path
-            printClassificationInfo(trainingDT->_classNames, classification, solutionPath, rootNode);
+            if (evalDebug) {
+                printClassificationInfo(trainingDT->_classNames, classification, solutionPath, rootNode);
+            }
             classification.erase("solution_path");
 
+            // Get the most likely class label
             std::vector<std::string> whichClasses;
             for (const auto &entry : classification) {
                 whichClasses.push_back(entry.first);
@@ -186,14 +215,20 @@ double EvalTrainingData::evaluateTrainingData()
 
             auto mostLikelyClassLabel = whichClasses.front();
             auto trueClassLabel       = _samplesClassLabelDict.at(std::stoi(testSampleName));
+
+            if (evalDebug) {
+                std::cout << "\n"
+                          << testSampleName << ":   true_class: " << trueClassLabel
+                          << "    estimated_class: " << mostLikelyClassLabel << "\n";
+            }
+
+            // Update confusion matrix with the classification results
             confusion_matrix[std::stoi(trueClassLabel)][mostLikelyClassLabel] += 1;
         }
     }
 
     // Display confusion matrix
-    if (_debug1) {
-        displayConfusionMatrix(confusion_matrix);
-    }
+    displayConfusionMatrix(confusion_matrix);
     auto idx = calculateDataQualityIndex(confusion_matrix);
     printDataQualityEvaluation(idx);
     return idx;
@@ -213,7 +248,7 @@ double EvalTrainingData::evaluateTrainingData()
  */
 void EvalTrainingData::printDebugInformation(DecisionTree &trainingDT, const std::vector<std::string> &testing_samples)
 {
-    std::cout << "\n\nPrinting samples in the testing set:";
+    std::cout << "\n\nPrinting samples in the testing set:\n";
     for (const auto &sample : testing_samples) {
         std::cout << sample << "\n";
     }
@@ -252,17 +287,21 @@ void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &w
                                                DecisionTreeNode* root_node)
 {
     std::cout << "\nClassification for sample:\n";
-    std::cout << "     " << std::setw(30) << "class name"
-              << "  probability\n";
-    std::cout << "     ----------                    -----------\n";
+    std::cout << "     " << std::setw(30) << std::left << "Class Name" << std::setw(14) << "Probability"
+              << "\n";
+    std::cout << "     " << std::string(28, '-') << "  " << std::string(15, '-') << "\n";
+
     for (const auto &which_class : which_classes) {
         if (which_class != "solution_path") {
-            std::cout << "     " << std::setw(30) << which_class << " " << classification.at(which_class) << "\n";
+            std::cout << "     " << std::setw(30) << std::left << which_class << std::setw(15)
+                      << classification.at(which_class) << "\n";
         }
     }
+
     std::cout << "\nSolution path in the decision tree: " << classification.at("solution_path") << "\n";
     std::cout << "\nNumber of nodes created: " << root_node->HowManyNodes() << "\n";
 }
+
 
 /**
  * @brief Displays the confusion matrix.
@@ -280,21 +319,33 @@ void EvalTrainingData::printClassificationInfo(const std::vector<std::string> &w
 void EvalTrainingData::displayConfusionMatrix(const std::map<int, std::map<std::string, int>> &confusion_matrix)
 {
     std::cout << "\n\n       DISPLAYING THE CONFUSION MATRIX FOR THE 10-FOLD "
-                 "CROSS-VALIDATION TEST:\n";
-    std::string matrix_header = std::string(30, ' ');
+                 "CROSS-VALIDATION TEST:\n\n";
+
+    // Determine the column width
+    int column_width = 12; // Default minimum width for alignment
     for (const auto &class_name : _classNames) {
-        matrix_header += class_name;
+        column_width =
+            std::max(column_width, static_cast<int>(_classLabel.length() + class_name.length()) + 3); // Add padding
     }
-    std::cout << "\n" << matrix_header << "\n";
+
+    // Print header row with tabs for alignment
+    std::cout << "\t\t" << std::string(column_width, ' '); // Empty space for row labels
+    for (const auto &class_name : _classNames) {
+        std::cout << std::setw(column_width) << (_classLabel + "=" + class_name);
+    }
+    std::cout << "\n";
+
+    // Print each row of the confusion matrix
     for (const auto &row_class_name : _classNames) {
-        std::string row_display = std::string(30, ' ');
-        row_display += row_class_name;
+        std::cout << "\t\t" << std::setw(column_width)
+                  << (_classLabel + "=" + row_class_name); // Add tabs and row label
         for (const auto &col_class_name : _classNames) {
-            row_display += std::to_string(confusion_matrix.at(std::stoi(row_class_name)).at(col_class_name));
+            std::cout << std::setw(column_width) << confusion_matrix.at(std::stoi(row_class_name)).at(col_class_name);
         }
-        std::cout << row_display << "\n";
+        std::cout << "\n";
     }
 }
+
 
 /**
  * @brief Calculates the Data Quality Index (DQI) based on the provided confusion matrix.
@@ -338,7 +389,8 @@ double EvalTrainingData::calculateDataQualityIndex(const std::map<int, std::map<
  * The function provides different messages based on the range in which the data quality
  * index falls:
  * - If the index is less than or equal to 80, it indicates poor class discriminatory information.
- * - If the index is between 80 and 90, it indicates some class discriminatory information but may not be sufficient.
+ * - If the index is between 80 and 90, it indicates some class discriminatory information but may not be
+ * sufficient.
  * - If the index is between 90 and 95, it indicates good class discriminatory information.
  * - If the index is between 95 and 98, it indicates very high-quality training data.
  * - If the index is greater than or equal to 98, it indicates excellent training data.
